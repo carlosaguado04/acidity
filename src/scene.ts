@@ -1,18 +1,14 @@
 import {
   AmbientLight,
-  BufferGeometry,
+  BufferAttribute,
+  CircleGeometry,
   Color,
   DirectionalLight,
-  Float32BufferAttribute,
   Group,
-  LineBasicMaterial,
-  LineSegments,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
   PointLight,
-  Points,
-  PointsMaterial,
   Scene,
   SphereGeometry,
   WebGLRenderer,
@@ -31,151 +27,197 @@ function isLightTheme(): boolean {
   return document.documentElement.getAttribute('data-theme') === 'light'
 }
 
-function themeColors() {
+/** Cheap hash noise in [-1, 1] — no extra deps. */
+function hashNoise(x: number, y: number, z: number): number {
+  const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453
+  return (s - Math.floor(s)) * 2 - 1
+}
+
+function softNoise(x: number, y: number, z: number): number {
+  const i = Math.floor(x)
+  const j = Math.floor(y)
+  const k = Math.floor(z)
+  const fx = x - i
+  const fy = y - j
+  const fz = z - k
+  const ux = fx * fx * (3 - 2 * fx)
+  const uy = fy * fy * (3 - 2 * fy)
+  const uz = fz * fz * (3 - 2 * fz)
+
+  const n000 = hashNoise(i, j, k)
+  const n100 = hashNoise(i + 1, j, k)
+  const n010 = hashNoise(i, j + 1, k)
+  const n110 = hashNoise(i + 1, j + 1, k)
+  const n001 = hashNoise(i, j, k + 1)
+  const n101 = hashNoise(i + 1, j, k + 1)
+  const n011 = hashNoise(i, j + 1, k + 1)
+  const n111 = hashNoise(i + 1, j + 1, k + 1)
+
+  const nx00 = n000 * (1 - ux) + n100 * ux
+  const nx10 = n010 * (1 - ux) + n110 * ux
+  const nx01 = n001 * (1 - ux) + n101 * ux
+  const nx11 = n011 * (1 - ux) + n111 * ux
+  const nxy0 = nx00 * (1 - uy) + nx10 * uy
+  const nxy1 = nx01 * (1 - uy) + nx11 * uy
+  return nxy0 * (1 - uz) + nxy1 * uz
+}
+
+function themePalette() {
   if (isLightTheme()) {
     return {
-      wire: new Color('#556600'),
-      core: new Color('#a8c900'),
-      mist: new Color('#9aa0aa'),
-      rim: new Color('#a8c900'),
-      bgClear: 0x000000,
+      blob: new Color('#0C0D10'),
+      blobRough: 0.92,
+      eye: new Color('#F4F4F2'),
+      pupil: new Color('#0C0D10'),
+      brow: new Color('#050506'),
+      rim: new Color('#D8FF47'),
+      rimIntensity: 0.16,
+      keyIntensity: 1.05,
+      ambient: 0.58,
     }
   }
+  // Lifted charcoal so the form reads on ink #0C0D10
   return {
-    wire: new Color('#d8ff47'),
-    core: new Color('#d8ff47'),
-    mist: new Color('#23262c'),
-    rim: new Color('#d8ff47'),
-    bgClear: 0x000000,
+    blob: new Color('#1B1D24'),
+    blobRough: 0.88,
+    eye: new Color('#F4F4F2'),
+    pupil: new Color('#0C0D10'),
+    brow: new Color('#090A0C'),
+    rim: new Color('#D8FF47'),
+    rimIntensity: 0.26,
+    keyIntensity: 0.8,
+    ambient: 0.4,
   }
 }
 
-/** Low-poly wire crystal with optional explode offsets stored per vertex. */
-function buildWireCrystal(): {
-  lines: LineSegments
+type BlobBits = {
+  body: Mesh
   basePositions: Float32Array
-  explodeDirs: Float32Array
-} {
-  const geo = new SphereGeometry(1.15, 3, 4)
-  const pos = geo.getAttribute('position')
-  const edges: number[] = []
-  const seen = new Set<string>()
+  face: Group
+  leftPupil: Mesh
+  rightPupil: Mesh
+  materials: MeshStandardMaterial[]
+}
 
-  const key = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`)
+function buildBlob(): BlobBits {
+  const geo = new SphereGeometry(1.05, 48, 48)
+  const pos = geo.attributes.position as BufferAttribute
+  const basePositions = new Float32Array(pos.count * 3)
 
-  const index = geo.index
-  if (index) {
-    for (let i = 0; i < index.count; i += 3) {
-      const a = index.getX(i)
-      const b = index.getX(i + 1)
-      const c = index.getX(i + 2)
-      for (const [u, v] of [
-        [a, b],
-        [b, c],
-        [c, a],
-      ] as const) {
-        const k = key(u, v)
-        if (seen.has(k)) continue
-        seen.add(k)
-        edges.push(
-          pos.getX(u),
-          pos.getY(u),
-          pos.getZ(u),
-          pos.getX(v),
-          pos.getY(v),
-          pos.getZ(v),
-        )
-      }
-    }
+  for (let i = 0; i < pos.count; i++) {
+    let x = pos.getX(i)
+    let y = pos.getY(i)
+    let z = pos.getZ(i)
+    // Soft gumdrop: wider mid, gentle top taper
+    const ny = (y + 1.05) / 2.1
+    const waist = 1 + 0.14 * Math.sin(ny * Math.PI)
+    const taper = 1 - 0.2 * Math.pow(Math.max(0, ny - 0.32), 1.55)
+    x *= waist * taper
+    z *= waist * taper
+    y *= 0.9
+    const lump = 1 + softNoise(x * 1.35, y * 1.35, z * 1.35) * 0.05
+    x *= lump
+    y *= lump
+    z *= lump
+    pos.setXYZ(i, x, y, z)
+    basePositions[i * 3] = x
+    basePositions[i * 3 + 1] = y
+    basePositions[i * 3 + 2] = z
   }
+  geo.computeVertexNormals()
 
-  const basePositions = new Float32Array(edges)
-  const explodeDirs = new Float32Array(edges.length)
-  for (let i = 0; i < edges.length; i += 3) {
-    const x = edges[i]
-    const y = edges[i + 1]
-    const z = edges[i + 2]
-    const len = Math.hypot(x, y, z) || 1
-    explodeDirs[i] = x / len
-    explodeDirs[i + 1] = y / len
-    explodeDirs[i + 2] = z / len
-  }
-
-  const lineGeo = new BufferGeometry()
-  lineGeo.setAttribute('position', new Float32BufferAttribute(edges, 3))
-
-  const mat = new LineBasicMaterial({
-    color: themeColors().wire,
-    transparent: true,
-    opacity: isLightTheme() ? 0.4 : 0.62,
+  const pal = themePalette()
+  const bodyMat = new MeshStandardMaterial({
+    color: pal.blob,
+    roughness: pal.blobRough,
+    metalness: 0.02,
   })
+  const body = new Mesh(geo, bodyMat)
+
+  const face = new Group()
+  face.position.set(0, 0.16, 0.82)
+
+  // Semi-ish eye discs (arc) — grumpy inward tilt lives in group rotation
+  const eyeGeo = new CircleGeometry(0.26, 28, 0.2, Math.PI * 1.05)
+  const pupilGeo = new CircleGeometry(0.05, 14)
+  const browGeo = new SphereGeometry(0.032, 8, 8)
+
+  const eyeMat = new MeshStandardMaterial({
+    color: pal.eye,
+    roughness: 0.42,
+    metalness: 0,
+    emissive: pal.eye,
+    emissiveIntensity: 0.18,
+  })
+  const pupilMat = new MeshStandardMaterial({
+    color: pal.pupil,
+    roughness: 0.75,
+    metalness: 0,
+  })
+  const browMat = new MeshStandardMaterial({
+    color: pal.brow,
+    roughness: 0.95,
+    metalness: 0,
+  })
+
+  const materials = [bodyMat, eyeMat, pupilMat, browMat]
+
+  function makeEye(side: 1 | -1): { group: Group; pupil: Mesh } {
+    const group = new Group()
+    group.position.set(side * 0.3, 0.04, 0.01)
+    // Inward furrow angle
+    group.rotation.z = side * 0.35
+
+    const white = new Mesh(eyeGeo, eyeMat)
+    white.scale.set(0.95, 0.72, 1)
+    group.add(white)
+
+    const pupil = new Mesh(pupilGeo, pupilMat)
+    // Pupils tucked toward center-bottom (grumpy)
+    pupil.position.set(side * -0.06, -0.05, 0.025)
+    group.add(pupil)
+
+    // Furrowed brow — short chain of soft blobs above the eye
+    for (let b = 0; b < 5; b++) {
+      const t = b / 4
+      const brow = new Mesh(browGeo, browMat)
+      brow.position.set(
+        side * (0.05 + t * 0.26),
+        0.18 - t * 0.05 + (side === 1 ? t * 0.03 : 0),
+        0.05,
+      )
+      brow.scale.set(1.6 - t * 0.2, 0.65, 0.65)
+      group.add(brow)
+    }
+
+    return { group, pupil }
+  }
+
+  const left = makeEye(-1)
+  const right = makeEye(1)
+  // Right brow sits a touch higher — skeptical cousin energy
+  right.group.children.forEach((child, idx) => {
+    if (idx === 0 || idx === 1) return // eye + pupil
+    child.position.y += 0.025
+  })
+  face.add(left.group, right.group)
+  body.add(face)
 
   return {
-    lines: new LineSegments(lineGeo, mat),
+    body,
     basePositions,
-    explodeDirs,
+    face,
+    leftPupil: left.pupil,
+    rightPupil: right.pupil,
+    materials,
   }
-}
-
-function buildCore(): Mesh {
-  return new Mesh(
-    new SphereGeometry(0.26, 32, 32),
-    new MeshStandardMaterial({
-      color: themeColors().core,
-      emissive: themeColors().core,
-      emissiveIntensity: isLightTheme() ? 0.2 : 0.45,
-      roughness: 0.28,
-      metalness: 0.15,
-      transparent: true,
-      opacity: isLightTheme() ? 0.6 : 0.9,
-    }),
-  )
-}
-
-function buildInnerShell(): Mesh {
-  return new Mesh(
-    new SphereGeometry(0.72, 24, 24),
-    new MeshStandardMaterial({
-      color: themeColors().wire,
-      emissive: themeColors().rim,
-      emissiveIntensity: isLightTheme() ? 0.04 : 0.12,
-      roughness: 0.55,
-      metalness: 0.05,
-      transparent: true,
-      opacity: isLightTheme() ? 0.06 : 0.1,
-      depthWrite: false,
-    }),
-  )
-}
-
-function buildMist(): Points {
-  const count = 72
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    const r = 1.5 + Math.random() * 1.8
-    const theta = Math.random() * Math.PI * 2
-    const phi = Math.acos(2 * Math.random() - 1)
-    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
-    positions[i * 3 + 2] = r * Math.cos(phi)
-  }
-  const geo = new BufferGeometry()
-  geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
-  const mat = new PointsMaterial({
-    color: themeColors().mist,
-    size: 0.032,
-    transparent: true,
-    opacity: isLightTheme() ? 0.32 : 0.48,
-    depthWrite: false,
-  })
-  return new Points(geo, mat)
 }
 
 export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   const reduced = prefersReducedMotion()
   const scene = new Scene()
   const camera = new PerspectiveCamera(38, 1, 0.1, 100)
-  camera.position.set(0.2, 0.12, 4.4)
+  camera.position.set(0.15, 0.1, 4.2)
 
   const renderer = new WebGLRenderer({
     canvas,
@@ -183,36 +225,43 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     alpha: true,
     powerPreference: 'high-performance',
   })
-  renderer.setClearColor(themeColors().bgClear, 0)
+  renderer.setClearColor(0x000000, 0)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
   const root = new Group()
-  root.position.set(0.9, 0.28, 0)
+  root.position.set(1.05, 0.05, 0)
   scene.add(root)
 
-  const { lines: crystal, basePositions, explodeDirs } = buildWireCrystal()
-  const core = buildCore()
-  const shell = buildInnerShell()
-  const mist = buildMist()
-  root.add(crystal, shell, core, mist)
+  const blob = buildBlob()
+  root.add(blob.body)
 
-  scene.add(new AmbientLight(0xffffff, 0.45))
-  const keyLight = new DirectionalLight(0xffffff, 0.7)
-  keyLight.position.set(2.2, 3.2, 4)
+  let pal = themePalette()
+  const ambient = new AmbientLight(0xffffff, pal.ambient)
+  scene.add(ambient)
+
+  const keyLight = new DirectionalLight(0xffffff, pal.keyIntensity)
+  keyLight.position.set(2.4, 3.4, 4.2)
   scene.add(keyLight)
 
-  const rimLight = new PointLight(themeColors().rim.getHex(), 0.55, 8, 2)
-  rimLight.position.set(-1.6, 0.8, 2.2)
+  const fill = new DirectionalLight(0xffffff, 0.28)
+  fill.position.set(-2.2, 0.6, 2)
+  scene.add(fill)
+
+  // Sparse acid rim — brand accent only
+  const rimLight = new PointLight(pal.rim.getHex(), pal.rimIntensity, 7, 2)
+  rimLight.position.set(-1.5, 0.6, 2.4)
   scene.add(rimLight)
 
-  const fillRim = new PointLight(themeColors().rim.getHex(), 0.22, 6, 2)
-  fillRim.position.set(1.4, -1.2, -1.5)
-  scene.add(fillRim)
+  const topKiss = new PointLight(0xffffff, 0.38, 6, 2)
+  topKiss.position.set(0.35, 2.15, 1.6)
+  scene.add(topKiss)
 
   let raf = 0
   let running = true
   let scrollProgress = 0
   let scrollSmooth = 0
+  let frameCount = 0
+  const baseRootScale = { current: 1 }
 
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 }
 
@@ -220,8 +269,8 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     if (reduced) return
     const nx = (e.clientX / window.innerWidth) * 2 - 1
     const ny = (e.clientY / window.innerHeight) * 2 - 1
-    pointer.tx = nx * 0.28
-    pointer.ty = -ny * 0.2
+    pointer.tx = nx
+    pointer.ty = -ny
   }
 
   const resize = () => {
@@ -230,26 +279,33 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     camera.aspect = width / height
     camera.updateProjectionMatrix()
     renderer.setSize(width, height, false)
+
+    if (width < 720) {
+      root.position.set(0.15, -0.35, -0.4)
+      baseRootScale.current = 0.78
+    } else if (width < 980) {
+      root.position.set(0.75, -0.05, 0)
+      baseRootScale.current = 0.9
+    } else {
+      root.position.set(1.05, 0.05, 0)
+      baseRootScale.current = 1
+    }
+    root.scale.setScalar(baseRootScale.current)
   }
 
   const applyThemeMaterials = () => {
-    const c = themeColors()
-    ;(crystal.material as LineBasicMaterial).color.copy(c.wire)
-    ;(crystal.material as LineBasicMaterial).opacity = isLightTheme() ? 0.4 : 0.62
-    const coreMat = core.material as MeshStandardMaterial
-    coreMat.color.copy(c.core)
-    coreMat.emissive.copy(c.core)
-    coreMat.emissiveIntensity = isLightTheme() ? 0.2 : 0.45
-    coreMat.opacity = isLightTheme() ? 0.6 : 0.9
-    const shellMat = shell.material as MeshStandardMaterial
-    shellMat.color.copy(c.wire)
-    shellMat.emissive.copy(c.rim)
-    shellMat.emissiveIntensity = isLightTheme() ? 0.04 : 0.12
-    shellMat.opacity = isLightTheme() ? 0.06 : 0.1
-    ;(mist.material as PointsMaterial).color.copy(c.mist)
-    ;(mist.material as PointsMaterial).opacity = isLightTheme() ? 0.32 : 0.48
-    rimLight.color.copy(c.rim)
-    fillRim.color.copy(c.rim)
+    pal = themePalette()
+    const [bodyMat, eyeMat, pupilMat, browMat] = blob.materials
+    bodyMat.color.copy(pal.blob)
+    bodyMat.roughness = pal.blobRough
+    eyeMat.color.copy(pal.eye)
+    eyeMat.emissive.copy(pal.eye)
+    pupilMat.color.copy(pal.pupil)
+    browMat.color.copy(pal.brow)
+    ambient.intensity = pal.ambient
+    keyLight.intensity = pal.keyIntensity
+    rimLight.color.copy(pal.rim)
+    rimLight.intensity = pal.rimIntensity
   }
 
   const themeObserver = new MutationObserver(applyThemeMaterials)
@@ -258,13 +314,31 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     attributeFilter: ['data-theme'],
   })
 
-  const applyExplode = (amount: number) => {
-    const attr = crystal.geometry.getAttribute('position')
+  const displaceBlob = (
+    t: number,
+    breathe: number,
+    leanX: number,
+    leanY: number,
+    updateNormals: boolean,
+  ) => {
+    const attr = blob.body.geometry.getAttribute('position') as BufferAttribute
     const arr = attr.array as Float32Array
-    for (let i = 0; i < basePositions.length; i++) {
-      arr[i] = basePositions[i] + explodeDirs[i] * amount
+    const base = blob.basePositions
+    for (let i = 0; i < base.length; i += 3) {
+      const bx = base[i]
+      const by = base[i + 1]
+      const bz = base[i + 2]
+      const n =
+        softNoise(bx * 1.1 + t * 0.35, by * 1.1, bz * 1.1 + t * 0.28) * 0.05 +
+        softNoise(bx * 2.1 - t * 0.2, by * 2.1 + t * 0.22, bz * 2.1) * 0.02
+      const lean = leanX * bx * 0.035 + leanY * by * 0.025
+      const pulse = 1 + breathe * 0.028 + n + lean
+      arr[i] = bx * pulse
+      arr[i + 1] = by * (1 + breathe * 0.04 + n * 0.55)
+      arr[i + 2] = bz * pulse
     }
     attr.needsUpdate = true
+    if (updateNormals) blob.body.geometry.computeVertexNormals()
   }
 
   const t0 = performance.now()
@@ -272,41 +346,50 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   const frame = (now: number) => {
     if (!running) return
     const t = (now - t0) / 1000
+    frameCount += 1
 
-    scrollSmooth += (scrollProgress - scrollSmooth) * 0.06
-
-    pointer.x += (pointer.tx - pointer.x) * 0.045
-    pointer.y += (pointer.ty - pointer.y) * 0.045
+    scrollSmooth += (scrollProgress - scrollSmooth) * 0.08
+    pointer.x += (pointer.tx - pointer.x) * 0.06
+    pointer.y += (pointer.ty - pointer.y) * 0.06
 
     if (!reduced) {
-      const spinBoost = 1 + scrollSmooth * 0.45
-      root.rotation.y = t * 0.14 * spinBoost + pointer.x + scrollSmooth * 0.28
-      root.rotation.x =
-        Math.sin(t * 0.32) * 0.09 + pointer.y + scrollSmooth * 0.12
-      root.rotation.z = scrollSmooth * 0.04
+      const breathe = Math.sin(t * 1.35)
+      const wobble = Math.sin(t * 0.9) * 0.045
 
-      const scale = 1 + scrollSmooth * 0.1
-      root.scale.setScalar(scale)
+      // Mild scroll squash — short travel, not a long pin journey
+      const scrollSquash = scrollSmooth * 0.12
+      const bounce = Math.sin(scrollSmooth * Math.PI) * 0.04
 
-      // Subtle explode / open as you scroll through the page
-      applyExplode(scrollSmooth * 0.08)
+      const sx = 1.05 + scrollSquash * 0.35 + breathe * -0.02
+      const sy = 0.95 - scrollSquash * 0.45 + breathe * 0.035 + bounce
+      const sz = 1.05 + scrollSquash * 0.25 + breathe * -0.02
+      blob.body.scale.set(sx, sy, sz)
 
-      const pulse = 1 + Math.sin(t * 1.15) * 0.045
-      core.scale.setScalar(pulse * (1 + scrollSmooth * 0.05))
-      shell.scale.setScalar(1 + scrollSmooth * 0.03)
-      mist.rotation.y = -t * 0.06 - scrollSmooth * 0.15
-      mist.rotation.x = scrollSmooth * 0.08
+      root.rotation.y = wobble + pointer.x * 0.22
+      root.rotation.x = Math.sin(t * 0.7) * 0.04 + pointer.y * 0.14
+      root.rotation.z = -pointer.x * 0.06 + scrollSmooth * 0.03
 
-      // Parallax camera pull
-      camera.position.z = 4.4 - scrollSmooth * 0.2
-      camera.position.y = 0.12 + scrollSmooth * 0.05
-      camera.lookAt(0.5, 0.2, 0)
+      blob.face.rotation.y = pointer.x * 0.28
+      blob.face.rotation.x = -pointer.y * 0.18
 
-      rimLight.intensity = 0.45 + scrollSmooth * 0.2
+      const pupilX = pointer.x * 0.055
+      const pupilY = pointer.y * 0.045
+      blob.leftPupil.position.x = 0.06 + pupilX
+      blob.leftPupil.position.y = -0.05 + pupilY
+      blob.rightPupil.position.x = -0.06 + pupilX
+      blob.rightPupil.position.y = -0.05 + pupilY
+
+      displaceBlob(t, breathe, pointer.x, pointer.y, frameCount % 2 === 0)
+
+      camera.position.z = 4.2 - scrollSmooth * 0.12
+      camera.lookAt(0.55, 0.1, 0)
+      rimLight.intensity = pal.rimIntensity + scrollSmooth * 0.05
     } else {
-      root.rotation.y = 0.45
-      root.rotation.x = 0.12
-      applyExplode(0)
+      blob.body.scale.set(1.05, 0.96, 1.05)
+      root.rotation.set(0.08, 0.35, -0.04)
+      blob.face.rotation.set(-0.05, 0.12, 0)
+      if (frameCount === 1) displaceBlob(0, 0.2, 0.15, -0.05, true)
+      camera.lookAt(0.55, 0.1, 0)
     }
 
     renderer.render(scene, camera)
@@ -328,14 +411,11 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointer)
       themeObserver.disconnect()
-      crystal.geometry.dispose()
-      ;(crystal.material as LineBasicMaterial).dispose()
-      core.geometry.dispose()
-      ;(core.material as MeshStandardMaterial).dispose()
-      shell.geometry.dispose()
-      ;(shell.material as MeshStandardMaterial).dispose()
-      mist.geometry.dispose()
-      ;(mist.material as PointsMaterial).dispose()
+      blob.body.geometry.dispose()
+      blob.face.traverse((child) => {
+        if (child instanceof Mesh) child.geometry.dispose()
+      })
+      for (const mat of blob.materials) mat.dispose()
       renderer.dispose()
     },
   }
