@@ -20,7 +20,7 @@ Open http://localhost:5173
 ## Stack
 
 - Vite + TypeScript
-- Three.js blobby mascot hero
+- GSAP jelly hero mascot (public/mascot.png)
 - Lenis + GSAP ScrollTrigger
 - Syne display + system UI fonts
 - Dark/light theme
@@ -28,7 +28,7 @@ Open http://localhost:5173
 
 ## Motion and accessibility
 
-Effects respect prefers-reduced-motion: reduced motion skips Lenis/GSAP, freezes the blob to a still pose, and shows content without reveals.
+Effects respect prefers-reduced-motion: reduced motion skips Lenis/GSAP, freezes the mascot to a still pose, and shows content without reveals.
 
 ## Brand notes
 

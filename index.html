@@ -33,15 +33,6 @@
       <div class="bg-layer bg-layer-c" data-speed="0.08"></div>
     </div>
 
-    <div class="canvas-wrap" data-parallax="canvas">
-      <canvas
-        id="scene"
-        role="img"
-        aria-label="Animated Acidity mascot blob"
-      ></canvas>
-      <div class="canvas-fade" aria-hidden="true"></div>
-    </div>
-
     <header class="site-header">
       <a class="mark" href="/" aria-label="Acidity home">
         <img
@@ -72,22 +63,37 @@
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-sticky">
-          <div class="hero-inner">
-            <p class="eyebrow reveal" data-reveal>Studio</p>
-            <h1 id="hero-title" class="wordmark" data-parallax="wordmark">
-              ACIDITY
-            </h1>
-            <p class="lede reveal" data-reveal>
-              Quiet tools with a sharp edge. Built for people who notice the
-              difference.
-            </p>
-            <div class="hero-actions reveal" data-reveal>
-              <a class="btn btn-acid magnetic" href="#products" data-magnetic>
-                See products
-              </a>
-              <a class="btn btn-ghost magnetic" href="#studio" data-magnetic>
-                About the studio
-              </a>
+          <div class="hero-layout">
+            <div class="hero-inner">
+              <p class="eyebrow reveal" data-reveal>Studio</p>
+              <h1 id="hero-title" class="wordmark" data-parallax="wordmark">
+                ACIDITY
+              </h1>
+              <p class="lede reveal" data-reveal>
+                Quiet tools with a sharp edge. Built for people who notice the
+                difference.
+              </p>
+              <div class="hero-actions reveal" data-reveal>
+                <a class="btn btn-acid magnetic" href="#products" data-magnetic>
+                  See products
+                </a>
+                <a class="btn btn-ghost magnetic" href="#studio" data-magnetic>
+                  About the studio
+                </a>
+              </div>
+            </div>
+            <div class="hero-mascot" data-mascot aria-hidden="true">
+              <div class="hero-mascot-blob" data-mascot-blob>
+                <img
+                  class="hero-mascot-img"
+                  src="/mascot.png"
+                  width="640"
+                  height="560"
+                  alt=""
+                  decoding="async"
+                  fetchpriority="high"
+                />
+              </div>
             </div>
           </div>
         </div>

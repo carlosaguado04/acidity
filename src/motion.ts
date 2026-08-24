@@ -14,20 +14,106 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-export function initMotion(opts: {
-  onScrollProgress?: (p: number) => void
-}): MotionHandle {
+function initHeroMascot(cleanups: Array<() => void>, reduced: boolean) {
+  const wrap = document.querySelector<HTMLElement>('[data-mascot]')
+  const blob = document.querySelector<HTMLElement>('[data-mascot-blob]')
+  if (!wrap || !blob) return
+
+  gsap.set([wrap, blob], { transformOrigin: '50% 100%' })
+
+  // Still pose for reduced motion — slight lean so it doesn't look dead flat
+  if (reduced) {
+    gsap.set(blob, {
+      scaleX: 1.04,
+      scaleY: 0.96,
+      rotate: -4,
+      y: 0,
+    })
+    return
+  }
+
+  // Idle jelly: squash-stretch + gentle bob (blob only)
+  const idle = gsap.timeline({ repeat: -1, yoyo: true })
+  idle
+    .to(blob, {
+      scaleX: 1.06,
+      scaleY: 0.94,
+      y: 6,
+      duration: 1.35,
+      ease: 'sine.inOut',
+    })
+    .to(blob, {
+      scaleX: 0.96,
+      scaleY: 1.05,
+      y: -4,
+      duration: 1.45,
+      ease: 'sine.inOut',
+    })
+  cleanups.push(() => idle.kill())
+
+  // Pointer tilt + mild scroll squash combined on wrap each frame
+  const pointer = { x: 0, y: 0, tx: 0, ty: 0 }
+  const scroll = { p: 0 }
+  let raf = 0
+
+  const onPointer = (e: PointerEvent) => {
+    const rect = wrap.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    pointer.tx = gsap.utils.clamp(-1, 1, (e.clientX - cx) / (rect.width * 0.65))
+    pointer.ty = gsap.utils.clamp(-1, 1, (e.clientY - cy) / (rect.height * 0.65))
+  }
+
+  const tick = () => {
+    pointer.x += (pointer.tx - pointer.x) * 0.08
+    pointer.y += (pointer.ty - pointer.y) * 0.08
+    const squash = scroll.p
+    gsap.set(wrap, {
+      rotateY: pointer.x * 14,
+      rotateX: -pointer.y * 10,
+      rotate: pointer.x * -3,
+      scaleX: 1 + squash * 0.08,
+      scaleY: 1 - squash * 0.08,
+      transformPerspective: 900,
+    })
+    raf = requestAnimationFrame(tick)
+  }
+
+  window.addEventListener('pointermove', onPointer, { passive: true })
+  raf = requestAnimationFrame(tick)
+  cleanups.push(() => {
+    cancelAnimationFrame(raf)
+    window.removeEventListener('pointermove', onPointer)
+  })
+
+  const hero = document.querySelector('.hero')
+  if (hero) {
+    const st = ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: '+=40vh',
+      scrub: 0.45,
+      onUpdate: (self) => {
+        scroll.p = self.progress
+      },
+    })
+    cleanups.push(() => st.kill())
+  }
+}
+
+export function initMotion(): MotionHandle {
   const reduced = prefersReducedMotion()
   const cleanups: Array<() => void> = []
 
   const progressBar = document.getElementById('scroll-progress')
+
+  initHeroMascot(cleanups, reduced)
 
   if (reduced) {
     document.documentElement.classList.add('reduced-motion')
     document.querySelectorAll('.reveal').forEach((el) => {
       el.classList.add('is-visible')
     })
-    opts.onScrollProgress?.(0)
     return {
       lenis: null,
       destroy() {
@@ -55,14 +141,13 @@ export function initMotion(opts: {
     lenis.destroy()
   })
 
-  // Progress + scene callback
+  // Progress bar
   const onScroll = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight
     const p = max > 0 ? window.scrollY / max : 0
     if (progressBar) {
       progressBar.style.transform = `scaleX(${p})`
     }
-    opts.onScrollProgress?.(p)
   }
   lenis.on('scroll', onScroll)
   onScroll()
@@ -71,7 +156,6 @@ export function initMotion(opts: {
   const hero = document.querySelector('.hero')
   const wordmark = document.querySelector('[data-parallax="wordmark"]')
   const heroInner = document.querySelector('.hero-inner')
-  const canvasWrap = document.querySelector('[data-parallax="canvas"]')
 
   if (hero && wordmark && heroInner) {
     const tl = gsap.timeline({
@@ -110,24 +194,6 @@ export function initMotion(opts: {
     cleanups.push(() => {
       tl.scrollTrigger?.kill()
       tl.kill()
-    })
-  }
-
-  // Canvas parallax (different speed)
-  if (canvasWrap) {
-    const st = gsap.to(canvasWrap, {
-      y: 70,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.8,
-      },
-    })
-    cleanups.push(() => {
-      st.scrollTrigger?.kill()
-      st.kill()
     })
   }
 
@@ -187,7 +253,6 @@ export function initMotion(opts: {
       start: 'top 75%',
       once: true,
       onEnter: () => {
-        // Already handled per-card; this reinforces stagger via class
         productCards.forEach((card, idx) => {
           card.style.setProperty('--stagger', String(idx))
         })
@@ -198,7 +263,6 @@ export function initMotion(opts: {
 
   // --- Magnetic CTAs ---
   document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((btn) => {
-    const strength = 18
     const onMove = (e: PointerEvent) => {
       const rect = btn.getBoundingClientRect()
       const x = e.clientX - rect.left - rect.width / 2
@@ -209,7 +273,6 @@ export function initMotion(opts: {
         duration: 0.35,
         ease: 'power2.out',
       })
-      void strength
     }
     const onLeave = () => {
       gsap.to(btn, { x: 0, y: 0, duration: 0.55, ease: 'elastic.out(1, 0.4)' })
