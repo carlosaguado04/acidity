@@ -30,6 +30,7 @@
 
   --font:
     -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  --font-display: "Syne", var(--font);
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --space: clamp(1rem, 2.5vw, 2rem);
@@ -389,10 +390,11 @@ main {
   color: var(--fg-mute);
 }
 
-/* Hero — tall pin scrub area */
+/* Hero — short pin scrub area */
 
 .hero {
-  min-height: 160vh;
+  min-height: 100vh;
+  /* Pin scrub distance controlled in motion.ts (end: +=70vh) */
   padding: 0;
   max-width: none;
 }
@@ -411,9 +413,10 @@ main {
 
 .wordmark {
   margin: 0;
-  font-size: clamp(3.75rem, 16vw, 9.5rem);
-  font-weight: 700;
-  line-height: 0.9;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 22vw, 14rem);
+  font-weight: 800;
+  line-height: 0.85;
   letter-spacing: -0.04em;
   color: var(--fg);
   transform-origin: left center;
@@ -489,10 +492,11 @@ main {
 
 .section-head h2 {
   margin: 0;
-  font-size: clamp(1.75rem, 4vw, 2.35rem);
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .studio-grid {

@@ -78,8 +78,8 @@ export function initMotion(opts: {
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: 'bottom top',
-        scrub: 0.65,
+        end: '+=70vh',
+        scrub: 0.45,
         pin: '.hero-sticky',
         pinSpacing: true,
         anticipatePin: 1,
@@ -89,10 +89,10 @@ export function initMotion(opts: {
     tl.to(
       wordmark,
       {
-        scale: 1.35,
-        opacity: 0.15,
-        y: -80,
-        letterSpacing: '-0.06em',
+        scale: 1.1,
+        opacity: 0.55,
+        y: -28,
+        letterSpacing: '-0.05em',
         ease: 'none',
       },
       0,
@@ -100,8 +100,8 @@ export function initMotion(opts: {
     tl.to(
       heroInner,
       {
-        opacity: 0.25,
-        y: -40,
+        opacity: 0.7,
+        y: -14,
         ease: 'none',
       },
       0,
@@ -116,7 +116,7 @@ export function initMotion(opts: {
   // Canvas parallax (different speed)
   if (canvasWrap) {
     const st = gsap.to(canvasWrap, {
-      y: 180,
+      y: 70,
       ease: 'none',
       scrollTrigger: {
         trigger: document.body,
@@ -135,7 +135,7 @@ export function initMotion(opts: {
   document.querySelectorAll<HTMLElement>('.bg-layer').forEach((layer) => {
     const speed = Number(layer.dataset.speed ?? 0.15)
     const st = gsap.to(layer, {
-      y: () => window.innerHeight * speed * 1.6,
+      y: () => window.innerHeight * speed * 0.7,
       ease: 'none',
       scrollTrigger: {
         trigger: document.body,

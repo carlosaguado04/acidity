@@ -279,30 +279,30 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     pointer.y += (pointer.ty - pointer.y) * 0.045
 
     if (!reduced) {
-      const spinBoost = 1 + scrollSmooth * 1.4
-      root.rotation.y = t * 0.14 * spinBoost + pointer.x + scrollSmooth * 0.85
+      const spinBoost = 1 + scrollSmooth * 0.45
+      root.rotation.y = t * 0.14 * spinBoost + pointer.x + scrollSmooth * 0.28
       root.rotation.x =
-        Math.sin(t * 0.32) * 0.09 + pointer.y + scrollSmooth * 0.35
-      root.rotation.z = scrollSmooth * 0.12
+        Math.sin(t * 0.32) * 0.09 + pointer.y + scrollSmooth * 0.12
+      root.rotation.z = scrollSmooth * 0.04
 
-      const scale = 1 + scrollSmooth * 0.28
+      const scale = 1 + scrollSmooth * 0.1
       root.scale.setScalar(scale)
 
       // Subtle explode / open as you scroll through the page
-      applyExplode(scrollSmooth * 0.22)
+      applyExplode(scrollSmooth * 0.08)
 
       const pulse = 1 + Math.sin(t * 1.15) * 0.045
-      core.scale.setScalar(pulse * (1 + scrollSmooth * 0.15))
-      shell.scale.setScalar(1 + scrollSmooth * 0.08)
-      mist.rotation.y = -t * 0.06 - scrollSmooth * 0.4
-      mist.rotation.x = scrollSmooth * 0.25
+      core.scale.setScalar(pulse * (1 + scrollSmooth * 0.05))
+      shell.scale.setScalar(1 + scrollSmooth * 0.03)
+      mist.rotation.y = -t * 0.06 - scrollSmooth * 0.15
+      mist.rotation.x = scrollSmooth * 0.08
 
       // Parallax camera pull
-      camera.position.z = 4.4 - scrollSmooth * 0.55
-      camera.position.y = 0.12 + scrollSmooth * 0.15
+      camera.position.z = 4.4 - scrollSmooth * 0.2
+      camera.position.y = 0.12 + scrollSmooth * 0.05
       camera.lookAt(0.5, 0.2, 0)
 
-      rimLight.intensity = 0.45 + scrollSmooth * 0.55
+      rimLight.intensity = 0.45 + scrollSmooth * 0.2
     } else {
       root.rotation.y = 0.45
       root.rotation.x = 0.12
