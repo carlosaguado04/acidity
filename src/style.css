@@ -577,6 +577,34 @@ main {
     );
 }
 
+.product-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.product-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  object-fit: cover;
+  background: var(--bg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+}
+
+.product-vela .product-icon {
+  background: transparent;
+  box-shadow: none;
+  border-radius: var(--radius-md);
+}
+
+.product-top .product-meta {
+  flex: 1;
+  min-height: 56px;
+  align-items: flex-start;
+}
+
 .product-meta {
   display: flex;
   align-items: center;
