@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="description"
+      content="Acidity — indie studio behind Mise, Vela, and tools that stay out of the way."
+    />
+    <title>Acidity</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <div class="canvas-wrap" aria-hidden="true">
+      <canvas id="scene"></canvas>
+      <div class="canvas-fade"></div>
+    </div>
+
+    <header class="site-header">
+      <a class="mark" href="/" aria-label="Acidity home">
+        <span class="mark-dot" aria-hidden="true"></span>
+        Acidity
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#products">Products</a>
+        <a href="#studio">Studio</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button
+        type="button"
+        class="theme-toggle"
+        id="theme-toggle"
+        aria-label="Toggle color theme"
+      >
+        <span class="theme-toggle-icon" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow">Studio</p>
+        <h1 id="hero-title" class="wordmark">ACIDITY</h1>
+        <p class="lede">
+          Quiet tools with a sharp edge. Built for people who notice the
+          difference.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-acid" href="#products">See products</a>
+          <a class="btn btn-ghost" href="#studio">About the studio</a>
+        </div>
+      </section>
+
+      <section id="studio" class="section studio" aria-labelledby="studio-title">
+        <div class="section-head">
+          <p class="eyebrow">Who we are</p>
+          <h2 id="studio-title">Small kitchen. Careful heat.</h2>
+        </div>
+        <div class="studio-grid">
+          <p class="studio-copy">
+            Acidity is an indie software studio. We make apps that feel finished
+            in the hand — precise, restrained, a little alive.
+          </p>
+          <p class="studio-copy mute">
+            Mise started it. Vela follows. More on the burner. We ship when it’s
+            ready, not when the calendar says so.
+          </p>
+        </div>
+      </section>
+
+      <section id="products" class="section products" aria-labelledby="products-title">
+        <div class="section-head">
+          <p class="eyebrow">Products</p>
+          <h2 id="products-title">On the line</h2>
+        </div>
+        <ul class="product-grid">
+          <li class="product-card product-mise">
+            <div class="product-meta">
+              <span class="tag">macOS</span>
+              <span class="product-status">Shipping</span>
+            </div>
+            <h3 class="product-name">Mise</h3>
+            <p class="product-desc">
+              Menu-bar window layouts. Snap your workspace into place, then get
+              back to work.
+            </p>
+            <a
+              class="product-link"
+              href="https://usemise.dev"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              usemise.dev
+              <span aria-hidden="true">→</span>
+            </a>
+          </li>
+
+          <li class="product-card product-vela">
+            <div class="product-meta">
+              <span class="tag tag-vela">App</span>
+              <span class="product-status">In progress</span>
+            </div>
+            <h3 class="product-name">Vela</h3>
+            <p class="product-desc">
+              Another Acidity app, still taking shape. Same craft, different
+              cut.
+            </p>
+            <span class="product-link product-link-soon">Coming soon</span>
+          </li>
+
+          <li class="product-card product-more">
+            <div class="product-meta">
+              <span class="tag">Lab</span>
+              <span class="product-status">Soon</span>
+            </div>
+            <h3 class="product-name">More coming</h3>
+            <p class="product-desc">
+              Experiments that earn a name. Nothing half-baked leaves the
+              kitchen.
+            </p>
+            <span class="product-link product-link-soon">Stay tuned</span>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer id="contact" class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <p class="footer-mark">Acidity</p>
+          <p class="footer-line mute">acidity.lol</p>
+        </div>
+        <div class="footer-meta">
+          <p class="mute">
+            Contact:
+            <a href="mailto:hello@acidity.lol">hello@acidity.lol</a>
+          </p>
+          <p class="footer-sub mute">Placeholder — swap when ready.</p>
+        </div>
+      </div>
+      <p class="footer-fine mute">© <span id="year"></span> Acidity. Built with care.</p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
