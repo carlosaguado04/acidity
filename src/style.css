@@ -593,11 +593,6 @@ main {
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
 }
 
-.product-vela .product-icon {
-  background: transparent;
-  box-shadow: none;
-  border-radius: var(--radius-md);
-}
 
 .product-top .product-meta {
   flex: 1;
