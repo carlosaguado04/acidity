@@ -393,32 +393,39 @@ main {
 /* Hero — short pin scrub area */
 
 .hero {
-  min-height: 100vh;
-  /* Pin scrub distance controlled in motion.ts (end: +=70vh) */
+  min-height: auto;
+  /* Pin scrub distance controlled in motion.ts */
   padding: 0;
   max-width: none;
 }
 
 .hero-sticky {
-  height: 100vh;
+  min-height: min(100dvh, 720px);
+  height: auto;
   display: flex;
   align-items: center;
-  max-width: 46rem;
+  width: 100%;
+  max-width: var(--max);
 }
 
 .hero-inner {
-  padding: clamp(2rem, 6vw, 3rem) 0;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 2.5rem) 0;
   will-change: transform, opacity;
 }
 
 .wordmark {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(4.5rem, 22vw, 14rem);
+  /* Fit full "ACIDITY" on one line — Syne ExtraBold is wide */
+  font-size: clamp(2.5rem, 11vw, 6.5rem);
   font-weight: 800;
-  line-height: 0.85;
+  line-height: 0.9;
   letter-spacing: -0.04em;
   color: var(--fg);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: visible;
   transform-origin: left center;
   will-change: transform, opacity;
 }

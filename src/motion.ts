@@ -78,7 +78,7 @@ export function initMotion(opts: {
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: '+=70vh',
+        end: '+=40vh',
         scrub: 0.45,
         pin: '.hero-sticky',
         pinSpacing: true,
@@ -89,10 +89,10 @@ export function initMotion(opts: {
     tl.to(
       wordmark,
       {
-        scale: 1.1,
-        opacity: 0.55,
-        y: -28,
-        letterSpacing: '-0.05em',
+        scale: 1.03,
+        opacity: 0.75,
+        y: -12,
+        letterSpacing: '-0.045em',
         ease: 'none',
       },
       0,
