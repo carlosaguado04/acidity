@@ -5,38 +5,22 @@ import { initMotion } from './motion'
 const year = document.getElementById('year')
 if (year) year.textContent = String(new Date().getFullYear())
 
-const themeButtons = document.querySelectorAll<HTMLButtonElement>('[data-theme-set]')
-const themeColorMeta = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+const root = document.documentElement
+const stored = localStorage.getItem('acidity-theme')
+const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
+const initial =
+  stored === 'light' || stored === 'dark'
+    ? stored
+    : prefersLight
+      ? 'light'
+      : 'dark'
+root.setAttribute('data-theme', initial)
 
-function applyTheme(theme: 'light' | 'dark') {
-  document.documentElement.setAttribute('data-theme', theme)
-  try {
-    localStorage.setItem('acidity-theme', theme)
-  } catch {}
-  themeButtons.forEach((btn) => {
-    btn.setAttribute(
-      'aria-pressed',
-      btn.dataset.themeSet === theme ? 'true' : 'false',
-    )
-  })
-  const color = theme === 'light' ? '#FFFFFF' : '#0C0D10'
-  themeColorMeta.forEach((meta) => {
-    meta.setAttribute('content', color)
-    meta.removeAttribute('media')
-  })
-}
-
-const initialTheme =
-  document.documentElement.getAttribute('data-theme') === 'light'
-    ? 'light'
-    : 'dark'
-applyTheme(initialTheme)
-
-themeButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const next = btn.dataset.themeSet
-    if (next === 'light' || next === 'dark') applyTheme(next)
-  })
+const toggle = document.getElementById('theme-toggle')
+toggle?.addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'
+  root.setAttribute('data-theme', next)
+  localStorage.setItem('acidity-theme', next)
 })
 
 let sceneHandle: SceneHandle | null = null
