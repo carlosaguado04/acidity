@@ -1,5 +1,6 @@
 import './style.css'
-import { mountScene } from './scene'
+import { mountScene, type SceneHandle } from './scene'
+import { initMotion } from './motion'
 
 const year = document.getElementById('year')
 if (year) year.textContent = String(new Date().getFullYear())
@@ -22,10 +23,14 @@ toggle?.addEventListener('click', () => {
   localStorage.setItem('acidity-theme', next)
 })
 
+let sceneHandle: SceneHandle | null = null
+let lastScroll = 0
+
 const canvas = document.getElementById('scene')
 if (canvas instanceof HTMLCanvasElement) {
   const start = () => {
-    mountScene(canvas)
+    sceneHandle = mountScene(canvas)
+    sceneHandle.setScrollProgress(lastScroll)
   }
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(start, { timeout: 400 })
@@ -33,3 +38,10 @@ if (canvas instanceof HTMLCanvasElement) {
     setTimeout(start, 1)
   }
 }
+
+initMotion({
+  onScrollProgress(p) {
+    lastScroll = p
+    sceneHandle?.setScrollProgress(p)
+  },
+})

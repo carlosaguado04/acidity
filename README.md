@@ -1,31 +1,35 @@
 # Acidity
 
-Studio site for [acidity.lol](https://acidity.lol) — indie software behind Mise, Vela, and whatever is next on the line.
+Studio site for [acidity.lol](https://acidity.lol).
 
 ## Run locally
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
-Open the URL Vite prints (default `http://localhost:5173`).
-
-On this box, Bun also works: `bun install && bun run dev`.
+Open http://localhost:5173
 
 ## Scripts
 
-- `npm run dev` — Dev server with HMR
-- `npm run build` — Typecheck + production build
-- `npm run preview` — Preview the production build
+- bun run dev
+- bun run build
+- bun run preview
 
 ## Stack
 
 - Vite + TypeScript
-- Three.js hero (wire crystal + soft core, pointer-aware, respects `prefers-reduced-motion`)
-- System SF / Helvetica Neue stack — no web fonts
-- Dark-first theme with light mode toggle
+- Three.js scroll-aware crystal
+- Lenis + GSAP ScrollTrigger
+- System SF stack, no web fonts
+- Dark/light theme
+- Mascot logo at public/mascot.png
+
+## Motion and accessibility
+
+Effects respect prefers-reduced-motion: reduced motion skips Lenis/GSAP, freezes the crystal, and shows content without reveals.
 
 ## Brand notes
 
-Dark face tokens: ink `#0C0D10`, raised `#16181D`, edge `#23262C`, paper `#F4F4F2`, acid `#D8FF47`. Acid is used sparingly (tags, focus, primary CTA).
+ink #0C0D10, raised #16181D, edge #23262C, paper #F4F4F2, acid #D8FF47 (sparse).

@@ -9,20 +9,40 @@
       content="Acidity — indie studio behind Mise, Vela, and tools that stay out of the way."
     />
     <title>Acidity</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/mascot.png" />
+    <link rel="apple-touch-icon" href="/mascot.png" />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
 
-    <div class="canvas-wrap" aria-hidden="true">
+    <div class="scroll-progress" aria-hidden="true">
+      <div class="scroll-progress-bar" id="scroll-progress"></div>
+    </div>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="bg-layers" aria-hidden="true">
+      <div class="bg-layer bg-layer-a" data-speed="0.12"></div>
+      <div class="bg-layer bg-layer-b" data-speed="0.22"></div>
+      <div class="bg-layer bg-layer-c" data-speed="0.08"></div>
+    </div>
+
+    <div class="canvas-wrap" aria-hidden="true" data-parallax="canvas">
       <canvas id="scene"></canvas>
       <div class="canvas-fade"></div>
     </div>
 
     <header class="site-header">
       <a class="mark" href="/" aria-label="Acidity home">
-        <span class="mark-dot" aria-hidden="true"></span>
-        Acidity
+        <img
+          class="mark-mascot"
+          src="/mascot.png"
+          width="32"
+          height="28"
+          alt=""
+          decoding="async"
+        />
+        <span class="mark-text">Acidity</span>
       </a>
       <nav class="nav" aria-label="Primary">
         <a href="#products">Products</a>
@@ -41,29 +61,41 @@
 
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
-        <p class="eyebrow">Studio</p>
-        <h1 id="hero-title" class="wordmark">ACIDITY</h1>
-        <p class="lede">
-          Quiet tools with a sharp edge. Built for people who notice the
-          difference.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-acid" href="#products">See products</a>
-          <a class="btn btn-ghost" href="#studio">About the studio</a>
+        <div class="hero-sticky">
+          <div class="hero-inner">
+            <p class="eyebrow reveal" data-reveal>Studio</p>
+            <h1 id="hero-title" class="wordmark" data-parallax="wordmark">
+              ACIDITY
+            </h1>
+            <p class="lede reveal" data-reveal>
+              Quiet tools with a sharp edge. Built for people who notice the
+              difference.
+            </p>
+            <div class="hero-actions reveal" data-reveal>
+              <a class="btn btn-acid magnetic" href="#products" data-magnetic>
+                See products
+              </a>
+              <a class="btn btn-ghost magnetic" href="#studio" data-magnetic>
+                About the studio
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
       <section id="studio" class="section studio" aria-labelledby="studio-title">
         <div class="section-head">
-          <p class="eyebrow">Who we are</p>
-          <h2 id="studio-title">Small kitchen. Careful heat.</h2>
+          <p class="eyebrow reveal" data-reveal>Who we are</p>
+          <h2 id="studio-title" class="reveal" data-reveal>
+            Small kitchen. Careful heat.
+          </h2>
         </div>
         <div class="studio-grid">
-          <p class="studio-copy">
+          <p class="studio-copy reveal" data-reveal>
             Acidity is an indie software studio. We make apps that feel finished
             in the hand — precise, restrained, a little alive.
           </p>
-          <p class="studio-copy mute">
+          <p class="studio-copy mute reveal" data-reveal>
             Mise started it. Vela follows. More on the burner. We ship when it’s
             ready, not when the calendar says so.
           </p>
@@ -72,11 +104,11 @@
 
       <section id="products" class="section products" aria-labelledby="products-title">
         <div class="section-head">
-          <p class="eyebrow">Products</p>
-          <h2 id="products-title">On the line</h2>
+          <p class="eyebrow reveal" data-reveal>Products</p>
+          <h2 id="products-title" class="reveal" data-reveal>On the line</h2>
         </div>
-        <ul class="product-grid">
-          <li class="product-card product-mise">
+        <ul class="product-grid" data-product-rail>
+          <li class="product-card product-mise tilt-card reveal" data-reveal data-tilt>
             <div class="product-meta">
               <span class="tag">macOS</span>
               <span class="product-status">Shipping</span>
@@ -97,7 +129,7 @@
             </a>
           </li>
 
-          <li class="product-card product-vela">
+          <li class="product-card product-vela tilt-card reveal" data-reveal data-tilt>
             <div class="product-meta">
               <span class="tag tag-vela">App</span>
               <span class="product-status">In progress</span>
@@ -110,7 +142,7 @@
             <span class="product-link product-link-soon">Coming soon</span>
           </li>
 
-          <li class="product-card product-more">
+          <li class="product-card product-more tilt-card reveal" data-reveal data-tilt>
             <div class="product-meta">
               <span class="tag">Lab</span>
               <span class="product-status">Soon</span>
@@ -127,9 +159,19 @@
     </main>
 
     <footer id="contact" class="site-footer">
-      <div class="footer-inner">
+      <div class="footer-inner reveal" data-reveal>
         <div class="footer-brand">
-          <p class="footer-mark">Acidity</p>
+          <p class="footer-mark">
+            <img
+              class="footer-mascot"
+              src="/mascot.png"
+              width="28"
+              height="25"
+              alt=""
+              decoding="async"
+            />
+            Acidity
+          </p>
           <p class="footer-line mute">acidity.lol</p>
         </div>
         <div class="footer-meta">

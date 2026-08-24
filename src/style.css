@@ -57,7 +57,12 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Lenis owns smooth scroll when motion is allowed */
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -72,6 +77,18 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .grain,
+  .scroll-progress,
+  .bg-layers {
+    display: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }
 
 body {
@@ -84,6 +101,7 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 img,
@@ -124,6 +142,96 @@ button:focus-visible {
   top: 1rem;
 }
 
+/* Scroll progress */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 50;
+  pointer-events: none;
+  background: transparent;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: var(--accent);
+  opacity: 0.85;
+  will-change: transform;
+}
+
+/* Film grain */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+[data-theme="light"] .grain {
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+}
+
+/* Soft parallax background blobs */
+
+.bg-layers {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-layer {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform;
+}
+
+.bg-layer-a {
+  width: min(55vw, 520px);
+  height: min(55vw, 520px);
+  top: -8%;
+  right: 5%;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.bg-layer-b {
+  width: min(45vw, 420px);
+  height: min(45vw, 420px);
+  bottom: 18%;
+  left: -8%;
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.bg-layer-c {
+  width: min(35vw, 320px);
+  height: min(35vw, 320px);
+  top: 42%;
+  right: 22%;
+  background: color-mix(in srgb, var(--fg-mute) 12%, transparent);
+}
+
+[data-theme="light"] .bg-layer-a {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+[data-theme="light"] .bg-layer-b {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 /* Canvas backdrop */
 
 .canvas-wrap {
@@ -132,17 +240,18 @@ button:focus-visible {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  will-change: transform;
 }
 
 #scene {
   width: 100%;
   height: 100%;
   display: block;
-  opacity: 0.55;
+  opacity: 0.62;
 }
 
 [data-theme="light"] #scene {
-  opacity: 0.28;
+  opacity: 0.32;
 }
 
 .canvas-fade {
@@ -185,12 +294,22 @@ button:focus-visible {
   color: var(--fg);
 }
 
-.mark-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+.mark-mascot {
+  width: 32px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+  /* Keep mascot readable on both themes without heavy filters */
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--ink) 25%, transparent));
+}
+
+[data-theme="light"] .mark-mascot {
+  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--ink) 12%, transparent));
+}
+
+.mark-text {
+  line-height: 1;
 }
 
 .nav {
@@ -244,8 +363,7 @@ button:focus-visible {
   height: 14px;
   border-radius: 50%;
   border: 1.5px solid currentColor;
-  background:
-    linear-gradient(90deg, currentColor 50%, transparent 50%);
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
 }
 
 /* Main layout */
@@ -271,11 +389,24 @@ main {
   color: var(--fg-mute);
 }
 
-/* Hero */
+/* Hero — tall pin scrub area */
 
 .hero {
-  padding: clamp(3.5rem, 12vw, 7rem) 0 clamp(4rem, 10vw, 6rem);
+  min-height: 160vh;
+  padding: 0;
+  max-width: none;
+}
+
+.hero-sticky {
+  height: 100vh;
+  display: flex;
+  align-items: center;
   max-width: 46rem;
+}
+
+.hero-inner {
+  padding: clamp(2rem, 6vw, 3rem) 0;
+  will-change: transform, opacity;
 }
 
 .wordmark {
@@ -285,6 +416,8 @@ main {
   line-height: 0.9;
   letter-spacing: -0.04em;
   color: var(--fg);
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 
 .lede {
@@ -318,6 +451,7 @@ main {
     background 160ms ease,
     color 160ms ease,
     border-color 160ms ease;
+  will-change: transform;
 }
 
 .btn-acid {
@@ -392,6 +526,7 @@ main {
   padding: 0;
   display: grid;
   gap: 1rem;
+  perspective: 1000px;
 }
 
 @media (min-width: 720px) {
@@ -409,14 +544,13 @@ main {
   border: 1px solid var(--edge);
   border-radius: var(--radius-md);
   min-height: 100%;
-  transition:
-    border-color 180ms ease,
-    transform 180ms ease;
+  transform-style: preserve-3d;
+  transition: border-color 180ms ease;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .product-card:hover {
-    transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--accent) 28%, var(--edge));
   }
 }
@@ -501,6 +635,12 @@ main {
   color: var(--fg-mute);
 }
 
+/* Reveals — JS sets initial; CSS fallback for no-js */
+
+.reveal.is-visible {
+  opacity: 1;
+}
+
 /* Footer */
 
 .site-footer {
@@ -524,6 +664,18 @@ main {
   margin: 0 0 0.25rem;
   font-weight: 650;
   letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-mascot {
+  width: 28px;
+  height: 25px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 3px;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--ink) 20%, transparent));
 }
 
 .footer-line,
