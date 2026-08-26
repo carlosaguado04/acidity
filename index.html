@@ -38,7 +38,7 @@
 
     <header class="site-header">
       <div class="header-inner">
-        <a class="mark" href="/" aria-label="Acidity home">
+        <a class="mark" href="#home" aria-label="Acidity home">
           <img
             class="mark-mascot"
             src="/mascot.png"
@@ -66,171 +66,156 @@
       </div>
     </header>
 
-    <main id="main">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-sticky">
-          <div class="hero-inner">
-            <p class="eyebrow reveal" data-reveal>Studio</p>
-            <h1 id="hero-title" class="wordmark" data-parallax="wordmark">
-              ACIDITY
-            </h1>
-            <p class="lede reveal" data-reveal>
+    <main id="main" class="windows">
+      <div class="windows-track">
+        <section
+          class="window window-hero"
+          id="home"
+          data-window="home"
+          aria-labelledby="hero-title"
+        >
+          <div class="window-inner hero-inner">
+            <h1 id="hero-title" class="wordmark">ACIDITY</h1>
+            <p class="lede">
               Mac apps that don’t nag, don’t upsell monthly, and don’t rearrange
               your life. They just sit there and work.
             </p>
-            <div class="hero-actions reveal" data-reveal>
-              <a class="btn btn-acid magnetic" href="#products" data-magnetic>
-                See products
-              </a>
-              <a class="btn btn-ghost magnetic" href="#studio" data-magnetic>
-                About
-              </a>
+          </div>
+        </section>
+
+        <section
+          class="window"
+          id="studio"
+          data-window="studio"
+          aria-labelledby="studio-title"
+        >
+          <div class="window-inner">
+            <div class="section-head">
+              <p class="eyebrow">Studio</p>
+              <h2 id="studio-title">Small kitchen. High heat.</h2>
+            </div>
+            <div class="studio-grid">
+              <p class="studio-copy">
+                Acidity is Carlos’s Mac studio. Few apps. Finished ones. The lime
+                is the point.
+              </p>
+              <p class="studio-copy mute">
+                Mise is on the pass. Vela is still in the pan. Nothing ships
+                because a calendar said so.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section
-        id="studio"
-        class="section studio"
-        aria-labelledby="studio-title"
-      >
-        <div class="section-head">
-          <p class="eyebrow reveal" data-reveal>Studio</p>
-          <h2 id="studio-title" class="reveal" data-reveal>
-            Small kitchen. High heat.
-          </h2>
-        </div>
-        <div class="studio-grid">
-          <p class="studio-copy reveal" data-reveal>
-            Acidity is Carlos’s Mac studio. Few apps. Finished ones. The lime is
-            the point.
-          </p>
-          <p class="studio-copy mute reveal" data-reveal>
-            Mise is on the pass. Vela is still in the pan. Nothing ships because
-            a calendar said so.
-          </p>
-        </div>
-      </section>
-
-      <section
-        id="products"
-        class="section products"
-        aria-labelledby="products-title"
-      >
-        <div class="section-head">
-          <p class="eyebrow reveal" data-reveal>Products</p>
-          <h2 id="products-title" class="reveal" data-reveal>On the line</h2>
-        </div>
-        <ul class="product-grid" data-product-rail>
-          <li
-            class="product-card product-mise tilt-card reveal"
-            data-reveal
-            data-tilt
-          >
-            <div class="product-top">
-              <img
-                class="product-icon"
-                src="/apps/mise.png"
-                width="56"
-                height="56"
-                alt=""
-                decoding="async"
-              />
-              <div class="product-meta">
-                <span class="tag">macOS</span>
-                <span class="product-status">In development</span>
-              </div>
+        <section
+          class="window"
+          id="products"
+          data-window="products"
+          aria-labelledby="products-title"
+        >
+          <div class="window-inner">
+            <div class="section-head">
+              <p class="eyebrow">Products</p>
+              <h2 id="products-title">On the line</h2>
             </div>
-            <h3 class="product-name">Mise</h3>
-            <p class="product-desc">
-              Your windows wander. Mise remembers the layout and puts them back.
-              Menu bar. macOS.
-            </p>
-            <a
-              class="product-link"
-              href="https://mise.acidity.lol"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              mise.acidity.lol
-              <span aria-hidden="true">→</span>
-            </a>
-          </li>
+            <ul class="product-grid" data-product-rail>
+              <li class="product-card product-mise tilt-card" data-tilt>
+                <div class="product-top">
+                  <img
+                    class="product-icon"
+                    src="/apps/mise.png"
+                    width="56"
+                    height="56"
+                    alt=""
+                    decoding="async"
+                  />
+                  <div class="product-meta">
+                    <span class="tag">macOS</span>
+                    <span class="product-status">In development</span>
+                  </div>
+                </div>
+                <h3 class="product-name">Mise</h3>
+                <p class="product-desc">
+                  Your windows wander. Mise remembers the layout and puts them
+                  back. Menu bar. macOS.
+                </p>
+                <a
+                  class="product-link"
+                  href="https://mise.acidity.lol"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  mise.acidity.lol
+                  <span aria-hidden="true">→</span>
+                </a>
+              </li>
 
-          <li
-            class="product-card product-vela tilt-card reveal"
-            data-reveal
-            data-tilt
-          >
-            <div class="product-top">
-              <img
-                class="product-icon"
-                src="/apps/vela.png"
-                width="56"
-                height="56"
-                alt=""
-                decoding="async"
-              />
-              <div class="product-meta">
-                <span class="tag tag-vela">macOS</span>
-                <span class="product-status">In progress</span>
-              </div>
-            </div>
-            <h3 class="product-name">Vela</h3>
-            <p class="product-desc">
-              A Mac browser for people who actually browse. Sidebar, pins,
-              downloads. Still cooking — don’t ask for a TestFlight yet.
-            </p>
-            <span class="product-link product-link-soon">Coming soon</span>
-          </li>
+              <li class="product-card product-vela tilt-card" data-tilt>
+                <div class="product-top">
+                  <img
+                    class="product-icon"
+                    src="/apps/vela.png"
+                    width="56"
+                    height="56"
+                    alt=""
+                    decoding="async"
+                  />
+                  <div class="product-meta">
+                    <span class="tag tag-vela">macOS</span>
+                    <span class="product-status">In progress</span>
+                  </div>
+                </div>
+                <h3 class="product-name">Vela</h3>
+                <p class="product-desc">
+                  A Mac browser for people who actually browse. Sidebar, pins,
+                  downloads. Still cooking — don’t ask for a TestFlight yet.
+                </p>
+                <span class="product-link product-link-soon">Coming soon</span>
+              </li>
 
-          <li
-            class="product-card product-more tilt-card reveal"
-            data-reveal
-            data-tilt
-          >
-            <div class="product-meta">
-              <span class="tag">Lab</span>
-              <span class="product-status">Soon</span>
-            </div>
-            <h3 class="product-name">More coming</h3>
-            <p class="product-desc">
-              If it isn’t sharp, it doesn’t leave the kitchen.
+              <li class="product-card product-more tilt-card" data-tilt>
+                <div class="product-meta">
+                  <span class="tag">Lab</span>
+                  <span class="product-status">Soon</span>
+                </div>
+                <h3 class="product-name">More coming</h3>
+                <p class="product-desc">
+                  If it isn’t sharp, it doesn’t leave the kitchen.
+                </p>
+                <span class="product-link product-link-soon">Not yet</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section
+          class="window window-contact"
+          id="contact"
+          data-window="contact"
+          aria-labelledby="contact-title"
+        >
+          <div class="window-inner">
+            <p class="eyebrow">Contact</p>
+            <h2 id="contact-title">
+              <a href="mailto:hello@acidity.lol">hello@acidity.lol</a>
+            </h2>
+            <p class="contact-note mute">
+              An Acidity studio. Don’t lick the mascot.
             </p>
-            <span class="product-link product-link-soon">Not yet</span>
-          </li>
-        </ul>
-      </section>
+            <p class="footer-fine mute">
+              © <span id="year"></span> Acidity. acidity.lol
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
 
-    <footer id="contact" class="site-footer">
-      <div class="footer-inner reveal" data-reveal>
-        <div class="footer-brand">
-          <p class="footer-mark">
-            <img
-              class="footer-mascot"
-              src="/mascot.png"
-              width="28"
-              height="25"
-              alt=""
-              decoding="async"
-            />
-            Acidity
-          </p>
-          <p class="footer-line mute">acidity.lol</p>
-        </div>
-        <div class="footer-meta">
-          <p class="mute">
-            Contact:
-            <a href="mailto:hello@acidity.lol">hello@acidity.lol</a>
-          </p>
-        </div>
-      </div>
-      <p class="footer-fine mute">
-        © <span id="year"></span> Acidity. Don’t lick the mascot.
-      </p>
-    </footer>
+    <nav class="pager" aria-label="Windows">
+      <a href="#home" aria-label="Acidity"></a>
+      <a href="#studio" aria-label="Studio"></a>
+      <a href="#products" aria-label="Products"></a>
+      <a href="#contact" aria-label="Contact"></a>
+    </nav>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
