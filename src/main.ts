@@ -23,6 +23,38 @@ toggle?.addEventListener('click', () => {
   localStorage.setItem('acidity-theme', next)
 })
 
+const header = document.querySelector('.site-header')
+const navToggle = document.getElementById('nav-toggle')
+
+const setNavOpen = (open: boolean) => {
+  header?.classList.toggle('is-nav-open', open)
+  navToggle?.setAttribute('aria-expanded', String(open))
+  navToggle?.setAttribute('aria-label', open ? 'Close menu' : 'Open menu')
+}
+
+navToggle?.addEventListener('click', () => {
+  const open = navToggle.getAttribute('aria-expanded') !== 'true'
+  setNavOpen(open)
+})
+
+header?.addEventListener('click', (e) => {
+  if ((e.target as Element | null)?.closest?.('a[href^="#"]')) setNavOpen(false)
+})
+
+document.addEventListener('click', (e) => {
+  if (!header?.classList.contains('is-nav-open')) return
+  if (header.contains(e.target as Node)) return
+  setNavOpen(false)
+})
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') setNavOpen(false)
+})
+
+window.addEventListener('resize', () => {
+  if (window.matchMedia('(min-width: 720px)').matches) setNavOpen(false)
+})
+
 let sceneHandle: SceneHandle | null = null
 let lastScroll = 0
 
