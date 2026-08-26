@@ -442,6 +442,8 @@ button:focus-visible {
 }
 
 .window-inner {
+  position: relative;
+  z-index: 0;
   box-sizing: border-box;
   min-height: 100%;
   width: 100%;
@@ -527,18 +529,20 @@ button:focus-visible {
 .studio-copy,
 .contact-note {
   color: var(--fg);
-  padding: 0.28em 0.5em;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),
-    0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-.studio-copy.mute,
-.contact-note.mute {
-  color: color-mix(in srgb, var(--fg) 82%, var(--fg-mute));
+.hl {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+  color: var(--on-accent);
+  padding: 0.04em 0.12em;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn {
@@ -616,6 +620,7 @@ button:focus-visible {
 
 .window-contact {
   position: relative;
+  overflow: visible;
 }
 
 .window-contact h2 {
@@ -794,7 +799,8 @@ button:focus-visible {
   position: absolute;
   right: max(var(--space), calc((100vw - var(--max)) / 2));
   bottom: 1.4rem;
-  z-index: 5;
+  z-index: 70;
+  pointer-events: auto;
 }
 
 .footer-mascot {
