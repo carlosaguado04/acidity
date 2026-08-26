@@ -523,26 +523,7 @@ button:focus-visible {
   margin: 1.35rem 0 0;
   max-width: 28rem;
   font-size: 1.125rem;
-}
-
-.lede,
-.studio-copy,
-.contact-note {
-  color: var(--fg);
-}
-
-.hl {
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  background: color-mix(in srgb, var(--accent) 72%, transparent);
-  color: var(--on-accent);
-  padding: 0.04em 0.12em;
-  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-
-::selection {
-  background: var(--accent);
-  color: var(--on-accent);
+  color: var(--fg-dim);
 }
 
 .btn {
@@ -616,6 +597,11 @@ button:focus-visible {
 
 .studio-copy {
   margin: 0;
+  color: var(--fg-dim);
+}
+
+.studio-copy.mute {
+  color: var(--fg-mute);
 }
 
 .window-contact {
@@ -637,7 +623,6 @@ button:focus-visible {
 .contact-note {
   margin: 0 0 2rem;
   font-size: 1.05rem;
-  max-width: 36rem;
 }
 
 /* Apps */
