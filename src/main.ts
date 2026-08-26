@@ -28,15 +28,8 @@ let lastScroll = 0
 
 const canvas = document.getElementById('scene')
 if (canvas instanceof HTMLCanvasElement) {
-  const start = () => {
-    sceneHandle = mountScene(canvas)
-    sceneHandle.setScrollProgress(lastScroll)
-  }
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(start, { timeout: 400 })
-  } else {
-    setTimeout(start, 1)
-  }
+  sceneHandle = mountScene(canvas)
+  sceneHandle.setScrollProgress(lastScroll)
 }
 
 initMotion({

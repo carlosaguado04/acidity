@@ -1,27 +1,20 @@
-import {
-  AmbientLight,
-  BufferGeometry,
-  Color,
-  DirectionalLight,
-  Float32BufferAttribute,
-  Group,
-  LineBasicMaterial,
-  LineSegments,
-  Mesh,
-  MeshStandardMaterial,
-  PerspectiveCamera,
-  PointLight,
-  Points,
-  PointsMaterial,
-  Scene,
-  SphereGeometry,
-  WebGLRenderer,
-} from 'three'
-
 export type SceneHandle = {
   setScrollProgress: (p: number) => void
   dispose: () => void
 }
+
+type Dot = {
+  x: number
+  y: number
+  hx: number
+  hy: number
+  vx: number
+  vy: number
+  r: number
+  seed: number
+}
+
+const TAU = Math.PI * 2
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -31,292 +24,222 @@ function isLightTheme(): boolean {
   return document.documentElement.getAttribute('data-theme') === 'light'
 }
 
-function themeColors() {
+function themePaint() {
   if (isLightTheme()) {
-    return {
-      wire: new Color('#556600'),
-      core: new Color('#a8c900'),
-      mist: new Color('#9aa0aa'),
-      rim: new Color('#a8c900'),
-      bgClear: 0x000000,
-    }
+    return { rgb: '168, 201, 0', rest: 0.42, near: 0.88, glow: 0.18 }
   }
-  return {
-    wire: new Color('#d8ff47'),
-    core: new Color('#d8ff47'),
-    mist: new Color('#23262c'),
-    rim: new Color('#d8ff47'),
-    bgClear: 0x000000,
-  }
+  return { rgb: '216, 255, 71', rest: 0.58, near: 1, glow: 0.28 }
 }
 
-/** Low-poly wire crystal with optional explode offsets stored per vertex. */
-function buildWireCrystal(): {
-  lines: LineSegments
-  basePositions: Float32Array
-  explodeDirs: Float32Array
-} {
-  const geo = new SphereGeometry(1.15, 3, 4)
-  const pos = geo.getAttribute('position')
-  const edges: number[] = []
-  const seen = new Set<string>()
-
-  const key = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`)
-
-  const index = geo.index
-  if (index) {
-    for (let i = 0; i < index.count; i += 3) {
-      const a = index.getX(i)
-      const b = index.getX(i + 1)
-      const c = index.getX(i + 2)
-      for (const [u, v] of [
-        [a, b],
-        [b, c],
-        [c, a],
-      ] as const) {
-        const k = key(u, v)
-        if (seen.has(k)) continue
-        seen.add(k)
-        edges.push(
-          pos.getX(u),
-          pos.getY(u),
-          pos.getZ(u),
-          pos.getX(v),
-          pos.getY(v),
-          pos.getZ(v),
-        )
-      }
-    }
-  }
-
-  const basePositions = new Float32Array(edges)
-  const explodeDirs = new Float32Array(edges.length)
-  for (let i = 0; i < edges.length; i += 3) {
-    const x = edges[i]
-    const y = edges[i + 1]
-    const z = edges[i + 2]
-    const len = Math.hypot(x, y, z) || 1
-    explodeDirs[i] = x / len
-    explodeDirs[i + 1] = y / len
-    explodeDirs[i + 2] = z / len
-  }
-
-  const lineGeo = new BufferGeometry()
-  lineGeo.setAttribute('position', new Float32BufferAttribute(edges, 3))
-
-  const mat = new LineBasicMaterial({
-    color: themeColors().wire,
-    transparent: true,
-    opacity: isLightTheme() ? 0.4 : 0.62,
-  })
-
-  return {
-    lines: new LineSegments(lineGeo, mat),
-    basePositions,
-    explodeDirs,
-  }
-}
-
-function buildCore(): Mesh {
-  return new Mesh(
-    new SphereGeometry(0.26, 32, 32),
-    new MeshStandardMaterial({
-      color: themeColors().core,
-      emissive: themeColors().core,
-      emissiveIntensity: isLightTheme() ? 0.2 : 0.45,
-      roughness: 0.28,
-      metalness: 0.15,
-      transparent: true,
-      opacity: isLightTheme() ? 0.6 : 0.9,
-    }),
-  )
-}
-
-function buildInnerShell(): Mesh {
-  return new Mesh(
-    new SphereGeometry(0.72, 24, 24),
-    new MeshStandardMaterial({
-      color: themeColors().wire,
-      emissive: themeColors().rim,
-      emissiveIntensity: isLightTheme() ? 0.04 : 0.12,
-      roughness: 0.55,
-      metalness: 0.05,
-      transparent: true,
-      opacity: isLightTheme() ? 0.06 : 0.1,
-      depthWrite: false,
-    }),
-  )
-}
-
-function buildMist(): Points {
-  const count = 72
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    const r = 1.5 + Math.random() * 1.8
-    const theta = Math.random() * Math.PI * 2
-    const phi = Math.acos(2 * Math.random() - 1)
-    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
-    positions[i * 3 + 2] = r * Math.cos(phi)
-  }
-  const geo = new BufferGeometry()
-  geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
-  const mat = new PointsMaterial({
-    color: themeColors().mist,
-    size: 0.032,
-    transparent: true,
-    opacity: isLightTheme() ? 0.32 : 0.48,
-    depthWrite: false,
-  })
-  return new Points(geo, mat)
+function hash(n: number) {
+  const s = Math.sin(n * 12.9898) * 43758.5453
+  return s - Math.floor(s)
 }
 
 export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
+  const ctx = canvas.getContext('2d', { alpha: true })
+  if (!ctx) {
+    return {
+      setScrollProgress() {},
+      dispose() {},
+    }
+  }
+
   const reduced = prefersReducedMotion()
-  const scene = new Scene()
-  const camera = new PerspectiveCamera(38, 1, 0.1, 100)
-  camera.position.set(0.2, 0.12, 4.4)
+  const dots: Dot[] = []
 
-  const renderer = new WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true,
-    powerPreference: 'high-performance',
-  })
-  renderer.setClearColor(themeColors().bgClear, 0)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-  const root = new Group()
-  root.position.set(0.9, 0.28, 0)
-  scene.add(root)
-
-  const { lines: crystal, basePositions, explodeDirs } = buildWireCrystal()
-  const core = buildCore()
-  const shell = buildInnerShell()
-  const mist = buildMist()
-  root.add(crystal, shell, core, mist)
-
-  scene.add(new AmbientLight(0xffffff, 0.45))
-  const keyLight = new DirectionalLight(0xffffff, 0.7)
-  keyLight.position.set(2.2, 3.2, 4)
-  scene.add(keyLight)
-
-  const rimLight = new PointLight(themeColors().rim.getHex(), 0.55, 8, 2)
-  rimLight.position.set(-1.6, 0.8, 2.2)
-  scene.add(rimLight)
-
-  const fillRim = new PointLight(themeColors().rim.getHex(), 0.22, 6, 2)
-  fillRim.position.set(1.4, -1.2, -1.5)
-  scene.add(fillRim)
-
+  let width = 0
+  let height = 0
   let raf = 0
   let running = true
   let scrollProgress = 0
   let scrollSmooth = 0
+  let lastT = 0
+  let paint = themePaint()
 
-  const pointer = { x: 0, y: 0, tx: 0, ty: 0 }
+  const pointer = { x: 0, y: 0, tx: 0, ty: 0, strength: 0, active: false }
+  let armed = false
 
-  const onPointer = (e: PointerEvent) => {
-    if (reduced) return
-    const nx = (e.clientX / window.innerWidth) * 2 - 1
-    const ny = (e.clientY / window.innerHeight) * 2 - 1
-    pointer.tx = nx * 0.28
-    pointer.ty = -ny * 0.2
+  const rebuild = () => {
+    dots.length = 0
+    const short = Math.min(width, height)
+    let gap = short < 640 ? 42 : 34
+    while ((width / gap) * (height / (gap * 0.866)) > 1900) gap += 2
+
+    const rowH = gap * 0.8660254
+    const cols = Math.ceil(width / gap) + 3
+    const rows = Math.ceil(height / rowH) + 3
+
+    for (let row = 0; row < rows; row++) {
+      const odd = row & 1
+      for (let col = 0; col < cols; col++) {
+        const n = row * 97 + col * 13
+        const jx = (hash(n) - 0.5) * gap * 0.32
+        const jy = (hash(n + 4.1) - 0.5) * rowH * 0.32
+        const hx = (col - 1) * gap + odd * gap * 0.5 + jx
+        const hy = (row - 1) * rowH + jy
+        const accent = hash(n + 2.7) > 0.88
+        dots.push({
+          x: hx,
+          y: hy,
+          hx,
+          hy,
+          vx: 0,
+          vy: 0,
+          r: (accent ? 3.2 : 2.15) + hash(n + 8.3) * 0.9,
+          seed: hash(n + 11) * TAU,
+        })
+      }
+    }
   }
 
   const resize = () => {
-    const width = canvas.clientWidth || window.innerWidth
-    const height = canvas.clientHeight || window.innerHeight
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-    renderer.setSize(width, height, false)
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const nextW = canvas.clientWidth || window.innerWidth
+    const nextH = canvas.clientHeight || window.innerHeight
+    if (nextW === width && nextH === height && canvas.width === Math.round(nextW * dpr)) {
+      return
+    }
+    width = nextW
+    height = nextH
+    canvas.width = Math.round(width * dpr)
+    canvas.height = Math.round(height * dpr)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    rebuild()
+    draw(reduced ? 0 : performance.now() / 1000)
   }
 
-  const applyThemeMaterials = () => {
-    const c = themeColors()
-    ;(crystal.material as LineBasicMaterial).color.copy(c.wire)
-    ;(crystal.material as LineBasicMaterial).opacity = isLightTheme() ? 0.4 : 0.62
-    const coreMat = core.material as MeshStandardMaterial
-    coreMat.color.copy(c.core)
-    coreMat.emissive.copy(c.core)
-    coreMat.emissiveIntensity = isLightTheme() ? 0.2 : 0.45
-    coreMat.opacity = isLightTheme() ? 0.6 : 0.9
-    const shellMat = shell.material as MeshStandardMaterial
-    shellMat.color.copy(c.wire)
-    shellMat.emissive.copy(c.rim)
-    shellMat.emissiveIntensity = isLightTheme() ? 0.04 : 0.12
-    shellMat.opacity = isLightTheme() ? 0.06 : 0.1
-    ;(mist.material as PointsMaterial).color.copy(c.mist)
-    ;(mist.material as PointsMaterial).opacity = isLightTheme() ? 0.32 : 0.48
-    rimLight.color.copy(c.rim)
-    fillRim.color.copy(c.rim)
+  const radiusFor = () => Math.min(220, Math.max(140, Math.min(width, height) * 0.22))
+
+  const draw = (t: number) => {
+    ctx.clearRect(0, 0, width, height)
+
+    const radius = radiusFor()
+    const radius2 = radius * radius
+    const { rgb, rest, near, glow } = paint
+
+    for (const d of dots) {
+      const dx = d.x - pointer.x
+      const dy = d.y - pointer.y
+      const d2 = dx * dx + dy * dy
+      const falloff = d2 < radius2 && d2 > 0.01 ? 1 - Math.sqrt(d2) / radius : 0
+      const heat = falloff * pointer.strength
+      const idle = reduced ? 0 : Math.sin(t * 0.7 + d.seed) * 0.35
+      const r = d.r * (1 + heat * 1.55) + idle * 0.12
+      const a = rest + heat * (near - rest)
+
+      if (heat > 0.28) {
+        ctx.beginPath()
+        ctx.fillStyle = `rgba(${rgb}, ${heat * glow})`
+        ctx.arc(d.x, d.y, r * 3.4, 0, TAU)
+        ctx.fill()
+      }
+
+      ctx.beginPath()
+      ctx.fillStyle = `rgba(${rgb}, ${a})`
+      ctx.arc(d.x, d.y, r, 0, TAU)
+      ctx.fill()
+    }
   }
 
-  const themeObserver = new MutationObserver(applyThemeMaterials)
+  const step = (now: number) => {
+    if (!running) return
+    const dt = lastT ? Math.min(2.2, (now - lastT) / 16.67) : 1
+    lastT = now
+    const t = now / 1000
+
+    scrollSmooth += (scrollProgress - scrollSmooth) * 0.06
+    pointer.x += (pointer.tx - pointer.x) * 0.18
+    pointer.y += (pointer.ty - pointer.y) * 0.18
+    pointer.strength += ((pointer.active ? 1 : 0) - pointer.strength) * 0.1
+
+    const radius = radiusFor()
+    const radius2 = radius * radius
+    const ox = Math.sin(scrollSmooth * Math.PI) * 18
+    const oy = scrollSmooth * 28
+    const pushMax = radius * 0.58 * pointer.strength
+    const swirl = 0.2
+
+    for (const d of dots) {
+      let tx = d.hx + ox
+      let ty = d.hy + oy
+      const dx = d.x - pointer.x
+      const dy = d.y - pointer.y
+      const d2 = dx * dx + dy * dy
+
+      if (d2 < radius2 && d2 > 0.25 && pointer.strength > 0.01) {
+        const dist = Math.sqrt(d2)
+        const f = 1 - dist / radius
+        const push = f * f * pushMax
+        const nx = dx / dist
+        const ny = dy / dist
+        tx += nx * push - ny * push * swirl
+        ty += ny * push + nx * push * swirl
+      }
+
+      d.vx += (tx - d.x) * 0.18 * dt
+      d.vy += (ty - d.y) * 0.18 * dt
+      d.vx *= 0.76
+      d.vy *= 0.76
+      d.x += d.vx * dt
+      d.y += d.vy * dt
+    }
+
+    draw(t)
+    raf = requestAnimationFrame(step)
+  }
+
+  const onPointer = (e: PointerEvent) => {
+    if (reduced) return
+    const rect = canvas.getBoundingClientRect()
+    pointer.tx = e.clientX - rect.left
+    pointer.ty = e.clientY - rect.top
+    if (!armed) {
+      pointer.x = pointer.tx
+      pointer.y = pointer.ty
+      armed = true
+    }
+    pointer.active = true
+  }
+
+  const onLeave = (e: PointerEvent | Event) => {
+    if ('relatedTarget' in e && e.relatedTarget) return
+    pointer.active = false
+  }
+
+  const applyTheme = () => {
+    paint = themePaint()
+    if (reduced) draw(0)
+  }
+
+  const themeObserver = new MutationObserver(applyTheme)
   themeObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-theme'],
   })
 
-  const applyExplode = (amount: number) => {
-    const attr = crystal.geometry.getAttribute('position')
-    const arr = attr.array as Float32Array
-    for (let i = 0; i < basePositions.length; i++) {
-      arr[i] = basePositions[i] + explodeDirs[i] * amount
+  const onVisibility = () => {
+    if (reduced) return
+    if (document.hidden) {
+      cancelAnimationFrame(raf)
+      lastT = 0
+    } else if (running) {
+      raf = requestAnimationFrame(step)
     }
-    attr.needsUpdate = true
   }
 
-  const t0 = performance.now()
-
-  const frame = (now: number) => {
-    if (!running) return
-    const t = (now - t0) / 1000
-
-    scrollSmooth += (scrollProgress - scrollSmooth) * 0.06
-
-    pointer.x += (pointer.tx - pointer.x) * 0.045
-    pointer.y += (pointer.ty - pointer.y) * 0.045
-
-    if (!reduced) {
-      const spinBoost = 1 + scrollSmooth * 0.45
-      root.rotation.y = t * 0.14 * spinBoost + pointer.x + scrollSmooth * 0.28
-      root.rotation.x =
-        Math.sin(t * 0.32) * 0.09 + pointer.y + scrollSmooth * 0.12
-      root.rotation.z = scrollSmooth * 0.04
-
-      const scale = 1 + scrollSmooth * 0.1
-      root.scale.setScalar(scale)
-
-      // Subtle explode / open as you scroll through the page
-      applyExplode(scrollSmooth * 0.08)
-
-      const pulse = 1 + Math.sin(t * 1.15) * 0.045
-      core.scale.setScalar(pulse * (1 + scrollSmooth * 0.05))
-      shell.scale.setScalar(1 + scrollSmooth * 0.03)
-      mist.rotation.y = -t * 0.06 - scrollSmooth * 0.15
-      mist.rotation.x = scrollSmooth * 0.08
-
-      // Parallax camera pull
-      camera.position.z = 4.4 - scrollSmooth * 0.2
-      camera.position.y = 0.12 + scrollSmooth * 0.05
-      camera.lookAt(0.5, 0.2, 0)
-
-      rimLight.intensity = 0.45 + scrollSmooth * 0.2
-    } else {
-      root.rotation.y = 0.45
-      root.rotation.x = 0.12
-      applyExplode(0)
-    }
-
-    renderer.render(scene, camera)
-    raf = requestAnimationFrame(frame)
-  }
-
+  const ro = new ResizeObserver(resize)
+  ro.observe(canvas)
   resize()
   window.addEventListener('resize', resize)
   window.addEventListener('pointermove', onPointer, { passive: true })
-  raf = requestAnimationFrame(frame)
+  window.addEventListener('pointerdown', onPointer, { passive: true })
+  document.documentElement.addEventListener('pointerleave', onLeave)
+  document.addEventListener('visibilitychange', onVisibility)
+
+  if (!reduced) {
+    raf = requestAnimationFrame(step)
+  }
 
   return {
     setScrollProgress(p: number) {
@@ -327,16 +250,11 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointer)
+      window.removeEventListener('pointerdown', onPointer)
+      document.documentElement.removeEventListener('pointerleave', onLeave)
+      document.removeEventListener('visibilitychange', onVisibility)
+      ro.disconnect()
       themeObserver.disconnect()
-      crystal.geometry.dispose()
-      ;(crystal.material as LineBasicMaterial).dispose()
-      core.geometry.dispose()
-      ;(core.material as MeshStandardMaterial).dispose()
-      shell.geometry.dispose()
-      ;(shell.material as MeshStandardMaterial).dispose()
-      mist.geometry.dispose()
-      ;(mist.material as PointsMaterial).dispose()
-      renderer.dispose()
     },
   }
 }
