@@ -53,8 +53,7 @@ const mascotBubble = document.querySelector<HTMLElement>('[data-mascot-bubble]')
 let mascotLine = 0
 let mascotHide: number | undefined
 
-function speakMascot(e: Event) {
-  e.preventDefault()
+mascotBtn?.addEventListener('click', (e) => {
   e.stopPropagation()
   if (!mascotBubble) return
   mascotBubble.hidden = false
@@ -67,7 +66,4 @@ function speakMascot(e: Event) {
   mascotHide = window.setTimeout(() => {
     mascotBubble.hidden = true
   }, 3200)
-}
-
-mascotBtn?.addEventListener('click', speakMascot)
-mascotBtn?.addEventListener('pointerdown', (e) => e.stopPropagation())
+})

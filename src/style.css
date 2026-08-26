@@ -442,8 +442,6 @@ button:focus-visible {
 }
 
 .window-inner {
-  position: relative;
-  z-index: 0;
   box-sizing: border-box;
   min-height: 100%;
   width: 100%;
@@ -606,7 +604,6 @@ button:focus-visible {
 
 .window-contact {
   position: relative;
-  overflow: visible;
 }
 
 .window-contact h2 {
@@ -775,17 +772,24 @@ button:focus-visible {
   color: var(--fg-mute);
 }
 
+.contact-end {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 36rem;
+  margin-top: 2.5rem;
+}
+
 .footer-fine {
   margin: 0;
   font-size: 0.8125rem;
 }
 
 .footer-mascot-wrap {
-  position: absolute;
-  right: max(var(--space), calc((100vw - var(--max)) / 2));
-  bottom: 1.4rem;
-  z-index: 70;
-  pointer-events: auto;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .footer-mascot {
