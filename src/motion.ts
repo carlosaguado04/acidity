@@ -14,6 +14,172 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+const SECTION_IDS = ['studio', 'products', 'contact'] as const
+
+function bindAnchors(
+  lenis: Lenis | null,
+  cleanups: Array<() => void>,
+): void {
+  const nav = document.querySelector('.nav')
+  const line = nav?.querySelector('.nav-line')
+  const navLinks = [
+    ...document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]'),
+  ]
+
+  const placeLine = (link: HTMLAnchorElement, animate: boolean) => {
+    if (!(line instanceof HTMLElement) || !(nav instanceof HTMLElement)) return
+    if (getComputedStyle(nav).display === 'none') return
+    const navRect = nav.getBoundingClientRect()
+    const rect = link.getBoundingClientRect()
+    const x = rect.left - navRect.left + nav.scrollLeft
+    gsap.to(line, {
+      x,
+      width: rect.width,
+      opacity: 1,
+      duration: animate ? 0.45 : 0,
+      ease: 'power3.out',
+      overwrite: true,
+    })
+  }
+
+  const hideLine = (animate: boolean) => {
+    if (!(line instanceof HTMLElement)) return
+    gsap.to(line, {
+      opacity: 0,
+      duration: animate ? 0.2 : 0,
+      overwrite: true,
+    })
+  }
+
+  const setActive = (id: string | null, animate = true) => {
+    navLinks.forEach((link) => {
+      const on = link.getAttribute('href') === `#${id}`
+      link.classList.toggle('is-active', on)
+      if (on) {
+        link.setAttribute('aria-current', 'location')
+        placeLine(link, animate)
+      } else {
+        link.removeAttribute('aria-current')
+      }
+    })
+    if (!id) hideLine(animate)
+  }
+
+  const currentSection = (): string | null => {
+    const probe = Math.max(
+      96,
+      (document.querySelector('.site-header')?.getBoundingClientRect().height ?? 64) + 80,
+    )
+    let id: string | null = null
+    for (const hid of SECTION_IDS) {
+      const el = document.getElementById(hid)
+      if (!el) continue
+      if (el.getBoundingClientRect().top <= probe) id = hid
+    }
+    const max = document.documentElement.scrollHeight - window.innerHeight
+    if (max > 0 && window.scrollY >= max - 12) id = 'contact'
+    return id
+  }
+
+  const flash = (target: Element) => {
+    const heading =
+      target.querySelector('h2') ??
+      target.querySelector('.footer-mark') ??
+      target
+    heading.classList.remove('arrive-flash')
+    void (heading as HTMLElement).offsetWidth
+    heading.classList.add('arrive-flash')
+    const clear = () => heading.classList.remove('arrive-flash')
+    heading.addEventListener('animationend', clear, { once: true })
+  }
+
+  const goTo = (href: string) => {
+    if (href === '#' || href === '#top') {
+      if (lenis) lenis.scrollTo(0, { duration: 1.15 })
+      else window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+      setActive(null, true)
+      return
+    }
+    const target = document.querySelector(href)
+    if (!(target instanceof HTMLElement)) return
+    const id = href.slice(1)
+    setActive(SECTION_IDS.includes(id as (typeof SECTION_IDS)[number]) ? id : currentSection(), true)
+
+    const done = () => flash(target)
+    if (lenis) {
+      lenis.scrollTo(target, {
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        onComplete: done,
+      })
+    } else {
+      target.scrollIntoView({
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        block: 'start',
+      })
+      window.setTimeout(done, prefersReducedMotion() ? 0 : 450)
+    }
+  }
+
+  const onClick = (e: MouseEvent) => {
+    const link = (e.target as Element | null)?.closest?.('a')
+    if (!(link instanceof HTMLAnchorElement)) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || link.target === '_blank') return
+
+    const hrefAttr = link.getAttribute('href')
+    if (!hrefAttr) return
+
+    if (link.classList.contains('mark')) {
+      const path = window.location.pathname
+      if (path === '/' || path === '' || path.endsWith('/index.html')) {
+        e.preventDefault()
+        goTo('#')
+        history.replaceState(null, '', '/')
+      }
+      return
+    }
+
+    if (!hrefAttr.startsWith('#') || hrefAttr === '#') return
+    const url = new URL(link.href)
+    if (url.pathname !== window.location.pathname) return
+    const target = document.querySelector(hrefAttr)
+    if (!target) return
+    e.preventDefault()
+    goTo(hrefAttr)
+    history.replaceState(null, '', hrefAttr)
+  }
+
+  document.addEventListener('click', onClick)
+  cleanups.push(() => document.removeEventListener('click', onClick))
+
+  navLinks.forEach((link) => {
+    link.style.cursor = 'pointer'
+    const onEnter = () => placeLine(link, true)
+    const onLeave = () => setActive(currentSection(), true)
+    link.addEventListener('pointerenter', onEnter)
+    link.addEventListener('pointerleave', onLeave)
+    cleanups.push(() => {
+      link.removeEventListener('pointerenter', onEnter)
+      link.removeEventListener('pointerleave', onLeave)
+    })
+  })
+
+  const onScroll = () => setActive(currentSection(), true)
+  const onResize = () => setActive(currentSection(), false)
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onResize)
+  cleanups.push(() => {
+    window.removeEventListener('scroll', onScroll)
+    window.removeEventListener('resize', onResize)
+  })
+  if (lenis) {
+    lenis.on('scroll', onScroll)
+    cleanups.push(() => lenis.off('scroll', onScroll))
+  }
+
+  requestAnimationFrame(() => setActive(currentSection(), false))
+}
+
 export function initMotion(opts: {
   onScrollProgress?: (p: number) => void
 }): MotionHandle {
@@ -28,6 +194,7 @@ export function initMotion(opts: {
       el.classList.add('is-visible')
     })
     opts.onScrollProgress?.(0)
+    bindAnchors(null, cleanups)
     return {
       lenis: null,
       destroy() {
@@ -66,6 +233,7 @@ export function initMotion(opts: {
   }
   lenis.on('scroll', onScroll)
   onScroll()
+  bindAnchors(lenis, cleanups)
 
   // --- Hero pin: wordmark scales + fades ---
   const hero = document.querySelector('.hero')

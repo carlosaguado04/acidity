@@ -58,7 +58,7 @@
 }
 
 html {
-  /* Lenis owns smooth scroll when motion is allowed */
+  scroll-padding-top: calc(var(--header-h) + 12px);
 }
 
 html.lenis,
@@ -111,7 +111,9 @@ svg {
   max-width: 100%;
 }
 
-a {
+a,
+a:link,
+a:visited {
   color: inherit;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
@@ -236,11 +238,17 @@ button:focus-visible {
 
 /* Canvas backdrop */
 
+.canvas-wrap,
+.canvas-wrap *,
+#scene,
+.canvas-fade {
+  pointer-events: none;
+}
+
 .canvas-wrap {
   position: fixed;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
   overflow: hidden;
   will-change: transform;
 }
@@ -274,7 +282,16 @@ button:focus-visible {
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 60;
+  width: 100%;
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--edge) 70%, transparent);
+}
+
+.header-inner {
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -282,10 +299,13 @@ button:focus-visible {
   padding: 0 var(--space);
   max-width: calc(var(--max) + 2 * var(--space));
   margin: 0 auto;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid color-mix(in srgb, var(--edge) 70%, transparent);
+}
+
+.mark,
+.mark * {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .mark {
@@ -321,20 +341,43 @@ button:focus-visible {
 
 .nav {
   display: none;
-  gap: 1.25rem;
+  position: relative;
+  align-items: center;
+  gap: 0.35rem;
   margin-left: auto;
   font-size: 0.9375rem;
   color: var(--fg-dim);
+  pointer-events: auto;
 }
 
 .nav a {
+  position: relative;
+  z-index: 1;
+  padding: 0.45rem 0.7rem;
   text-decoration: none;
   cursor: pointer;
-  padding: 0.4rem 0.15rem;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
-.nav a:hover {
+.nav a:hover,
+.nav a.is-active {
   color: var(--fg);
+}
+
+.nav-line {
+  position: absolute;
+  left: 0;
+  bottom: 0.35rem;
+  height: 2px;
+  width: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0);
+  will-change: transform, width, opacity;
 }
 
 @media (min-width: 720px) {
@@ -464,6 +507,7 @@ main {
   font-weight: 560;
   letter-spacing: -0.01em;
   text-decoration: none;
+  cursor: pointer;
   border: 1px solid transparent;
   transition:
     background 160ms ease,
@@ -495,9 +539,27 @@ main {
 
 /* Sections */
 
+.section,
+.site-footer {
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+
 .section {
   padding: clamp(3rem, 8vw, 5rem) 0;
   border-top: 1px solid var(--edge);
+}
+
+.arrive-flash {
+  animation: arrive-flash 0.7s var(--ease, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+
+@keyframes arrive-flash {
+  0% {
+    color: var(--accent);
+  }
+  100% {
+    color: var(--fg);
+  }
 }
 
 .section-head {
