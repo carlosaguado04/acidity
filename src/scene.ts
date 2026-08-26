@@ -148,21 +148,29 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     lastT = now
     const t = now / 1000
 
-    scrollSmooth += (scrollProgress - scrollSmooth) * 0.06
+    scrollSmooth += (scrollProgress - scrollSmooth) * 0.02
     pointer.x += (pointer.tx - pointer.x) * 0.18
     pointer.y += (pointer.ty - pointer.y) * 0.18
     pointer.strength += ((pointer.active ? 1 : 0) - pointer.strength) * 0.1
 
     const radius = radiusFor()
     const radius2 = radius * radius
-    const ox = Math.sin(scrollSmooth * Math.PI) * 18
-    const oy = scrollSmooth * 28
+    const cx = width * 0.5
+    const cy = height * 0.42
+    const zoom = 1 + scrollSmooth * 0.42
+    const ox = scrollSmooth * width * 0.16
+    const oy = scrollSmooth * height * 1.15
+    const rot = scrollSmooth * 0.12
+    const cos = Math.cos(rot)
+    const sin = Math.sin(rot)
     const pushMax = radius * 0.58 * pointer.strength
     const swirl = 0.2
 
     for (const d of dots) {
-      let tx = d.hx + ox
-      let ty = d.hy + oy
+      const rx = (d.hx - cx) * zoom
+      const ry = (d.hy - cy) * zoom
+      let tx = cx + rx * cos - ry * sin + ox
+      let ty = cy + rx * sin + ry * cos + oy
       const dx = d.x - pointer.x
       const dy = d.y - pointer.y
       const d2 = dx * dx + dy * dy

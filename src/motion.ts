@@ -5,7 +5,10 @@ export type MotionHandle = {
   destroy: () => void
 }
 
-const WINDOWS = ['home', 'studio', 'products', 'contact'] as const
+const WINDOWS = ['home', 'studio', 'apps', 'contact'] as const
+const MOVE_EASE = 'expo.inOut'
+const MOVE_WINDOW = 1.55
+const MOVE_BEHIND = 1.85
 type WindowId = (typeof WINDOWS)[number]
 
 function prefersReducedMotion(): boolean {
@@ -94,7 +97,8 @@ export function initMotion(opts: {
   const idAt = (i: number): WindowId => WINDOWS[i] ?? 'home'
 
   const indexOf = (id: string): number => {
-    const i = WINDOWS.indexOf(id as WindowId)
+    const key = id === 'products' ? 'apps' : id
+    const i = WINDOWS.indexOf(key as WindowId)
     return i === -1 ? 0 : i
   }
 
@@ -140,20 +144,61 @@ export function initMotion(opts: {
   const applyTransform = (i: number, animate: boolean) => {
     if (!(track instanceof HTMLElement)) return
     const shell = track.parentElement
-    const y = -i * (shell instanceof HTMLElement ? shell.clientHeight : window.innerHeight)
-    if (!animate || reduced) {
+    const h = shell instanceof HTMLElement ? shell.clientHeight : window.innerHeight
+    const y = -i * h
+    const dur = animate && !reduced
+    const canvas = document.querySelector('.canvas-wrap')
+    const layers = document.querySelectorAll<HTMLElement>('.bg-layer')
+
+    if (!dur) {
       gsap.set(track, { y })
+      if (canvas) gsap.set(canvas, { y: -i * h * 0.55, scale: 1 + i * 0.16 })
+      layers.forEach((layer, n) => {
+        gsap.set(layer, { y: -i * h * (0.35 + n * 0.18) })
+      })
+      panes.forEach((pane, n) => {
+        const inner = pane.querySelector('.window-inner')
+        if (inner) gsap.set(inner, { y: (n - i) * 70 })
+      })
       return
     }
+
     locked = true
     gsap.to(track, {
       y,
-      duration: 0.95,
-      ease: 'power3.inOut',
+      duration: MOVE_WINDOW,
+      ease: MOVE_EASE,
       overwrite: true,
       onComplete: () => {
         locked = false
       },
+    })
+    if (canvas) {
+      gsap.to(canvas, {
+        y: -i * h * 0.55,
+        scale: 1 + i * 0.16,
+        duration: MOVE_BEHIND,
+        ease: MOVE_EASE,
+        overwrite: true,
+      })
+    }
+    layers.forEach((layer, n) => {
+      gsap.to(layer, {
+        y: -i * h * (0.35 + n * 0.18),
+        duration: MOVE_BEHIND + n * 0.08,
+        ease: MOVE_EASE,
+        overwrite: true,
+      })
+    })
+    panes.forEach((pane, n) => {
+      const inner = pane.querySelector('.window-inner')
+      if (!inner) return
+      gsap.to(inner, {
+        y: (n - i) * 70,
+        duration: MOVE_WINDOW,
+        ease: MOVE_EASE,
+        overwrite: true,
+      })
     })
   }
 
@@ -249,6 +294,7 @@ export function initMotion(opts: {
         id === 'home' ||
         id === 'main' ||
         WINDOWS.includes(id as WindowId) ||
+        id === 'products' ||
         href === '/'
       ) {
         e.preventDefault()
