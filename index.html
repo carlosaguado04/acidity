@@ -39,14 +39,24 @@
     <header class="site-header">
       <div class="header-inner">
         <a class="mark" href="#home" aria-label="Acidity home">
-          <span class="mark-text">Acidity</span>
+          <span class="mark-text">Acid<span class="brand-i">i</span>ty</span>
         </a>
-        <nav class="nav" aria-label="Primary">
+        <nav class="nav" id="site-nav" aria-label="Primary">
           <a href="#studio">Studio</a>
           <a href="#apps">Apps</a>
           <a href="#contact">Contact</a>
           <span class="nav-line" aria-hidden="true"></span>
         </nav>
+        <button
+          type="button"
+          class="nav-toggle"
+          id="nav-toggle"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <span class="nav-toggle-bars" aria-hidden="true"></span>
+        </button>
         <button
           type="button"
           class="theme-toggle"
@@ -67,7 +77,7 @@
           aria-labelledby="hero-title"
         >
           <div class="window-inner hero-inner">
-            <h1 id="hero-title" class="wordmark">ACIDITY</h1>
+            <h1 id="hero-title" class="wordmark">ACID<span class="brand-i">I</span>TY</h1>
             <p class="lede">
               Mac apps that don’t nag, don’t upsell, and don’t get in your way.
               They just sit there and work.
@@ -84,24 +94,13 @@
           <div class="window-inner">
             <div class="section-head">
               <p class="eyebrow">Studio</p>
-              <h2 id="studio-title">Independent. Opinionated. Useful.</h2>
+              <h2 id="studio-title">A small Mac studio</h2>
             </div>
             <div class="studio-grid">
               <p class="studio-copy">
-                Acidity is an indie MacOS studio that builds apps focused on real
-                user experience, usability, and design that actually does
-                something. No monthly fees. No ads. No tracking. We started this
-                because we were sick of software constantly nagging you to
-                upgrade, shove features you never asked for, or just feel like it
-                was made by people who don’t use their own shit. We couldn’t find
-                the tools we actually wanted, so we built them ourselves—simple,
-                useful, and ours. The software is opinionated. We trust you’ll
-                still find it useful.
-              </p>
-              <p class="studio-copy mute">
-                Founded in 2026 out of the optimistic belief that people will
-                actually use good software and pay for it when it doesn’t treat
-                them like a subscription farm.
+                Acidity makes Mac apps that don’t nag, don’t meter you, and don’t
+                pretend they know better than you. No ads. No tracking. If we
+                needed it and it didn’t exist, that’s the kitchen.
               </p>
             </div>
           </div>
@@ -124,8 +123,8 @@
                   <img
                     class="product-icon"
                     src="/apps/mise.png"
-                    width="56"
-                    height="56"
+                    width="36"
+                    height="36"
                     alt=""
                     decoding="async"
                   />
@@ -137,16 +136,24 @@
                 <h3 class="product-name">Mise</h3>
                 <p class="product-desc">
                   Your windows wander. Mise remembers the layout and puts them
-                  back. Menu bar. macOS.
+                  back.
                 </p>
                 <a
                   class="product-link"
+                  href="https://usemise.dev"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  usemise.dev
+                  <span aria-hidden="true">→</span>
+                </a>
+                <a
+                  class="product-link product-link-alt"
                   href="https://mise.acidity.lol"
                   rel="noopener noreferrer"
                   target="_blank"
                 >
                   mise.acidity.lol
-                  <span aria-hidden="true">→</span>
                 </a>
               </li>
 
@@ -155,8 +162,8 @@
                   <img
                     class="product-icon"
                     src="/apps/vela.png"
-                    width="56"
-                    height="56"
+                    width="36"
+                    height="36"
                     alt=""
                     decoding="async"
                   />
