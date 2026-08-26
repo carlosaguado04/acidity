@@ -1,5 +1,21 @@
 /* Acidity — brand tokens (dark face, light supported) */
 
+@font-face {
+  font-family: "Anurati";
+  src: url("/fonts/Anurati-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
 
@@ -28,9 +44,8 @@
   --radius-md: 14px;
   --radius-lg: 22px;
 
-  --font:
-    -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
-  --font-display: "Syne", var(--font);
+  --font: "Satoshi", -apple-system, "Helvetica Neue", sans-serif;
+  --font-brand: "Anurati", var(--font);
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --space: clamp(1rem, 2.5vw, 2rem);
@@ -97,6 +112,7 @@ body {
   min-height: 100dvh;
   font-family: var(--font);
   font-size: 17px;
+  font-weight: 700;
   line-height: 1.55;
   color: var(--fg);
   background: var(--bg);
@@ -312,8 +328,6 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
   text-decoration: none;
 }
 
@@ -336,7 +350,12 @@ button:focus-visible {
 }
 
 .mark-text {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-size: 0.92rem;
+  letter-spacing: 0.22em;
   line-height: 1;
+  text-transform: uppercase;
 }
 
 .nav {
@@ -467,12 +486,12 @@ main {
 
 .wordmark {
   margin: 0;
-  font-family: var(--font-display);
-  /* Fit full "ACIDITY" on one line — Syne ExtraBold is wide */
-  font-size: clamp(2.5rem, 11vw, 6.5rem);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -0.04em;
+  font-family: var(--font-brand);
+  font-size: clamp(2.4rem, 9.5vw, 5.8rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--fg);
   white-space: nowrap;
   max-width: 100%;
@@ -504,7 +523,7 @@ main {
   border-radius: var(--radius-sm);
   font: inherit;
   font-size: 0.9375rem;
-  font-weight: 560;
+  font-weight: 700;
   letter-spacing: -0.01em;
   text-decoration: none;
   cursor: pointer;
@@ -569,9 +588,8 @@ main {
 
 .section-head h2 {
   margin: 0;
-  font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
@@ -702,7 +720,7 @@ main {
 .product-name {
   margin: 0.25rem 0 0;
   font-size: 1.5rem;
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -719,7 +737,7 @@ main {
   gap: 0.35rem;
   margin-top: 0.5rem;
   font-size: 0.9375rem;
-  font-weight: 560;
+  font-weight: 700;
   letter-spacing: -0.01em;
   text-decoration: none;
   color: var(--fg);
@@ -766,7 +784,7 @@ main {
 
 .footer-mark {
   margin: 0 0 0.25rem;
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.02em;
   display: inline-flex;
   align-items: center;

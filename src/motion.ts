@@ -260,7 +260,7 @@ export function initMotion(opts: {
         scale: 1.03,
         opacity: 0.75,
         y: -12,
-        letterSpacing: '-0.045em',
+        letterSpacing: '0.1em',
         ease: 'none',
       },
       0,
