@@ -39,14 +39,6 @@
     <header class="site-header">
       <div class="header-inner">
         <a class="mark" href="#home" aria-label="Acidity home">
-          <img
-            class="mark-mascot"
-            src="/mascot.png"
-            width="32"
-            height="28"
-            alt=""
-            decoding="async"
-          />
           <span class="mark-text">Acidity</span>
         </a>
         <nav class="nav" aria-label="Primary">
@@ -205,6 +197,23 @@
             <p class="footer-fine mute">
               © <span id="year"></span> Acidity. acidity.lol
             </p>
+          </div>
+          <div class="footer-mascot-wrap">
+            <button
+              type="button"
+              class="footer-mascot"
+              aria-label="Talk to the mascot"
+              data-mascot
+            >
+              <img src="/mascot.png" width="36" height="32" alt="" />
+            </button>
+            <div
+              class="mascot-bubble"
+              data-mascot-bubble
+              hidden
+              role="status"
+              aria-live="polite"
+            ></div>
           </div>
         </section>
       </div>

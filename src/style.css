@@ -317,26 +317,7 @@ button:focus-visible {
 .mark {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
   text-decoration: none;
-}
-
-.mark:hover {
-  color: var(--fg);
-}
-
-.mark-mascot {
-  width: 32px;
-  height: 28px;
-  object-fit: contain;
-  flex-shrink: 0;
-  border-radius: 4px;
-  /* Keep mascot readable on both themes without heavy filters */
-  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--ink) 25%, transparent));
-}
-
-[data-theme="light"] .mark-mascot {
-  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--ink) 12%, transparent));
 }
 
 .mark-text {
@@ -346,6 +327,17 @@ button:focus-visible {
   letter-spacing: 0.22em;
   line-height: 1;
   text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.mark:hover .mark-text,
+.mark:focus-visible .mark-text {
+  color: var(--accent);
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--accent) 80%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .nav {
@@ -610,6 +602,10 @@ button:focus-visible {
   color: var(--fg-mute);
 }
 
+.window-contact {
+  position: relative;
+}
+
 .window-contact h2 {
   margin: 0.35rem 0 1rem;
   font-size: clamp(1.8rem, 5vw, 3.4rem);
@@ -779,4 +775,94 @@ button:focus-visible {
 .footer-fine {
   margin: 0;
   font-size: 0.8125rem;
+}
+
+.footer-mascot-wrap {
+  position: absolute;
+  right: max(var(--space), calc((100vw - var(--max)) / 2));
+  bottom: 1.4rem;
+  z-index: 5;
+}
+
+.footer-mascot {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  opacity: 0.45;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.footer-mascot img {
+  width: 36px;
+  height: auto;
+}
+
+.footer-mascot:hover,
+.footer-mascot:focus-visible {
+  opacity: 0.95;
+  outline: none;
+}
+
+.footer-mascot:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: 6px;
+}
+
+.footer-mascot:active {
+  transform: scale(0.94);
+}
+
+.mascot-bubble {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  z-index: 5;
+  width: max-content;
+  max-width: min(220px, 70vw);
+  padding: 10px 12px;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  text-align: left;
+  transform-origin: bottom right;
+  animation: mascot-pop 280ms ease both;
+}
+
+.mascot-bubble::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--fg);
+  transform: rotate(45deg);
+  border-bottom-right-radius: 2px;
+}
+
+@keyframes mascot-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bubble {
+    animation: none;
+  }
 }

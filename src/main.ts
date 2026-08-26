@@ -38,3 +38,31 @@ initMotion({
     sceneHandle?.setScrollProgress(p)
   },
 })
+
+const mascotLines = [
+  "Don’t lick the mascot. We put that on the site for a reason.",
+  "I’m the lime. Carlos is the kitchen.",
+  "Decorative until you click me. Now I’m tart.",
+  "Vela’s still in the pan. I’m already plated.",
+  "Few apps. High heat. One judgmental fruit.",
+  "You clicked a citrus. Peak productivity.",
+]
+
+const mascotBtn = document.querySelector<HTMLButtonElement>('[data-mascot]')
+const mascotBubble = document.querySelector<HTMLElement>('[data-mascot-bubble]')
+let mascotLine = 0
+let mascotHide: number | undefined
+
+mascotBtn?.addEventListener('click', () => {
+  if (!mascotBubble) return
+  mascotBubble.hidden = false
+  mascotBubble.textContent = mascotLines[mascotLine % mascotLines.length] ?? ''
+  mascotLine += 1
+  mascotBubble.style.animation = 'none'
+  void mascotBubble.offsetWidth
+  mascotBubble.style.animation = ''
+  window.clearTimeout(mascotHide)
+  mascotHide = window.setTimeout(() => {
+    mascotBubble.hidden = true
+  }, 3200)
+})
