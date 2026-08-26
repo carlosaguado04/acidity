@@ -521,7 +521,24 @@ button:focus-visible {
   margin: 1.35rem 0 0;
   max-width: 28rem;
   font-size: 1.125rem;
-  color: var(--fg-dim);
+}
+
+.lede,
+.studio-copy,
+.contact-note {
+  color: var(--fg);
+  padding: 0.28em 0.5em;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.studio-copy.mute,
+.contact-note.mute {
+  color: color-mix(in srgb, var(--fg) 82%, var(--fg-mute));
 }
 
 .btn {
@@ -595,11 +612,6 @@ button:focus-visible {
 
 .studio-copy {
   margin: 0;
-  color: var(--fg-dim);
-}
-
-.studio-copy.mute {
-  color: var(--fg-mute);
 }
 
 .window-contact {
@@ -620,6 +632,7 @@ button:focus-visible {
 .contact-note {
   margin: 0 0 2rem;
   font-size: 1.05rem;
+  max-width: 36rem;
 }
 
 /* Apps */
