@@ -56,17 +56,24 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   let scrollSmooth = 0
   let lastT = 0
   let paint = themePaint()
+  let gap = 34
+  let rowH = 34 * 0.8660254
 
   const pointer = { x: 0, y: 0, tx: 0, ty: 0, strength: 0, active: false }
   let armed = false
 
+  const wrap = (v: number, span: number) => {
+    if (span <= 0) return v
+    return ((v % span) + span) % span
+  }
+
   const rebuild = () => {
     dots.length = 0
     const short = Math.min(width, height)
-    let gap = short < 640 ? 42 : 34
+    gap = short < 640 ? 42 : 34
     while ((width / gap) * (height / (gap * 0.866)) > 1900) gap += 2
 
-    const rowH = gap * 0.8660254
+    rowH = gap * 0.8660254
     const cols = Math.ceil(width / gap) + 3
     const rows = Math.ceil(height / rowH) + 3
 
@@ -148,29 +155,31 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     lastT = now
     const t = now / 1000
 
-    scrollSmooth += (scrollProgress - scrollSmooth) * 0.02
+    scrollSmooth += (scrollProgress - scrollSmooth) * 0.035
     pointer.x += (pointer.tx - pointer.x) * 0.18
     pointer.y += (pointer.ty - pointer.y) * 0.18
     pointer.strength += ((pointer.active ? 1 : 0) - pointer.strength) * 0.1
 
     const radius = radiusFor()
     const radius2 = radius * radius
-    const cx = width * 0.5
-    const cy = height * 0.42
-    const zoom = 1 + scrollSmooth * 0.42
-    const ox = scrollSmooth * width * 0.16
-    const oy = scrollSmooth * height * 1.15
-    const rot = scrollSmooth * 0.12
-    const cos = Math.cos(rot)
-    const sin = Math.sin(rot)
+    const spanX = width + gap * 2
+    const spanY = height + rowH * 2
+    const ox = scrollSmooth * gap * 4
+    const oy = scrollSmooth * height * 0.7
     const pushMax = radius * 0.58 * pointer.strength
     const swirl = 0.2
 
     for (const d of dots) {
-      const rx = (d.hx - cx) * zoom
-      const ry = (d.hy - cy) * zoom
-      let tx = cx + rx * cos - ry * sin + ox
-      let ty = cy + rx * sin + ry * cos + oy
+      let tx = wrap(d.hx + ox + gap, spanX) - gap
+      let ty = wrap(d.hy + oy + rowH, spanY) - rowH
+      if (Math.abs(tx - d.x) > spanX * 0.45) {
+        d.x = tx
+        d.vx = 0
+      }
+      if (Math.abs(ty - d.y) > spanY * 0.45) {
+        d.y = ty
+        d.vy = 0
+      }
       const dx = d.x - pointer.x
       const dy = d.y - pointer.y
       const d2 = dx * dx + dy * dy

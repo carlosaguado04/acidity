@@ -150,11 +150,12 @@ export function initMotion(opts: {
     const canvas = document.querySelector('.canvas-wrap')
     const layers = document.querySelectorAll<HTMLElement>('.bg-layer')
 
+    if (canvas) gsap.set(canvas, { y: 0, scale: 1 })
+
     if (!dur) {
       gsap.set(track, { y })
-      if (canvas) gsap.set(canvas, { y: -i * h * 0.55, scale: 1 + i * 0.16 })
       layers.forEach((layer, n) => {
-        gsap.set(layer, { y: -i * h * (0.35 + n * 0.18) })
+        gsap.set(layer, { y: -i * h * (0.06 + n * 0.04) })
       })
       panes.forEach((pane, n) => {
         const inner = pane.querySelector('.window-inner')
@@ -173,18 +174,9 @@ export function initMotion(opts: {
         locked = false
       },
     })
-    if (canvas) {
-      gsap.to(canvas, {
-        y: -i * h * 0.55,
-        scale: 1 + i * 0.16,
-        duration: MOVE_BEHIND,
-        ease: MOVE_EASE,
-        overwrite: true,
-      })
-    }
     layers.forEach((layer, n) => {
       gsap.to(layer, {
-        y: -i * h * (0.35 + n * 0.18),
+        y: -i * h * (0.06 + n * 0.04),
         duration: MOVE_BEHIND + n * 0.08,
         ease: MOVE_EASE,
         overwrite: true,
