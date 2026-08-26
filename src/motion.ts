@@ -206,7 +206,6 @@ export function initMotion(opts: {
     opts.onScrollProgress?.(p)
     const hash = id === 'home' ? '/' : `#${id}`
     if (animate) history.replaceState(null, '', hash)
-    panes[i]?.scrollTo({ top: 0 })
   }
 
   const goTo = (id: string) => {
@@ -219,19 +218,8 @@ export function initMotion(opts: {
     goToIndex(index + dir)
   }
 
-  const paneCanScroll = (dir: number): boolean => {
-    const pane = panes[index]
-    if (!pane) return false
-    if (pane.scrollHeight <= pane.clientHeight + 2) return false
-    if (dir > 0) {
-      return pane.scrollTop + pane.clientHeight < pane.scrollHeight - 2
-    }
-    return pane.scrollTop > 2
-  }
-
   const onWheel = (e: WheelEvent) => {
     if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
-    if (paneCanScroll(e.deltaY > 0 ? 1 : -1)) return
     e.preventDefault()
     if (locked) return
     if (Math.abs(e.deltaY) < 8) return
@@ -247,7 +235,6 @@ export function initMotion(opts: {
     const dy = touchY - y
     if (Math.abs(dy) < 56) return
     const dir = dy > 0 ? 1 : -1
-    if (paneCanScroll(dir)) return
     step(dir)
   }
 
