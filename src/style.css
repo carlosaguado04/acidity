@@ -349,7 +349,7 @@ button:focus-visible {
 .mark-text {
   font-family: var(--font-brand);
   font-weight: 400;
-  font-size: 0.92rem;
+  font-size: 2rem;
   letter-spacing: 0.28em;
   line-height: 1;
   text-transform: uppercase;
