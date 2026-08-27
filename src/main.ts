@@ -75,7 +75,7 @@ const mascotLines = [
   "Don’t lick the mascot. We put that on the site for a reason.",
   "I’m the lime. Carlos is the kitchen.",
   "Decorative until you click me. Now I’m tart.",
-  "Vela’s still in the pan. I’m already plated.",
+  "Orza’s still in the pan. I’m already plated.",
   "Few apps. High heat. One judgmental fruit.",
   "You clicked a citrus. Peak productivity.",
 ]
