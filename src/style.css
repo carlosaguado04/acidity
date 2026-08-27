@@ -53,8 +53,8 @@
   --accent: var(--acid);
   --on-accent: var(--on-acid);
 
-  --vela-tint: #ff7a6e;
-  --vela-cyan: #5ec8d8;
+  --orza-tint: #ff7a6e;
+  --orza-cyan: #5ec8d8;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -806,13 +806,13 @@ button:focus-visible {
   }
 }
 
-.product-vela {
+.product-orza {
   background:
     linear-gradient(
       160deg,
-      color-mix(in srgb, var(--vela-tint) 7%, var(--bg-raised)) 0%,
+      color-mix(in srgb, var(--orza-tint) 7%, var(--bg-raised)) 0%,
       var(--bg-raised) 48%,
-      color-mix(in srgb, var(--vela-cyan) 6%, var(--bg-raised)) 100%
+      color-mix(in srgb, var(--orza-cyan) 6%, var(--bg-raised)) 100%
     );
 }
 
@@ -860,8 +860,8 @@ button:focus-visible {
   background: var(--accent);
 }
 
-.tag-vela {
-  background: color-mix(in srgb, var(--vela-cyan) 85%, white);
+.tag-orza {
+  background: color-mix(in srgb, var(--orza-cyan) 85%, white);
   color: var(--ink);
 }
 
