@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import './style.css'
 import { mountScene, type SceneHandle } from './scene'
 import { initMotion } from './motion'
@@ -70,6 +71,56 @@ initMotion({
     sceneHandle?.setScrollProgress(p)
   },
 })
+
+const frostRoot = document.querySelector('.copy-frost')
+const frostSources = [
+  ...document.querySelectorAll<HTMLElement>('.lede, .studio-copy, .contact-note'),
+]
+if (frostRoot instanceof HTMLElement && frostSources.length) {
+  const frostPanes = frostSources.map(() => {
+    const pane = document.createElement('div')
+    pane.className = 'copy-frost-pane'
+    pane.hidden = true
+    frostRoot.appendChild(pane)
+    return pane
+  })
+  const headingBottom = (src: HTMLElement, textTop: number) => {
+    const root = src.closest('.window-inner')
+    if (!root) return -Infinity
+    let max = -Infinity
+    root.querySelectorAll('h1, h2, .eyebrow').forEach((el) => {
+      const b = el.getBoundingClientRect().bottom
+      if (b <= textTop + 1) max = Math.max(max, b)
+    })
+    return max
+  }
+  const syncFrost = () => {
+    const vh = window.innerHeight
+    const vw = window.innerWidth
+    frostSources.forEach((src, i) => {
+      const pane = frostPanes[i]
+      if (!pane) return
+      const r = src.getBoundingClientRect()
+      const padX = Math.round(Math.max(40, Math.min(108, r.width * 0.2)))
+      const padTop = Math.round(Math.max(8, Math.min(16, r.height * 0.18)))
+      const padBottom = Math.round(Math.max(22, Math.min(52, r.height * 0.55)))
+      const visible =
+        r.bottom > -padBottom && r.top < vh + padTop && r.right > 0 && r.left < vw
+      if (!visible || r.width < 2 || r.height < 2) {
+        pane.hidden = true
+        return
+      }
+      const top = Math.max(r.top - padTop, headingBottom(src, r.top) + 6)
+      pane.hidden = false
+      pane.style.left = `${Math.round(r.left - padX)}px`
+      pane.style.top = `${Math.round(top)}px`
+      pane.style.width = `${Math.round(r.width + padX * 2)}px`
+      pane.style.height = `${Math.round(r.bottom + padBottom - top)}px`
+    })
+  }
+  gsap.ticker.add(syncFrost)
+  syncFrost()
+}
 
 const mascotLines = [
   "Don’t lick the mascot. We put that on the site for a reason.",
