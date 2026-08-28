@@ -308,6 +308,39 @@ button:focus-visible {
   background: linear-gradient(180deg, transparent 70%, var(--bg) 100%);
 }
 
+/* Paper frost — body copy column only. Headings sit on the field. */
+.copy-frost {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.copy-frost-pane {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--paper) 7%, transparent);
+  backdrop-filter: blur(30px) saturate(1.14);
+  -webkit-backdrop-filter: blur(30px) saturate(1.14);
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    #000 42%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(ellipse at center, #000 42%, transparent 78%);
+}
+
+[data-theme="light"] .copy-frost-pane {
+  background: color-mix(in srgb, var(--paper) 30%, transparent);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .copy-frost-pane {
+    background: color-mix(in srgb, var(--paper) 10%, color-mix(in srgb, var(--bg) 30%, transparent));
+  }
+}
+
 /* Header */
 
 .site-header {
@@ -550,7 +583,7 @@ button:focus-visible {
 
 .windows {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
@@ -669,7 +702,7 @@ button:focus-visible {
 
 .lede {
   margin: 1.35rem 0 0;
-  max-width: 28rem;
+  max-width: min(28rem, 100%);
   font-size: 1.125rem;
   color: var(--fg-dim);
 }
@@ -734,6 +767,8 @@ button:focus-visible {
   display: grid;
   gap: 1.25rem;
   max-width: 40rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .studio-copy {
@@ -763,6 +798,8 @@ button:focus-visible {
 
 .contact-note {
   margin: 0 0 2rem;
+  width: fit-content;
+  max-width: min(36rem, 100%);
   font-size: 1.05rem;
 }
 

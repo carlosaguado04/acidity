@@ -74,17 +74,73 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
     while ((width / gap) * (height / (gap * 0.866)) > 1900) gap += 2
 
     rowH = gap * 0.8660254
+    const minDist = gap * 0.56
+    const minDist2 = minDist * minDist
+    const lineEps = 5.4
+    const lineReach = gap * 1.85
+    const cell = minDist
     const cols = Math.ceil(width / gap) + 3
     const rows = Math.ceil(height / rowH) + 3
+    const buckets = new Map<string, Array<{ x: number; y: number }>>()
+
+    const cellKey = (x: number, y: number) =>
+      `${Math.floor(x / cell)},${Math.floor(y / cell)}`
+
+    const neighbors = (x: number, y: number) => {
+      const cx = Math.floor(x / cell)
+      const cy = Math.floor(y / cell)
+      const out: Array<{ x: number; y: number }> = []
+      for (let iy = -4; iy <= 4; iy++) {
+        for (let ix = -4; ix <= 4; ix++) {
+          const bucket = buckets.get(`${cx + ix},${cy + iy}`)
+          if (bucket) out.push(...bucket)
+        }
+      }
+      return out
+    }
+
+    const usable = (x: number, y: number) => {
+      for (const p of neighbors(x, y)) {
+        const dx = x - p.x
+        const dy = y - p.y
+        if (dx * dx + dy * dy < minDist2) return false
+        const adx = Math.abs(dx)
+        const ady = Math.abs(dy)
+        if (adx < lineReach && ady < lineEps) return false
+        if (ady < lineReach && adx < lineEps) return false
+      }
+      return true
+    }
+
+    const remember = (x: number, y: number) => {
+      const key = cellKey(x, y)
+      const bucket = buckets.get(key)
+      if (bucket) bucket.push({ x, y })
+      else buckets.set(key, [{ x, y }])
+    }
 
     for (let row = 0; row < rows; row++) {
       const odd = row & 1
       for (let col = 0; col < cols; col++) {
         const n = row * 97 + col * 13
-        const jx = (hash(n) - 0.5) * gap * 0.32
-        const jy = (hash(n + 4.1) - 0.5) * rowH * 0.32
-        const hx = (col - 1) * gap + odd * gap * 0.5 + jx
-        const hy = (row - 1) * rowH + jy
+        const bx = (col - 1) * gap + odd * gap * 0.5
+        const by = (row - 1) * rowH
+        let hx = 0
+        let hy = 0
+        let placed = false
+        for (let t = 0; t < 28; t++) {
+          const ang = hash(n + t * 2.37 + 0.11) * TAU
+          const mag = (0.2 + hash(n + t * 5.91 + 4.1) * 0.8) * gap
+          const x = bx + Math.cos(ang) * mag
+          const y = by + Math.sin(ang) * mag
+          if (!usable(x, y)) continue
+          hx = x
+          hy = y
+          placed = true
+          break
+        }
+        if (!placed) continue
+        remember(hx, hy)
         const accent = hash(n + 2.7) > 0.88
         dots.push({
           x: hx,
