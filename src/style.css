@@ -1148,8 +1148,31 @@ body.is-nav-open .pager {
 }
 
 .footer-fine {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
   margin: 0;
   font-size: 0.8125rem;
+}
+
+.footer-x {
+  display: inline-flex;
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.75;
+  line-height: 0;
+}
+
+.footer-x svg {
+  width: 13px;
+  height: 13px;
+}
+
+.footer-x:hover,
+.footer-x:focus-visible {
+  color: var(--accent);
+  opacity: 1;
+  outline: none;
 }
 
 .footer-mascot-wrap {
