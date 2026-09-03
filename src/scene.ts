@@ -62,6 +62,36 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   const pointer = { x: 0, y: 0, tx: 0, ty: 0, strength: 0, active: false }
   let armed = false
 
+  const COPY_SEL = '.lede, .studio-copy, .contact-note'
+  const COPY_DIM = 0.22
+  const copyEls = [...document.querySelectorAll<HTMLElement>(COPY_SEL)]
+  const copyBoxes: Array<{ l: number; t: number; r: number; b: number }> = []
+
+  const syncCopyBoxes = () => {
+    copyBoxes.length = 0
+    const cr = canvas.getBoundingClientRect()
+    for (const el of copyEls) {
+      const r = el.getBoundingClientRect()
+      if (r.width < 2 || r.height < 2) continue
+      if (r.bottom < cr.top || r.top > cr.bottom || r.right < cr.left || r.left > cr.right) {
+        continue
+      }
+      copyBoxes.push({
+        l: r.left - cr.left,
+        t: r.top - cr.top,
+        r: r.right - cr.left,
+        b: r.bottom - cr.top,
+      })
+    }
+  }
+
+  const underCopy = (x: number, y: number) => {
+    for (const box of copyBoxes) {
+      if (x >= box.l && x <= box.r && y >= box.t && y <= box.b) return true
+    }
+    return false
+  }
+
   const wrap = (v: number, span: number) => {
     if (span <= 0) return v
     return ((v % span) + span) % span
@@ -176,6 +206,7 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
 
   const draw = (t: number) => {
     ctx.clearRect(0, 0, width, height)
+    syncCopyBoxes()
 
     const radius = radiusFor()
     const radius2 = radius * radius
@@ -189,9 +220,10 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
       const heat = falloff * pointer.strength
       const idle = reduced ? 0 : Math.sin(t * 0.7 + d.seed) * 0.35
       const r = d.r * (1 + heat * 1.55) + idle * 0.12
-      const a = rest + heat * (near - rest)
+      const quiet = underCopy(d.x, d.y)
+      const a = (rest + heat * (near - rest)) * (quiet ? COPY_DIM : 1)
 
-      if (heat > 0.28) {
+      if (heat > 0.28 && !quiet) {
         ctx.beginPath()
         ctx.fillStyle = `rgba(${rgb}, ${heat * glow})`
         ctx.arc(d.x, d.y, r * 3.4, 0, TAU)
