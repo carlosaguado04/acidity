@@ -80,8 +80,6 @@ export function initMotion(opts: {
   const panes = [
     ...document.querySelectorAll<HTMLElement>('.window[data-window]'),
   ]
-  const nav = document.querySelector('.nav')
-  const line = nav?.querySelector('.nav-line')
   const navLinks = [
     ...document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]'),
   ]
@@ -102,42 +100,53 @@ export function initMotion(opts: {
     return i === -1 ? 0 : i
   }
 
-  const placeLine = (link: HTMLAnchorElement, animate: boolean) => {
-    if (!(line instanceof HTMLElement) || !(nav instanceof HTMLElement)) return
-    if (getComputedStyle(nav).display === 'none') return
-    const navRect = nav.getBoundingClientRect()
-    const rect = link.getBoundingClientRect()
-    gsap.to(line, {
-      x: rect.left - navRect.left + nav.scrollLeft,
-      width: rect.width,
-      opacity: 1,
-      duration: animate && !reduced ? 0.45 : 0,
-      ease: 'power3.out',
-      overwrite: true,
-    })
-  }
+  const menuOpen = () => document.body.classList.contains('is-nav-open')
 
-  const setActive = (id: WindowId, animate = true) => {
+  const setActive = (id: WindowId) => {
     const href = `#${id}`
     navLinks.forEach((link) => {
       const on = link.getAttribute('href') === href
       link.classList.toggle('is-active', on)
-      if (on) {
-        link.setAttribute('aria-current', 'location')
-        placeLine(link, animate)
-      } else {
-        link.removeAttribute('aria-current')
-      }
+      if (on) link.setAttribute('aria-current', 'location')
+      else link.removeAttribute('aria-current')
     })
-    if (id === 'home' && line instanceof HTMLElement) {
-      gsap.to(line, {
-        opacity: 0,
-        duration: animate && !reduced ? 0.2 : 0,
-        overwrite: true,
-      })
-    }
     pagerLinks.forEach((link) => {
       link.classList.toggle('is-active', link.getAttribute('href') === href)
+    })
+  }
+
+  const paintPane = (pane: HTMLElement, dist: number, animate: boolean) => {
+    const inner = pane.querySelector('.window-inner')
+    if (!(inner instanceof HTMLElement)) return
+    const visible = dist === 0
+    const dur = animate && !reduced
+    const innerVars = {
+      y: reduced ? 0 : dist * 72,
+      opacity: reduced || visible ? 1 : 0,
+      overwrite: true,
+    }
+    if (!dur) gsap.set(inner, innerVars)
+    else {
+      gsap.to(inner, {
+        ...innerVars,
+        duration: MOVE_WINDOW,
+        ease: MOVE_EASE,
+      })
+    }
+
+    const title = pane.querySelector<HTMLElement>('h1, h2')
+    const copy = pane.querySelectorAll<HTMLElement>(
+      '.studio-copy, .eyebrow, .contact-note, .product-grid',
+    )
+    const titleVars = { y: reduced ? 0 : dist * 120, overwrite: true }
+    const copyVars = { y: reduced ? 0 : dist * 40, overwrite: true }
+    if (title) {
+      if (!dur) gsap.set(title, titleVars)
+      else gsap.to(title, { ...titleVars, duration: MOVE_WINDOW + 0.12, ease: MOVE_EASE })
+    }
+    copy.forEach((el) => {
+      if (!dur) gsap.set(el, copyVars)
+      else gsap.to(el, { ...copyVars, duration: MOVE_WINDOW - 0.08, ease: MOVE_EASE })
     })
   }
 
@@ -157,10 +166,7 @@ export function initMotion(opts: {
       layers.forEach((layer, n) => {
         gsap.set(layer, { y: -i * h * (0.06 + n * 0.04) })
       })
-      panes.forEach((pane, n) => {
-        const inner = pane.querySelector('.window-inner')
-        if (inner) gsap.set(inner, { y: (n - i) * 70 })
-      })
+      panes.forEach((pane, n) => paintPane(pane, n - i, false))
       return
     }
 
@@ -182,16 +188,7 @@ export function initMotion(opts: {
         overwrite: true,
       })
     })
-    panes.forEach((pane, n) => {
-      const inner = pane.querySelector('.window-inner')
-      if (!inner) return
-      gsap.to(inner, {
-        y: (n - i) * 70,
-        duration: MOVE_WINDOW,
-        ease: MOVE_EASE,
-        overwrite: true,
-      })
-    })
+    panes.forEach((pane, n) => paintPane(pane, n - i, true))
   }
 
   const goToIndex = (next: number, animate = true) => {
@@ -200,7 +197,7 @@ export function initMotion(opts: {
     index = i
     const id = idAt(i)
     applyTransform(i, animate)
-    setActive(id, animate)
+    setActive(id)
     const p = WINDOWS.length > 1 ? i / (WINDOWS.length - 1) : 0
     if (progressBar) progressBar.style.transform = `scaleX(${p})`
     opts.onScrollProgress?.(p)
@@ -214,6 +211,7 @@ export function initMotion(opts: {
   }
 
   const step = (dir: number) => {
+    if (menuOpen()) return
     if (locked && !reduced) return
     goToIndex(index + dir)
   }
@@ -221,7 +219,7 @@ export function initMotion(opts: {
   const onWheel = (e: WheelEvent) => {
     if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
     e.preventDefault()
-    if (locked) return
+    if (menuOpen() || locked) return
     if (Math.abs(e.deltaY) < 8) return
     step(e.deltaY > 0 ? 1 : -1)
   }
@@ -240,6 +238,7 @@ export function initMotion(opts: {
 
   const onKey = (e: KeyboardEvent) => {
     if (e.defaultPrevented) return
+    if (menuOpen()) return
     const tag = (e.target as HTMLElement | null)?.tagName
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
@@ -297,18 +296,6 @@ export function initMotion(opts: {
     window.removeEventListener('keydown', onKey)
     document.removeEventListener('click', onClick)
     window.removeEventListener('resize', onResize)
-  })
-
-  navLinks.forEach((link) => {
-    link.style.cursor = 'pointer'
-    const onEnter = () => placeLine(link, true)
-    const onLeave = () => setActive(idAt(index), true)
-    link.addEventListener('pointerenter', onEnter)
-    link.addEventListener('pointerleave', onLeave)
-    cleanups.push(() => {
-      link.removeEventListener('pointerenter', onEnter)
-      link.removeEventListener('pointerleave', onLeave)
-    })
   })
 
   bindPointerToys(cleanups)

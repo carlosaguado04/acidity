@@ -24,11 +24,20 @@ function isLightTheme(): boolean {
   return document.documentElement.getAttribute('data-theme') === 'light'
 }
 
+const ACCENT_RGB: Record<string, { dark: string; light: string }> = {
+  lime: { dark: '216, 255, 71', light: '168, 201, 0' },
+  cyan: { dark: '51, 242, 235', light: '10, 168, 163' },
+  coral: { dark: '255, 107, 97', light: '226, 74, 66' },
+  violet: { dark: '184, 97, 255', light: '154, 63, 224' },
+}
+
 function themePaint() {
+  const key = document.documentElement.getAttribute('data-accent') ?? 'lime'
+  const rgb = (ACCENT_RGB[key] ?? ACCENT_RGB.lime)!
   if (isLightTheme()) {
-    return { rgb: '168, 201, 0', rest: 0.42, near: 0.88, glow: 0.18 }
+    return { rgb: rgb.light, rest: 0.42, near: 0.88, glow: 0.18 }
   }
-  return { rgb: '216, 255, 71', rest: 0.58, near: 1, glow: 0.28 }
+  return { rgb: rgb.dark, rest: 0.58, near: 1, glow: 0.28 }
 }
 
 function hash(n: number) {
@@ -62,7 +71,7 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   const pointer = { x: 0, y: 0, tx: 0, ty: 0, strength: 0, active: false }
   let armed = false
 
-  const COPY_SEL = '.lede, .studio-copy, .contact-note'
+  const COPY_SEL = '.studio-copy, .contact-note'
   const COPY_DIM = 0.22
   const copyEls = [...document.querySelectorAll<HTMLElement>(COPY_SEL)]
   const copyBoxes: Array<{ l: number; t: number; r: number; b: number }> = []
@@ -320,7 +329,7 @@ export function mountScene(canvas: HTMLCanvasElement): SceneHandle {
   const themeObserver = new MutationObserver(applyTheme)
   themeObserver.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme'],
+    attributeFilter: ['data-theme', 'data-accent'],
   })
 
   const onVisibility = () => {

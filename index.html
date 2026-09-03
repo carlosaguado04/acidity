@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-accent="lime">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -41,32 +41,77 @@
         <a class="mark" href="#home" aria-label="Acidity home">
           <span class="mark-text">A</span>
         </a>
-        <nav class="nav" id="site-nav" aria-label="Primary">
-          <a href="#studio">Studio</a>
-          <a href="#apps">Apps</a>
-          <a href="#contact">Contact</a>
-          <span class="nav-line" aria-hidden="true"></span>
-        </nav>
-        <button
-          type="button"
-          class="nav-toggle"
-          id="nav-toggle"
-          aria-label="Open menu"
-          aria-expanded="false"
-          aria-controls="site-nav"
-        >
-          <span class="nav-toggle-bars" aria-hidden="true"></span>
-        </button>
-        <button
-          type="button"
-          class="theme-toggle"
-          id="theme-toggle"
-          aria-label="Toggle color theme"
-        >
-          <span class="theme-toggle-icon" aria-hidden="true"></span>
-        </button>
+        <div class="header-actions">
+          <div class="accent-picks" role="radiogroup" aria-label="Accent">
+            <button
+              type="button"
+              class="accent-pick"
+              data-accent="lime"
+              aria-label="Lime"
+              aria-checked="true"
+              role="radio"
+            ></button>
+            <button
+              type="button"
+              class="accent-pick"
+              data-accent="cyan"
+              aria-label="Cyan"
+              aria-checked="false"
+              role="radio"
+            ></button>
+            <button
+              type="button"
+              class="accent-pick"
+              data-accent="coral"
+              aria-label="Coral"
+              aria-checked="false"
+              role="radio"
+            ></button>
+            <button
+              type="button"
+              class="accent-pick"
+              data-accent="violet"
+              aria-label="Violet"
+              aria-checked="false"
+              role="radio"
+            ></button>
+          </div>
+          <button
+            type="button"
+            class="theme-toggle"
+            id="theme-toggle"
+            aria-label="Toggle color theme"
+          >
+            <span class="theme-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="nav-toggle"
+            id="nav-toggle"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="site-nav"
+          >
+            <span data-nav-label>Menu</span>
+          </button>
+        </div>
       </div>
     </header>
+
+    <nav class="nav" id="site-nav" aria-label="Primary" inert>
+      <a href="#studio">
+        <span class="nav-index">01</span>
+        <span class="nav-text">Studio</span>
+      </a>
+      <a href="#apps">
+        <span class="nav-index">02</span>
+        <span class="nav-text">Apps</span>
+      </a>
+      <a href="#contact">
+        <span class="nav-index">03</span>
+        <span class="nav-text">Contact</span>
+      </a>
+    </nav>
 
     <main id="main" class="windows">
       <div class="windows-track">
@@ -77,10 +122,9 @@
           aria-labelledby="hero-title"
         >
           <div class="window-inner hero-inner">
-            <h1 id="hero-title" class="wordmark">ACID<span class="brand-i">I</span>TY</h1>
-            <p class="lede">
-              Mac apps that don’t nag, don’t meter you, and don’t get in the way.
-            </p>
+            <h1 id="hero-title" class="wordmark" aria-label="Acidity">
+              <span class="wordmark-letter">A</span><span class="wordmark-letter">C</span><span class="wordmark-letter">I</span><span class="wordmark-letter">D</span><span class="wordmark-letter brand-i">I</span><span class="wordmark-letter">T</span><span class="wordmark-letter">Y</span>
+            </h1>
           </div>
         </section>
 
@@ -96,8 +140,12 @@
               <h2 id="studio-title">A small Mac studio</h2>
             </div>
             <div class="studio-grid">
+              <p class="studio-copy">We started in 2026.</p>
               <p class="studio-copy">
-                We build what we needed and couldn’t find. Sites too, full stack if that’s the job.
+                We make Mac and iOS software. Apps that stay out of the way. No ads, no tracking — we don’t want your data. We care about the experience: something you can actually use and trust.
+              </p>
+              <p class="studio-copy">
+                We also build websites: product and marketing sites, and full-stack work when the project needs a backend. Same studio. Apps and sites that make being on the internet feel lighter.
               </p>
             </div>
           </div>
