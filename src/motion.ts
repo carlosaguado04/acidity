@@ -1,311 +1,266 @@
-import gsap from 'gsap'
-
 export type MotionHandle = {
   goTo: (id: string) => void
   destroy: () => void
 }
 
-const WINDOWS = ['home', 'studio', 'apps', 'contact'] as const
-const MOVE_EASE = 'expo.inOut'
-const MOVE_WINDOW = 1.55
-const MOVE_BEHIND = 1.85
-type WindowId = (typeof WINDOWS)[number]
+const RAIL_IDS = ['studio', 'mise', 'orza', 'hilo', 'more', 'contact'] as const
+type RailId = (typeof RAIL_IDS)[number]
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+function clamp(n: number, min = 0, max = 1): number {
+  return Math.min(max, Math.max(min, n))
 }
 
-function bindPointerToys(cleanups: Array<() => void>): void {
-  document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((btn) => {
-    const onMove = (e: PointerEvent) => {
-      const rect = btn.getBoundingClientRect()
-      const x = e.clientX - rect.left - rect.width / 2
-      const y = e.clientY - rect.top - rect.height / 2
-      gsap.to(btn, {
-        x: x * 0.28,
-        y: y * 0.28,
-        duration: 0.35,
-        ease: 'power2.out',
-      })
-    }
-    const onLeave = () => {
-      gsap.to(btn, { x: 0, y: 0, duration: 0.55, ease: 'elastic.out(1, 0.4)' })
-    }
-    btn.addEventListener('pointermove', onMove)
-    btn.addEventListener('pointerleave', onLeave)
-    cleanups.push(() => {
-      btn.removeEventListener('pointermove', onMove)
-      btn.removeEventListener('pointerleave', onLeave)
-    })
-  })
-
-  document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
-    const onMove = (e: PointerEvent) => {
-      const rect = card.getBoundingClientRect()
-      const px = (e.clientX - rect.left) / rect.width - 0.5
-      const py = (e.clientY - rect.top) / rect.height - 0.5
-      gsap.to(card, {
-        rotateY: px * 8,
-        rotateX: -py * 6,
-        y: -4,
-        transformPerspective: 800,
-        duration: 0.35,
-        ease: 'power2.out',
-      })
-    }
-    const onLeave = () => {
-      gsap.to(card, {
-        rotateY: 0,
-        rotateX: 0,
-        y: 0,
-        duration: 0.55,
-        ease: 'power3.out',
-      })
-    }
-    card.addEventListener('pointermove', onMove)
-    card.addEventListener('pointerleave', onLeave)
-    cleanups.push(() => {
-      card.removeEventListener('pointermove', onMove)
-      card.removeEventListener('pointerleave', onLeave)
-    })
-  })
+function coverage(el: HTMLElement): number {
+  const r = el.getBoundingClientRect()
+  const vh = window.innerHeight
+  const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0)
+  if (visible <= 0) return 0
+  return Math.min(1, visible / Math.min(Math.max(r.height, 1), vh))
 }
 
-export function initMotion(opts: {
-  onScrollProgress?: (p: number) => void
-}): MotionHandle {
-  const reduced = prefersReducedMotion()
+export function initMotion(): MotionHandle {
+  const motionMq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const fineMq = window.matchMedia('(pointer: fine)')
   const cleanups: Array<() => void> = []
-  const track = document.querySelector('.windows-track')
-  const panes = [
-    ...document.querySelectorAll<HTMLElement>('.window[data-window]'),
-  ]
-  const navLinks = [
-    ...document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]'),
-  ]
-  const pagerLinks = [
-    ...document.querySelectorAll<HTMLAnchorElement>('.pager a[href^="#"]'),
-  ]
-  const progressBar = document.getElementById('scroll-progress')
+  const root = document.documentElement
+  const railLinks = [...document.querySelectorAll<HTMLAnchorElement>('.rail a[data-rail]')]
+  const sheetLinks = [...document.querySelectorAll<HTMLAnchorElement>('.index-sheet a[href^="#"]')]
+  const tick = document.getElementById('rail-tick')
+  const washLime = document.querySelector<HTMLElement>('[data-wash="mise"]')
+  const washCyan = document.querySelector<HTMLElement>('[data-wash="orza"]')
+  const washCoral = document.querySelector<HTMLElement>('[data-wash="hilo"]')
+  const mise = document.getElementById('mise')
+  const orza = document.getElementById('orza')
+  const hilo = document.getElementById('hilo')
+  const heroInner = document.querySelector<HTMLElement>('.hero-inner')
+  const hero = document.getElementById('home')
+  const cursor = document.querySelector<HTMLElement>('.cursor')
+  const typeEls = [...document.querySelectorAll<HTMLElement>('[data-scroll-type]')]
+  const railTargets = RAIL_IDS.map((id) => ({
+    id,
+    el: document.getElementById(id),
+    link: railLinks.find((a) => a.dataset.rail === id),
+  })).filter((row): row is { id: RailId; el: HTMLElement; link: HTMLAnchorElement } => {
+    return row.el instanceof HTMLElement && row.link instanceof HTMLAnchorElement
+  })
 
-  let index = 0
-  let locked = false
-  let touchY = 0
+  let reduced = motionMq.matches
+  let cursorOn = false
+  let cursorRaf = 0
+  let scrollRaf = 0
+  let ptrX = 0
+  let ptrY = 0
+  let curX = 0
+  let curY = 0
+  let cursorHot = false
+  let cursorArmed = false
 
-  const idAt = (i: number): WindowId => WINDOWS[i] ?? 'home'
-
-  const indexOf = (id: string): number => {
-    const key = id === 'products' ? 'apps' : id
-    const i = WINDOWS.indexOf(key as WindowId)
-    return i === -1 ? 0 : i
+  const setReduced = (on: boolean) => {
+    reduced = on
+    root.classList.toggle('reduced-motion', on)
+    if (on) {
+      typeEls.forEach((el) => {
+        el.style.opacity = '1'
+        el.style.filter = 'none'
+        el.style.transform = 'none'
+        el.classList.add('is-in')
+      })
+      if (heroInner) {
+        heroInner.style.opacity = '1'
+        heroInner.style.filter = 'none'
+        heroInner.style.transform = 'none'
+      }
+    }
   }
 
-  const menuOpen = () => document.body.classList.contains('is-nav-open')
+  const stepCursor = () => {
+    if (!cursorOn || !cursor) return
+    curX += (ptrX - curX) * 0.22
+    curY += (ptrY - curY) * 0.22
+    cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%)`
+    cursorRaf = requestAnimationFrame(stepCursor)
+  }
 
-  const setActive = (id: WindowId) => {
+  const setCursorMode = () => {
+    const next = !reduced && fineMq.matches
+    root.classList.toggle('has-cursor', next)
+    if (cursorOn && !next) {
+      cancelAnimationFrame(cursorRaf)
+      cursorRaf = 0
+      cursorOn = false
+      if (cursor) cursor.style.opacity = '0'
+    }
+    if (next && !cursorOn) {
+      cursorOn = true
+      stepCursor()
+    }
+  }
+
+  const setActive = (id: RailId | 'home') => {
     const href = `#${id}`
-    navLinks.forEach((link) => {
+    ;[...railLinks, ...sheetLinks].forEach((link) => {
       const on = link.getAttribute('href') === href
       link.classList.toggle('is-active', on)
       if (on) link.setAttribute('aria-current', 'location')
       else link.removeAttribute('aria-current')
     })
-    pagerLinks.forEach((link) => {
-      link.classList.toggle('is-active', link.getAttribute('href') === href)
+  }
+
+  const paintType = () => {
+    const vh = window.innerHeight
+    typeEls.forEach((el) => {
+      if (reduced) return
+      const r = el.getBoundingClientRect()
+      const i = Number(el.dataset.i ?? 0)
+      const enter = clamp((vh * 0.98 - i * 16 - r.top) / (vh * 0.2))
+      let leave = 1
+      if (r.bottom < vh * 0.14) {
+        leave = clamp(0.45 + (r.bottom / (vh * 0.14)) * 0.55)
+      }
+      const t = Math.min(enter, leave)
+      const blur = (1 - enter) * 7
+      const y = (1 - enter) * 24
+      el.style.opacity = String(t)
+      el.style.filter = blur > 0.35 ? `blur(${blur.toFixed(2)}px)` : 'none'
+      el.style.transform = y > 0.5 ? `translate3d(0, ${y.toFixed(1)}px, 0)` : 'none'
+      el.classList.toggle('is-in', enter > 0.72 && leave > 0.85)
     })
   }
 
-  const paintPane = (pane: HTMLElement, dist: number, animate: boolean) => {
-    const inner = pane.querySelector('.window-inner')
-    if (!(inner instanceof HTMLElement)) return
-    const visible = dist === 0
-    const dur = animate && !reduced
-    const innerVars = {
-      y: reduced ? 0 : dist * 72,
-      opacity: reduced || visible ? 1 : 0,
-      overwrite: true,
-    }
-    if (!dur) gsap.set(inner, innerVars)
-    else {
-      gsap.to(inner, {
-        ...innerVars,
-        duration: MOVE_WINDOW,
-        ease: MOVE_EASE,
-      })
-    }
-
-    const title = pane.querySelector<HTMLElement>('h1, h2')
-    const copy = pane.querySelectorAll<HTMLElement>(
-      '.studio-copy, .eyebrow, .contact-note, .product-grid',
-    )
-    const titleVars = { y: reduced ? 0 : dist * 120, overwrite: true }
-    const copyVars = { y: reduced ? 0 : dist * 40, overwrite: true }
-    if (title) {
-      if (!dur) gsap.set(title, titleVars)
-      else gsap.to(title, { ...titleVars, duration: MOVE_WINDOW + 0.12, ease: MOVE_EASE })
-    }
-    copy.forEach((el) => {
-      if (!dur) gsap.set(el, copyVars)
-      else gsap.to(el, { ...copyVars, duration: MOVE_WINDOW - 0.08, ease: MOVE_EASE })
-    })
+  const paintHero = () => {
+    if (!heroInner || !hero) return
+    if (reduced) return
+    const r = hero.getBoundingClientRect()
+    const vh = window.innerHeight
+    const vis = clamp(r.bottom / vh)
+    const o = vis > 0.58 ? 1 : clamp(vis / 0.58)
+    heroInner.style.opacity = String(o)
+    heroInner.style.filter = o < 0.98 ? `blur(${((1 - o) * 10).toFixed(2)}px)` : 'none'
+    heroInner.style.transform = o < 0.98 ? `translate3d(0, ${((1 - o) * -28).toFixed(1)}px, 0)` : 'none'
   }
 
-  const applyTransform = (i: number, animate: boolean) => {
-    if (!(track instanceof HTMLElement)) return
-    const shell = track.parentElement
-    const h = shell instanceof HTMLElement ? shell.clientHeight : window.innerHeight
-    const y = -i * h
-    const dur = animate && !reduced
-    const canvas = document.querySelector('.canvas-wrap')
-    const layers = document.querySelectorAll<HTMLElement>('.bg-layer')
+  const paintWash = () => {
+    const lime = mise instanceof HTMLElement ? coverage(mise) : 0
+    const cyan = orza instanceof HTMLElement ? coverage(orza) : 0
+    const coral = hilo instanceof HTMLElement ? coverage(hilo) : 0
+    const snap = (n: number) => (reduced ? (n > 0.45 ? 1 : 0) : n)
+    if (washLime) washLime.style.opacity = String(snap(lime))
+    if (washCyan) washCyan.style.opacity = String(snap(cyan))
+    if (washCoral) washCoral.style.opacity = String(snap(coral))
 
-    if (canvas) gsap.set(canvas, { y: 0, scale: 1 })
-
-    if (!dur) {
-      gsap.set(track, { y })
-      layers.forEach((layer, n) => {
-        gsap.set(layer, { y: -i * h * (0.06 + n * 0.04) })
-      })
-      panes.forEach((pane, n) => paintPane(pane, n - i, false))
-      return
-    }
-
-    locked = true
-    gsap.to(track, {
-      y,
-      duration: MOVE_WINDOW,
-      ease: MOVE_EASE,
-      overwrite: true,
-      onComplete: () => {
-        locked = false
-      },
-    })
-    layers.forEach((layer, n) => {
-      gsap.to(layer, {
-        y: -i * h * (0.06 + n * 0.04),
-        duration: MOVE_BEHIND + n * 0.08,
-        ease: MOVE_EASE,
-        overwrite: true,
-      })
-    })
-    panes.forEach((pane, n) => paintPane(pane, n - i, true))
+    let chapter = 'ink'
+    if (coral > lime && coral > cyan && coral > 0.28) chapter = 'hilo'
+    else if (cyan > lime && cyan > 0.28) chapter = 'orza'
+    else if (lime > 0.28) chapter = 'mise'
+    if (root.dataset.chapter !== chapter) root.dataset.chapter = chapter
   }
 
-  const goToIndex = (next: number, animate = true) => {
-    const i = Math.max(0, Math.min(WINDOWS.length - 1, next))
-    if (i === index && animate) return
-    index = i
-    const id = idAt(i)
-    applyTransform(i, animate)
-    setActive(id)
-    const p = WINDOWS.length > 1 ? i / (WINDOWS.length - 1) : 0
-    if (progressBar) progressBar.style.transform = `scaleX(${p})`
-    opts.onScrollProgress?.(p)
-    const hash = id === 'home' ? '/' : `#${id}`
-    if (animate) history.replaceState(null, '', hash)
-  }
-
-  const goTo = (id: string) => {
-    const key = id.replace('#', '')
-    goToIndex(key === '' || key === 'top' || key === 'main' ? 0 : indexOf(key))
-  }
-
-  const step = (dir: number) => {
-    if (menuOpen()) return
-    if (locked && !reduced) return
-    goToIndex(index + dir)
-  }
-
-  const onWheel = (e: WheelEvent) => {
-    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
-    e.preventDefault()
-    if (menuOpen() || locked) return
-    if (Math.abs(e.deltaY) < 8) return
-    step(e.deltaY > 0 ? 1 : -1)
-  }
-
-  const onTouchStart = (e: TouchEvent) => {
-    touchY = e.touches[0]?.clientY ?? 0
-  }
-
-  const onTouchEnd = (e: TouchEvent) => {
-    const y = e.changedTouches[0]?.clientY ?? touchY
-    const dy = touchY - y
-    if (Math.abs(dy) < 56) return
-    const dir = dy > 0 ? 1 : -1
-    step(dir)
-  }
-
-  const onKey = (e: KeyboardEvent) => {
-    if (e.defaultPrevented) return
-    if (menuOpen()) return
-    const tag = (e.target as HTMLElement | null)?.tagName
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-      e.preventDefault()
-      step(1)
-    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-      e.preventDefault()
-      step(-1)
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      goToIndex(0)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      goToIndex(WINDOWS.length - 1)
-    }
-  }
-
-  const onClick = (e: MouseEvent) => {
-    const link = (e.target as Element | null)?.closest?.('a')
-    if (!(link instanceof HTMLAnchorElement)) return
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || link.target === '_blank') {
-      return
-    }
-    const href = link.getAttribute('href')
-    if (!href) return
-    if (link.classList.contains('mark') || href.startsWith('#')) {
-      const url = href.startsWith('#') ? new URL(link.href) : null
-      if (url && url.pathname !== window.location.pathname) return
-      const id = href.startsWith('#') ? href.slice(1) : 'home'
-      if (
-        id === 'home' ||
-        id === 'main' ||
-        WINDOWS.includes(id as WindowId) ||
-        id === 'products' ||
-        href === '/'
-      ) {
-        e.preventDefault()
-        goTo(id === '' || id === 'main' ? 'home' : id)
+  const paintRail = () => {
+    const mid = window.innerHeight * 0.42
+    let current: RailId | 'home' = 'home'
+    let idx = 0
+    let frac = 0
+    for (let i = 0; i < railTargets.length; i++) {
+      const row = railTargets[i]
+      if (!row) continue
+      const top = row.el.getBoundingClientRect().top
+      if (top <= mid) {
+        current = row.id
+        idx = i
+        const next = railTargets[i + 1]
+        if (next) {
+          const span = next.el.getBoundingClientRect().top - top
+          frac = span > 1 ? clamp((mid - top) / span) : 0
+        } else {
+          frac = 0
+        }
       }
     }
+    setActive(current)
+
+    if (tick && railTargets[idx]?.link) {
+      const a = railTargets[idx].link.offsetTop
+      const nextLink = railTargets[idx + 1]?.link
+      const b = nextLink ? nextLink.offsetTop : a
+      tick.style.transform = `translateY(${a + (b - a) * frac}px)`
+    }
   }
 
-  const onResize = () => applyTransform(index, false)
+  const paint = () => {
+    paintHero()
+    paintType()
+    paintWash()
+    paintRail()
+  }
 
-  window.addEventListener('wheel', onWheel, { passive: false })
-  window.addEventListener('touchstart', onTouchStart, { passive: true })
-  window.addEventListener('touchend', onTouchEnd, { passive: true })
-  window.addEventListener('keydown', onKey)
-  document.addEventListener('click', onClick)
-  window.addEventListener('resize', onResize)
+  const onScroll = () => {
+    if (scrollRaf) return
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = 0
+      paint()
+    })
+  }
+
+  setReduced(reduced)
+  setCursorMode()
+
+  motionMq.addEventListener('change', (e) => {
+    setReduced(e.matches)
+    setCursorMode()
+    paint()
+  })
+  fineMq.addEventListener('change', () => setCursorMode())
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll)
   cleanups.push(() => {
-    window.removeEventListener('wheel', onWheel)
-    window.removeEventListener('touchstart', onTouchStart)
-    window.removeEventListener('touchend', onTouchEnd)
-    window.removeEventListener('keydown', onKey)
-    document.removeEventListener('click', onClick)
-    window.removeEventListener('resize', onResize)
+    window.removeEventListener('scroll', onScroll)
+    window.removeEventListener('resize', onScroll)
   })
 
-  bindPointerToys(cleanups)
-
-  if (reduced) {
-    document.documentElement.classList.add('reduced-motion')
+  const onPointerMove = (e: PointerEvent) => {
+    if (!cursorOn || e.pointerType === 'touch') return
+    ptrX = e.clientX
+    ptrY = e.clientY
+    if (!cursorArmed) {
+      curX = ptrX
+      curY = ptrY
+      cursorArmed = true
+      cursor?.style.setProperty('opacity', '1')
+    }
+    const hot = !!(e.target instanceof Element && e.target.closest('a, button'))
+    if (hot !== cursorHot) {
+      cursorHot = hot
+      cursor?.classList.toggle('is-hot', hot)
+    }
   }
 
-  const startHash = window.location.hash.replace('#', '')
-  goToIndex(indexOf(startHash || 'home'), false)
+  const onPointerLeave = () => {
+    cursorArmed = false
+    cursor?.style.setProperty('opacity', '0')
+  }
+
+  window.addEventListener('pointermove', onPointerMove, { passive: true })
+  document.documentElement.addEventListener('pointerleave', onPointerLeave)
+  cleanups.push(() => {
+    window.removeEventListener('pointermove', onPointerMove)
+    document.documentElement.removeEventListener('pointerleave', onPointerLeave)
+    cancelAnimationFrame(cursorRaf)
+  })
+
+  const goTo = (id: string) => {
+    const raw = id.replace('#', '')
+    const el = document.getElementById(raw)
+    if (!el) return
+    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+  }
+
+  paint()
+
+  const start = window.location.hash.replace('#', '')
+  if (start) {
+    document.getElementById(start)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+    paint()
+  }
 
   return {
     goTo,
