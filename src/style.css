@@ -79,7 +79,12 @@ html[data-chapter="hilo"] {
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  overscroll-behavior: none;
 }
 
 html,

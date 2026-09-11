@@ -1,3 +1,4 @@
+import 'lenis/dist/lenis.css'
 import './style.css'
 import { initMotion } from './motion'
 
@@ -35,9 +36,12 @@ const sheet = document.getElementById('index-sheet')
 const layer = document.getElementById('index-layer')
 let lastFocus: HTMLElement | null = null
 
+const motion = initMotion()
+
 const setOpen = (open: boolean) => {
   const was = document.body.classList.contains('is-index-open')
   document.body.classList.toggle('is-index-open', open)
+  motion.setPaused(open)
   toggle?.setAttribute('aria-expanded', String(open))
   toggle?.setAttribute('aria-label', open ? 'Close index' : 'Open index')
   if (toggle) toggle.textContent = open ? 'Close' : 'Index'
@@ -100,8 +104,6 @@ document.addEventListener('keydown', (e) => {
     first.focus()
   }
 })
-
-initMotion()
 
 const mascotLines = [
   "Don’t lick the mascot. We put that on the site for a reason.",
