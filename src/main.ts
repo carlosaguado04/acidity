@@ -4,6 +4,29 @@ import { initMotion } from './motion'
 const year = document.getElementById('year')
 if (year) year.textContent = String(new Date().getFullYear())
 
+document.querySelectorAll<HTMLImageElement>('img[data-mockup]').forEach((img) => {
+  const stem = img.dataset.mockup
+  if (!stem) return
+  const candidates = stem.match(/\.(webp|png)$/i)
+    ? [stem, stem.replace(/\.webp$/i, '.png').replace(/\.png$/i, '.webp')]
+    : [`${stem}.webp`, `${stem}.png`]
+  const tryNext = (i: number) => {
+    const src = candidates[i]
+    if (!src || src === img.src) {
+      if (i + 1 < candidates.length) tryNext(i + 1)
+      return
+    }
+    const probe = new Image()
+    probe.onload = () => {
+      img.src = src
+      img.closest('.stage-visual')?.classList.add('is-mockup')
+    }
+    probe.onerror = () => tryNext(i + 1)
+    probe.src = src
+  }
+  tryNext(0)
+})
+
 localStorage.removeItem('acidity-theme')
 localStorage.removeItem('acidity-accent')
 

@@ -39,6 +39,11 @@ export function initMotion(): MotionHandle {
   const hero = document.getElementById('home')
   const cursor = document.querySelector<HTMLElement>('.cursor')
   const typeEls = [...document.querySelectorAll<HTMLElement>('[data-scroll-type]')]
+  const visuals = [...document.querySelectorAll<HTMLElement>('[data-visual]')].map((el) => ({
+    el,
+    stage: el.closest<HTMLElement>('.stage'),
+    img: el.querySelector<HTMLElement>('img'),
+  }))
   const railTargets = RAIL_IDS.map((id) => ({
     id,
     el: document.getElementById(id),
@@ -81,13 +86,17 @@ export function initMotion(): MotionHandle {
         heroLine.style.opacity = '1'
         heroLine.style.filter = 'none'
       }
+      visuals.forEach(({ el, img }) => {
+        el.style.transform = 'none'
+        if (img) img.style.transform = 'none'
+      })
     }
   }
 
   const stepCursor = () => {
     if (!cursorOn || !cursor) return
-    curX += (ptrX - curX) * 0.11
-    curY += (ptrY - curY) * 0.11
+    curX += (ptrX - curX) * 0.075
+    curY += (ptrY - curY) * 0.075
     cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%)`
     cursorRaf = requestAnimationFrame(stepCursor)
   }
@@ -123,18 +132,35 @@ export function initMotion(): MotionHandle {
       if (reduced) return
       const r = el.getBoundingClientRect()
       const i = Number(el.dataset.i ?? 0)
-      const enter = clamp((vh * 0.98 - i * 16 - r.top) / (vh * 0.2))
+      const enter = clamp((vh * 1.04 - i * 36 - r.top) / (vh * 0.42))
       let leave = 1
-      if (r.bottom < vh * 0.14) {
-        leave = clamp(0.45 + (r.bottom / (vh * 0.14)) * 0.55)
+      if (r.bottom < vh * 0.34) {
+        leave = clamp(0.18 + (r.bottom / (vh * 0.34)) * 0.82)
       }
       const t = Math.min(enter, leave)
-      const blur = (1 - enter) * 7
-      const y = (1 - enter) * 24
+      const blur = (1 - enter) * 12
+      const y = (1 - enter) * 16
       el.style.opacity = String(t)
       el.style.filter = blur > 0.35 ? `blur(${blur.toFixed(2)}px)` : 'none'
       el.style.transform = y > 0.5 ? `translate3d(0, ${y.toFixed(1)}px, 0)` : 'none'
       el.classList.toggle('is-in', enter > 0.72 && leave > 0.85)
+    })
+  }
+
+  const paintVisuals = () => {
+    const vh = window.innerHeight
+    visuals.forEach(({ stage, img }) => {
+      if (!stage || !img) return
+      if (reduced) {
+        img.style.transform = 'none'
+        return
+      }
+      const r = stage.getBoundingClientRect()
+      const c = coverage(stage)
+      const through = clamp((vh * 0.5 - (r.top + r.height * 0.35)) / vh)
+      const y = through * -22
+      const scale = 1 + 0.02 * c
+      img.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`
     })
   }
 
@@ -206,6 +232,7 @@ export function initMotion(): MotionHandle {
   const paint = () => {
     paintHero()
     paintType()
+    paintVisuals()
     paintWash()
     paintRail()
   }
