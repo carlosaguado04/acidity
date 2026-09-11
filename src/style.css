@@ -5,7 +5,7 @@
   src: url("/fonts/Anurati-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
 
 @font-face {
@@ -55,7 +55,7 @@
   --on-accent: var(--on-acid);
 
   --font: "Satoshi", -apple-system, "Helvetica Neue", sans-serif;
-  --font-brand: "Anurati", var(--font);
+  --font-brand: "Anurati", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --space: clamp(1.4rem, 4.5vw, 3.75rem);
@@ -204,25 +204,30 @@ button:focus-visible {
   top: 0;
   left: 0;
   z-index: 200;
-  width: 20px;
-  height: 20px;
-  border: 1.25px solid var(--acid);
+  width: 92px;
+  height: 92px;
+  border: 1px solid color-mix(in srgb, var(--acid) 32%, transparent);
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
   display: none;
-  mix-blend-mode: difference;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--acid) 10%, transparent) 0%,
+    color-mix(in srgb, var(--ink) 18%, transparent) 38%,
+    transparent 72%
+  );
   transition:
-    width 180ms var(--ease),
-    height 180ms var(--ease),
-    background-color 180ms ease,
-    opacity 180ms ease;
+    width 280ms var(--ease),
+    height 280ms var(--ease),
+    border-color 280ms ease,
+    opacity 220ms ease;
 }
 
 .cursor.is-hot {
-  width: 28px;
-  height: 28px;
-  background: color-mix(in srgb, var(--acid) 14%, transparent);
+  width: 118px;
+  height: 118px;
+  border-color: color-mix(in srgb, var(--acid) 48%, transparent);
 }
 
 html.has-cursor .cursor {
@@ -512,9 +517,15 @@ html.has-cursor * {
   max-width: none;
 }
 
+.wordmark,
+.mark-text,
+.brand-word {
+  font-family: "Anurati", sans-serif;
+}
+
 .wordmark {
   margin: 0;
-  font-family: var(--font-brand);
+  font-family: "Anurati", sans-serif;
   font-size: clamp(3.1rem, 14vw, 11rem);
   font-weight: 400;
   line-height: 0.92;
@@ -885,6 +896,7 @@ html.has-cursor * {
     display: none !important;
   }
 
+  .wordmark,
   .wordmark-letter,
   .hero-line,
   [data-scroll-type],

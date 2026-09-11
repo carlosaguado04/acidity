@@ -21,6 +21,7 @@ function coverage(el: HTMLElement): number {
 export function initMotion(): MotionHandle {
   const motionMq = window.matchMedia('(prefers-reduced-motion: reduce)')
   const fineMq = window.matchMedia('(pointer: fine)')
+  const hoverMq = window.matchMedia('(hover: hover)')
   const cleanups: Array<() => void> = []
   const root = document.documentElement
   const railLinks = [...document.querySelectorAll<HTMLAnchorElement>('.rail a[data-rail]')]
@@ -33,6 +34,8 @@ export function initMotion(): MotionHandle {
   const orza = document.getElementById('orza')
   const hilo = document.getElementById('hilo')
   const heroInner = document.querySelector<HTMLElement>('.hero-inner')
+  const wordmark = document.querySelector<HTMLElement>('.wordmark')
+  const heroLine = document.querySelector<HTMLElement>('.hero-line')
   const hero = document.getElementById('home')
   const cursor = document.querySelector<HTMLElement>('.cursor')
   const typeEls = [...document.querySelectorAll<HTMLElement>('[data-scroll-type]')]
@@ -70,19 +73,27 @@ export function initMotion(): MotionHandle {
         heroInner.style.filter = 'none'
         heroInner.style.transform = 'none'
       }
+      if (wordmark) {
+        wordmark.style.opacity = '1'
+        wordmark.style.filter = 'none'
+      }
+      if (heroLine) {
+        heroLine.style.opacity = '1'
+        heroLine.style.filter = 'none'
+      }
     }
   }
 
   const stepCursor = () => {
     if (!cursorOn || !cursor) return
-    curX += (ptrX - curX) * 0.22
-    curY += (ptrY - curY) * 0.22
+    curX += (ptrX - curX) * 0.11
+    curY += (ptrY - curY) * 0.11
     cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%)`
     cursorRaf = requestAnimationFrame(stepCursor)
   }
 
   const setCursorMode = () => {
-    const next = !reduced && fineMq.matches
+    const next = !reduced && fineMq.matches && hoverMq.matches
     root.classList.toggle('has-cursor', next)
     if (cursorOn && !next) {
       cancelAnimationFrame(cursorRaf)
@@ -134,9 +145,15 @@ export function initMotion(): MotionHandle {
     const vh = window.innerHeight
     const vis = clamp(r.bottom / vh)
     const o = vis > 0.58 ? 1 : clamp(vis / 0.58)
-    heroInner.style.opacity = String(o)
-    heroInner.style.filter = o < 0.98 ? `blur(${((1 - o) * 10).toFixed(2)}px)` : 'none'
-    heroInner.style.transform = o < 0.98 ? `translate3d(0, ${((1 - o) * -28).toFixed(1)}px, 0)` : 'none'
+    heroInner.style.transform = o < 0.98 ? `translate3d(0, ${((1 - o) * -20).toFixed(1)}px, 0)` : 'none'
+    if (wordmark) {
+      wordmark.style.opacity = String(o)
+      wordmark.style.filter = 'none'
+    }
+    if (heroLine) {
+      heroLine.style.opacity = String(o)
+      heroLine.style.filter = o < 0.96 ? `blur(${((1 - o) * 6).toFixed(2)}px)` : 'none'
+    }
   }
 
   const paintWash = () => {
@@ -210,6 +227,7 @@ export function initMotion(): MotionHandle {
     paint()
   })
   fineMq.addEventListener('change', () => setCursorMode())
+  hoverMq.addEventListener('change', () => setCursorMode())
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll)
   cleanups.push(() => {
