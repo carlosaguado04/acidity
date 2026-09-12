@@ -1,4 +1,4 @@
-/* Acidity — home + glass shelf */
+/* Acidity — Anurati stage, neon drift, glass shelf */
 
 @font-face {
   font-family: "Anurati";
@@ -41,18 +41,19 @@
   --paper: #f4f4f2;
   --paper-dim: #9aa0aa;
   --paper-mute: #7c828c;
-  --acid: #d8ff47;
-  --on-acid: #0c0d10;
+  --magenta: #ff3d9a;
+  --cyan: #2ef0ea;
+  --neon: linear-gradient(90deg, var(--magenta), var(--cyan));
+  --on-neon: #0c0d10;
 
   --bg: var(--ink);
   --fg: var(--paper);
   --fg-dim: var(--paper-dim);
   --fg-mute: var(--paper-mute);
-  --accent: var(--acid);
 
   --font: "Satoshi", -apple-system, "Helvetica Neue", sans-serif;
   --font-brand: "Anurati", sans-serif;
-  --space: clamp(1.4rem, 4.4vw, 3.5rem);
+  --space: clamp(1.25rem, 4vw, 3.25rem);
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --shelf-w: min(40rem, 100vw);
@@ -95,13 +96,9 @@ a:visited {
   text-underline-offset: 0.18em;
 }
 
-a:hover {
-  color: var(--accent);
-}
-
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--cyan);
   outline-offset: 3px;
 }
 
@@ -111,8 +108,8 @@ button:focus-visible {
   top: 0;
   z-index: 40;
   padding: 0.55rem 0.9rem;
-  background: var(--accent);
-  color: var(--on-acid);
+  background: var(--cyan);
+  color: var(--on-neon);
 }
 
 .skip:focus {
@@ -120,110 +117,140 @@ button:focus-visible {
   top: 1rem;
 }
 
-/* Cursor */
-
-.cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 80;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-  display: none;
-  background: transparent;
-  transition:
-    width 160ms var(--ease),
-    height 160ms var(--ease),
-    margin 160ms var(--ease),
-    background 160ms var(--ease),
-    border-color 160ms ease,
-    opacity 180ms ease;
+.neon {
+  background-image: var(--neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.cursor.is-hot {
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  background: color-mix(in srgb, var(--accent) 28%, transparent);
-}
-
-html.has-cursor .cursor {
-  display: block;
-}
-
-html.has-cursor,
-html.has-cursor * {
-  cursor: none !important;
-}
-
-/* Home */
+/* Ambient neon — CSS drift, not pointer */
 
 .wash {
   position: fixed;
-  inset: -12%;
+  inset: -22%;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 80% 70% at 18% 42%,
-      color-mix(in srgb, var(--acid) 18%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(
-      ellipse 50% 45% at 88% 78%,
-      color-mix(in srgb, var(--acid) 7%, transparent),
-      transparent 70%
-    );
-  will-change: transform;
 }
+
+.wash-a {
+  background: radial-gradient(
+    ellipse 75% 65% at 22% 38%,
+    color-mix(in srgb, var(--magenta) 32%, transparent),
+    transparent 64%
+  );
+}
+
+.wash-b {
+  background: radial-gradient(
+    ellipse 70% 60% at 78% 68%,
+    color-mix(in srgb, var(--cyan) 28%, transparent),
+    transparent 66%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wash-a {
+    animation: drift-a 32s ease-in-out infinite alternate;
+  }
+
+  .wash-b {
+    animation: drift-b 26s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes drift-a {
+  from {
+    transform: translate3d(-5%, -4%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(6%, 5%, 0) scale(1.14);
+  }
+}
+
+@keyframes drift-b {
+  from {
+    transform: translate3d(4%, 6%, 0) scale(1.06);
+  }
+  to {
+    transform: translate3d(-6%, -3%, 0) scale(1.12);
+  }
+}
+
+/* Home — Anurati owns the stage */
 
 .home {
   position: relative;
   z-index: 1;
   min-height: 100svh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: calc(var(--space) + env(safe-area-inset-top))
     var(--space)
     calc(var(--space) + env(safe-area-inset-bottom));
 }
 
-.home-inner {
-  display: grid;
-  gap: clamp(1.8rem, 4vh, 3.2rem);
-  width: 100%;
-  max-width: 74rem;
-  margin: 0 auto;
+.stage-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 38%;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  padding: calc(var(--space) + env(safe-area-inset-top)) var(--space) 0;
+  container-type: size;
+  pointer-events: none;
 }
 
 .wordmark {
   margin: 0;
+  width: 100%;
   font-family: var(--font-brand);
   font-weight: 400;
   font-synthesis: none;
-  font-size: min(13vw, 9.2rem, calc((100vw - 2 * var(--space)) / 6.5));
-  letter-spacing: normal;
-  line-height: 0.95;
+  font-size: min(52cqh, calc(100cqi / 7.05));
+  letter-spacing: 0.07em;
+  line-height: 0.9;
+  white-space: nowrap;
   color: var(--fg);
-  /* Anurati ships caps only. DOM stays “Acidity”. */
   text-transform: uppercase;
-  will-change: transform;
+  text-shadow:
+    0 0 48px color-mix(in srgb, var(--magenta) 22%, transparent),
+    0 0 96px color-mix(in srgb, var(--cyan) 16%, transparent);
 }
 
 .letter {
+  position: relative;
+  z-index: 1;
   max-width: var(--measure);
+  padding-top: 1.2rem;
+}
+
+.letter::before {
+  content: "";
+  position: absolute;
+  left: -2rem;
+  right: -3rem;
+  top: -3rem;
+  bottom: -1.5rem;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 55%, transparent) 35%,
+    color-mix(in srgb, var(--ink) 82%, transparent) 100%
+  );
 }
 
 .letter p {
-  margin: 0 0 1.15em;
-  font-size: clamp(1.05rem, 1.55vw, 1.2rem);
+  margin: 0 0 1.1em;
+  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
   line-height: 1.62;
-  color: color-mix(in srgb, var(--fg-dim) 28%, var(--fg));
+  color: color-mix(in srgb, var(--fg-dim) 22%, var(--fg));
 }
 
 .letter p:last-of-type {
@@ -234,48 +261,42 @@ a.to-work,
 a.to-work:link,
 a.to-work:visited {
   display: inline-block;
-  margin-top: 1.75rem;
+  margin-top: 1.55rem;
   font-size: 1.08rem;
   font-weight: 500;
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
+  background-image: var(--neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-decoration: none;
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--magenta) 70%, var(--cyan));
 }
 
 a.to-work:hover,
 a.to-work:focus-visible {
+  background-image: none;
   color: var(--fg);
+  box-shadow: 0 1px 0 0 var(--fg);
 }
 
-@media (min-width: 900px) {
-  .home-inner {
-    gap: clamp(2rem, 4vh, 3rem);
-  }
-
-  .letter {
-    max-width: 40rem;
-  }
-}
-
-html.is-pending .home-inner {
+html.is-pending .home {
   opacity: 0;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html.is-ready .wordmark {
-    animation: rise 1.15s var(--ease) both;
+    animation: rise 1.2s var(--ease) both;
   }
 
   html.is-ready .letter {
-    animation: rise 1.05s var(--ease) 0.12s both;
+    animation: rise 1.05s var(--ease) 0.14s both;
   }
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translate3d(0, 18px, 0);
+    transform: translate3d(0, 16px, 0);
   }
   to {
     opacity: 1;
@@ -291,7 +312,7 @@ html.is-pending .home-inner {
   z-index: 20;
   border: 0;
   padding: 0;
-  background: color-mix(in srgb, var(--ink) 42%, transparent);
+  background: color-mix(in srgb, var(--ink) 46%, transparent);
   opacity: 0;
   pointer-events: none;
   cursor: pointer;
@@ -323,9 +344,9 @@ body.is-shelf .shelf {
   inset: 0;
   pointer-events: none;
   background: color-mix(in srgb, var(--ink) 58%, transparent);
-  border-left: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
-  backdrop-filter: blur(28px) saturate(1.25);
-  -webkit-backdrop-filter: blur(28px) saturate(1.25);
+  border-left: 1px solid color-mix(in srgb, var(--cyan) 28%, var(--magenta));
+  backdrop-filter: blur(28px) saturate(1.3);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3);
 }
 
 .shelf-body {
@@ -360,25 +381,31 @@ body.is-shelf .shelf {
   font: inherit;
   font-size: 0.92rem;
   font-weight: 500;
-  color: var(--accent);
+  background-image: var(--neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--cyan) 60%, var(--magenta));
   text-underline-offset: 0.2em;
   cursor: pointer;
 }
 
 .shelf-close:hover {
+  background-image: none;
   color: var(--fg);
+  text-decoration-color: var(--fg);
 }
 
 .app {
   display: grid;
   gap: 1.1rem;
   padding: 1.5rem 0 1.7rem;
-  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--cyan) 18%, var(--magenta));
 }
 
 .app:last-child {
-  border-bottom: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 18%, var(--magenta));
 }
 
 .app-mark {
@@ -419,14 +446,35 @@ body.is-shelf .shelf {
   display: inline-block;
   margin-top: 1rem;
   font-weight: 500;
-  color: var(--accent);
+  background-image: var(--neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--cyan) 55%, var(--magenta));
   text-underline-offset: 0.2em;
 }
 
 .app-copy a:hover,
 .app-copy a:focus-visible {
+  background-image: none;
   color: var(--fg);
+  text-decoration-color: var(--fg);
+}
+
+@media (max-width: 720px) {
+  .stage-mark {
+    bottom: auto;
+    height: 34svh;
+    align-items: flex-end;
+    padding-bottom: 0.2rem;
+    overflow: hidden;
+  }
+
+  .wordmark {
+    font-size: min(22vw, 30cqh);
+    letter-spacing: 0.055em;
+  }
 }
 
 @media (min-width: 640px) {
@@ -464,7 +512,7 @@ body.is-shelf .shelf {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-inner,
+  .home,
   .wordmark,
   .letter,
   body.is-shelf .app {
@@ -473,22 +521,15 @@ body.is-shelf .shelf {
     transform: none;
   }
 
-  html.is-pending .home-inner {
+  html.is-pending .home {
     opacity: 1;
   }
 
-  .wash,
-  .wordmark {
+  .stage-mark,
+  .letter,
+  .wash {
     transform: none !important;
-  }
-
-  .cursor {
-    display: none !important;
-  }
-
-  html.has-cursor,
-  html.has-cursor * {
-    cursor: auto !important;
+    animation: none !important;
   }
 
   .scrim,
