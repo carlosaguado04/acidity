@@ -88,13 +88,13 @@ img {
 a,
 a:link,
 a:visited {
-  color: inherit;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+  color: var(--accent);
+  text-decoration: none;
 }
 
-a:hover {
-  color: var(--accent);
+a:hover,
+a:focus-visible {
+  color: var(--fg);
 }
 
 a:focus-visible,
@@ -118,32 +118,63 @@ button:focus-visible {
   top: 1rem;
 }
 
-/* Soft pink bloom — one color, slow drift */
+/* Soft pink blooms — CSS drift + scroll track, no cursor follow */
 
-.bloom {
+.wash-track {
   position: fixed;
-  inset: -18%;
+  inset: -22%;
   z-index: 0;
   pointer-events: none;
+  will-change: transform;
+}
+
+.bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bloom-a {
   background: radial-gradient(
-    ellipse 70% 55% at 50% 18%,
-    color-mix(in srgb, var(--pink) 16%, transparent),
-    transparent 62%
+    ellipse 72% 58% at 42% 28%,
+    color-mix(in srgb, var(--pink) 22%, transparent),
+    transparent 64%
+  );
+}
+
+.bloom-b {
+  background: radial-gradient(
+    ellipse 64% 52% at 72% 78%,
+    color-mix(in srgb, var(--pink) 14%, transparent),
+    transparent 66%
   );
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bloom {
-    animation: drift 30s ease-in-out infinite alternate;
+  .bloom-a {
+    animation: drift-a 28s ease-in-out infinite alternate;
+  }
+
+  .bloom-b {
+    animation: drift-b 36s ease-in-out infinite alternate;
   }
 }
 
-@keyframes drift {
+@keyframes drift-a {
   from {
-    transform: translate3d(-3%, -2%, 0) scale(1.04);
+    transform: translate3d(-4%, -3%, 0) scale(1.04);
   }
   to {
-    transform: translate3d(4%, 3%, 0) scale(1.1);
+    transform: translate3d(5%, 4%, 0) scale(1.12);
+  }
+}
+
+@keyframes drift-b {
+  from {
+    transform: translate3d(5%, 4%, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(-6%, -3%, 0) scale(1.1);
   }
 }
 
@@ -152,28 +183,14 @@ button:focus-visible {
 .home {
   position: relative;
   z-index: 1;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: calc(var(--space) + env(safe-area-inset-top))
-    var(--space)
-    calc(var(--space) + env(safe-area-inset-bottom));
 }
 
-.stage-mark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 40%;
-  z-index: 0;
+.hero {
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--space) + env(safe-area-inset-top)) var(--space) 0;
-  container-type: size;
-  pointer-events: none;
+  padding: 0 var(--space);
 }
 
 .wordmark {
@@ -182,7 +199,7 @@ button:focus-visible {
   font-family: var(--font-brand);
   font-weight: 400;
   font-synthesis: none;
-  font-size: min(48cqh, calc(100cqi / 8.15));
+  font-size: calc((100vw - 2 * var(--space)) / 8.2);
   letter-spacing: 0.2em;
   line-height: 0.9;
   text-align: center;
@@ -192,13 +209,12 @@ button:focus-visible {
 }
 
 .letter {
-  position: relative;
-  z-index: 1;
   max-width: var(--measure);
+  padding: 8vh var(--space) 18vh;
 }
 
 .letter p {
-  margin: 0 0 1.1em;
+  margin: 0 0 1.15em;
   font-size: clamp(1.02rem, 1.5vw, 1.16rem);
   line-height: 1.62;
   color: color-mix(in srgb, var(--fg-dim) 22%, var(--fg));
@@ -211,7 +227,7 @@ button:focus-visible {
 .entries {
   display: flex;
   gap: 1.6rem;
-  margin-top: 1.7rem;
+  margin-top: 1.85rem;
 }
 
 .entries a,
@@ -219,18 +235,20 @@ button:focus-visible {
 .entries a:visited {
   font-size: 1.08rem;
   font-weight: 500;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.22em;
 }
 
-.entries a:hover,
-.entries a:focus-visible {
-  color: var(--fg);
-}
-
-html.is-pending .home {
+html.is-pending .wordmark {
   opacity: 0;
+}
+
+html.has-js [data-enter] {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+}
+
+html.has-js [data-enter].is-in {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -238,8 +256,26 @@ html.is-pending .home {
     animation: rise 1.15s var(--ease) both;
   }
 
-  html.is-ready .letter {
-    animation: rise 1.05s var(--ease) 0.12s both;
+  [data-enter].is-in {
+    transition:
+      opacity 0.85s var(--ease),
+      transform 0.85s var(--ease);
+  }
+
+  [data-enter].is-in:nth-child(2) {
+    transition-delay: 0.05s;
+  }
+
+  [data-enter].is-in:nth-child(3) {
+    transition-delay: 0.1s;
+  }
+
+  [data-enter].is-in:nth-child(4) {
+    transition-delay: 0.15s;
+  }
+
+  [data-enter].is-in:nth-child(5) {
+    transition-delay: 0.2s;
   }
 }
 
@@ -255,16 +291,12 @@ html.is-pending .home {
 }
 
 @media (max-width: 720px) {
-  .stage-mark {
-    bottom: auto;
-    height: 32svh;
-    align-items: flex-end;
-    padding-bottom: 0.35rem;
+  .hero {
     overflow: hidden;
   }
 
   .wordmark {
-    font-size: min(18vw, 28cqh);
+    font-size: calc((100vw - 2 * var(--space)) / 8.5);
     letter-spacing: 0.16em;
   }
 }
@@ -347,8 +379,6 @@ body.is-shelf .scrim {
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
   cursor: pointer;
 }
 
@@ -412,9 +442,6 @@ body.is-shelf .scrim {
   display: inline-block;
   margin-top: 1rem;
   font-weight: 500;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
 }
 
 .app-copy a:hover,
@@ -461,6 +488,7 @@ body.is-shelf .scrim {
   .home,
   .wordmark,
   .letter,
+  [data-enter],
   .shelf.is-on .app,
   .shelf.is-on .hold {
     opacity: 1;
@@ -468,12 +496,11 @@ body.is-shelf .scrim {
     transform: none;
   }
 
-  html.is-pending .home {
+  html.is-pending .wordmark {
     opacity: 1;
   }
 
-  .stage-mark,
-  .letter,
+  .wash-track,
   .bloom {
     transform: none !important;
     animation: none !important;

@@ -2,7 +2,6 @@ import './style.css'
 
 const root = document.documentElement
 const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)')
-const fineMq = window.matchMedia('(pointer: fine)')
 
 type ShelfId = 'apps' | 'work'
 
@@ -11,16 +10,11 @@ const scrim = document.querySelector<HTMLElement>('.scrim')
 const shelves = [...document.querySelectorAll<HTMLElement>('[data-shelf]')]
 const openers = [...document.querySelectorAll<HTMLAnchorElement>('[data-open]')]
 const closers = [...document.querySelectorAll('[data-close]')]
-const mark = document.querySelector<HTMLElement>('[data-parallax="mark"]')
-const copy = document.querySelector<HTMLElement>('[data-parallax="copy"]')
+const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
 
 let lastFocus: HTMLElement | null = null
 let openId: ShelfId | null = null
-let parX = 0
-let parY = 0
-let parTX = 0
-let parTY = 0
-let parRaf = 0
+let washRaf = 0
 
 function reduced() {
   return reduceMq.matches
@@ -89,8 +83,6 @@ function setShelf(id: ShelfId | null, push = false) {
       lastFocus =
         document.activeElement instanceof HTMLElement ? document.activeElement : openers[0] ?? null
     }
-    if (mark) mark.style.transform = 'none'
-    if (copy) copy.style.transform = 'none'
     const panel = shelves.find((el) => el.dataset.shelf === id)
     panel?.querySelector<HTMLElement>('a[href], button')?.focus()
     if (push) {
@@ -106,37 +98,35 @@ function setShelf(id: ShelfId | null, push = false) {
   }
 }
 
-function stepParallax() {
-  if (reduced() || openId) {
-    parRaf = 0
+function paintWash() {
+  washRaf = 0
+  if (!wash || reduced()) return
+  const y = window.scrollY
+  wash.style.transform = `translate3d(0, ${(y * 0.16).toFixed(1)}px, 0)`
+}
+
+function onScroll() {
+  if (reduced() || washRaf) return
+  washRaf = requestAnimationFrame(paintWash)
+}
+
+function watchEnter() {
+  const nodes = [...document.querySelectorAll<HTMLElement>('[data-enter]')]
+  if (reduced()) {
+    nodes.forEach((el) => el.classList.add('is-in'))
     return
   }
-  parX += (parTX - parX) * 0.07
-  parY += (parTY - parY) * 0.07
-  if (mark) {
-    mark.style.transform = `translate3d(${(parX * -10).toFixed(1)}px, ${(parY * -8).toFixed(1)}px, 0)`
-  }
-  if (copy) {
-    copy.style.transform = `translate3d(${(parX * 7).toFixed(1)}px, ${(parY * 5).toFixed(1)}px, 0)`
-  }
-  if (Math.abs(parTX - parX) > 0.001 || Math.abs(parTY - parY) > 0.001) {
-    parRaf = requestAnimationFrame(stepParallax)
-  } else {
-    parRaf = 0
-  }
-}
-
-function onPointerMove(e: PointerEvent) {
-  if (e.pointerType === 'touch' || reduced() || openId || !fineMq.matches) return
-  parTX = e.clientX / window.innerWidth - 0.5
-  parTY = e.clientY / window.innerHeight - 0.5
-  if (!parRaf) parRaf = requestAnimationFrame(stepParallax)
-}
-
-function onPointerLeave() {
-  parTX = 0
-  parTY = 0
-  if (!parRaf && !reduced()) parRaf = requestAnimationFrame(stepParallax)
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        entry.target.classList.add('is-in')
+        io.unobserve(entry.target)
+      }
+    },
+    { threshold: 0.22, rootMargin: '0px 0px -10% 0px' },
+  )
+  nodes.forEach((el) => io.observe(el))
 }
 
 openers.forEach((a) => {
@@ -163,13 +153,12 @@ window.addEventListener('keydown', (e) => {
 })
 
 window.addEventListener('popstate', () => setShelf(shelfFromPath()))
-window.addEventListener('pointermove', onPointerMove, { passive: true })
-document.documentElement.addEventListener('pointerleave', onPointerLeave)
+window.addEventListener('scroll', onScroll, { passive: true })
 
 reduceMq.addEventListener('change', () => {
   if (reduced()) {
-    if (mark) mark.style.transform = 'none'
-    if (copy) copy.style.transform = 'none'
+    if (wash) wash.style.transform = 'none'
+    document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
     readyType()
   }
 })
@@ -179,4 +168,5 @@ document.querySelectorAll<HTMLImageElement>('.app-mark').forEach((img) => {
 })
 
 setShelf(shelfFromPath())
+watchEnter()
 void waitForAnurati()

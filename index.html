@@ -35,39 +35,42 @@
     <link rel="apple-touch-icon" href="/mascot.png" />
     <link rel="canonical" href="https://acidity.lol/" />
     <script>
-      document.documentElement.classList.add('is-pending')
+      document.documentElement.classList.add('is-pending', 'has-js')
     </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <div class="bloom" aria-hidden="true"></div>
+    <div class="wash-track" data-scroll-wash aria-hidden="true">
+      <div class="bloom bloom-a"></div>
+      <div class="bloom bloom-b"></div>
+    </div>
 
     <main id="main" class="home">
-      <div class="stage-mark" data-parallax="mark">
+      <section class="hero">
         <h1 class="wordmark" aria-label="Acidity">Acidity</h1>
-      </div>
-      <div class="letter" data-parallax="copy">
-        <p>
+      </section>
+      <section class="letter" aria-label="Studio">
+        <p data-enter>
           Acidity started in 2026 because I got sick of paying for apps that
           feel half-done. If I’m going to live in this stuff all day, I want it
           to actually work. So I started building the things I use.
         </p>
-        <p>
+        <p data-enter>
           That’s the rule. I don’t put something out that I wouldn’t keep on my
           own machine. No ads. No tracking. I don’t want your data.
         </p>
-        <p>
+        <p data-enter>
           I also build websites when someone has a product and needs the web
           part done properly — product sites, marketing sites, a real backend
           when a pretty shell isn’t enough. Same filter. If it isn’t sharp, it
           stays here.
         </p>
-        <p>One person. Small studio. That’s the whole thing.</p>
-        <nav class="entries" aria-label="Open">
+        <p data-enter>One person. Small studio. That’s the whole thing.</p>
+        <nav class="entries" data-enter aria-label="Open">
           <a href="/apps" data-open="apps" aria-expanded="false" aria-controls="shelf-apps">Apps</a>
           <a href="/work" data-open="work" aria-expanded="false" aria-controls="shelf-work">Work</a>
         </nav>
-      </div>
+      </section>
     </main>
 
     <div class="scrim" data-close hidden></div>
