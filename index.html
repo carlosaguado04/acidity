@@ -12,14 +12,21 @@
     <title>Acidity</title>
     <link
       rel="preload"
-      href="/fonts/Satoshi-Bold.woff2"
+      href="/fonts/Anurati-Regular.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Satoshi-Regular.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/fonts/Satoshi-Regular.woff2"
+      href="/fonts/Satoshi-Bold.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -31,12 +38,16 @@
       document.documentElement.classList.add('is-pending')
     </script>
   </head>
-  <body class="page-home">
+  <body>
     <a class="skip" href="#main">Skip to content</a>
+    <div class="cursor" aria-hidden="true"></div>
+    <div class="wash" data-parallax="wash" aria-hidden="true"></div>
 
     <main id="main" class="home">
       <div class="home-inner">
-        <h1 class="wordmark">Acidity</h1>
+        <div data-parallax="mark">
+          <h1 class="wordmark">Acidity</h1>
+        </div>
         <div class="letter">
           <p>
             Acidity started in 2026 because I got sick of paying for apps that
@@ -54,11 +65,88 @@
             stays here.
           </p>
           <p>One person. Small studio. That’s the whole thing.</p>
-          <a class="to-work" href="/work">Work</a>
+          <a class="to-work" href="/work" data-open-shelf aria-expanded="false" aria-controls="shelf">Work</a>
         </div>
       </div>
     </main>
 
-    <script type="module" src="/src/home.ts"></script>
+    <div class="scrim" data-close-shelf hidden></div>
+
+    <aside
+      class="shelf"
+      id="shelf"
+      aria-label="Work"
+      aria-hidden="true"
+    >
+      <div class="shelf-glass" aria-hidden="true"></div>
+      <div class="shelf-body">
+        <header class="shelf-bar">
+          <p class="shelf-title">Work</p>
+          <button type="button" class="shelf-close" data-close-shelf>
+            Close
+          </button>
+        </header>
+
+        <article class="app" aria-labelledby="mise-name">
+          <img
+            class="app-mark"
+            src="/apps/mise.png"
+            width="88"
+            height="88"
+            alt=""
+            decoding="async"
+          />
+          <div class="app-copy">
+            <h2 id="mise-name">Mise</h2>
+            <p class="app-slogan">Windows wander. Mise puts them back.</p>
+            <p class="app-note">
+              I tried everything. Shortcuts. Tiling managers. They work for a
+              while, then you’re in a config file just to nudge a window.
+            </p>
+            <a href="https://usemise.dev">usemise.dev</a>
+          </div>
+        </article>
+
+        <article class="app" aria-labelledby="hilo-name">
+          <img
+            class="app-mark app-mark-hilo"
+            src="/apps/hilo-smile.png"
+            width="88"
+            height="88"
+            alt=""
+            decoding="async"
+          />
+          <div class="app-copy">
+            <h2 id="hilo-name">Hilo</h2>
+            <p class="app-slogan">Pull the string. Steal the time.</p>
+            <p class="app-note">
+              Needed a small timer on my Mac while boiling an egg....
+            </p>
+            <a href="https://hilo.acidity.lol">hilo.acidity.lol</a>
+          </div>
+        </article>
+
+        <article class="app" aria-labelledby="orza-name">
+          <img
+            class="app-mark"
+            src="/apps/orza.png"
+            width="88"
+            height="88"
+            alt=""
+            decoding="async"
+          />
+          <div class="app-copy">
+            <h2 id="orza-name">Orza</h2>
+            <p class="app-slogan">A minimal Mac browser.</p>
+            <p class="app-note">
+              I wanted Arc’s feel on Safari’s bones. I hate Chromium.
+            </p>
+            <a href="https://useorza.dev">Coming soon</a>
+          </div>
+        </article>
+      </div>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

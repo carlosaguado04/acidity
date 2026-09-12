@@ -1,4 +1,12 @@
-/* Acidity — two pages */
+/* Acidity — home + glass shelf */
+
+@font-face {
+  font-family: "Anurati";
+  src: url("/fonts/Anurati-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
 
 @font-face {
   font-family: "Satoshi";
@@ -43,9 +51,11 @@
   --accent: var(--acid);
 
   --font: "Satoshi", -apple-system, "Helvetica Neue", sans-serif;
+  --font-brand: "Anurati", sans-serif;
   --space: clamp(1.4rem, 4.4vw, 3.5rem);
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shelf-w: min(40rem, 100vw);
 }
 
 *,
@@ -61,6 +71,7 @@ body {
 
 body {
   margin: 0;
+  overflow-x: hidden;
   font-family: var(--font);
   font-size: 17px;
   font-weight: 400;
@@ -98,7 +109,7 @@ button:focus-visible {
   position: absolute;
   left: -9999px;
   top: 0;
-  z-index: 20;
+  z-index: 40;
   padding: 0.55rem 0.9rem;
   background: var(--accent);
   color: var(--on-acid);
@@ -109,19 +120,71 @@ button:focus-visible {
   top: 1rem;
 }
 
+/* Cursor */
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  display: none;
+  background: transparent;
+  transition:
+    width 160ms var(--ease),
+    height 160ms var(--ease),
+    margin 160ms var(--ease),
+    background 160ms var(--ease),
+    border-color 160ms ease,
+    opacity 180ms ease;
+}
+
+.cursor.is-hot {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+html.has-cursor .cursor {
+  display: block;
+}
+
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
 /* Home */
 
-.page-home {
+.wash {
+  position: fixed;
+  inset: -12%;
+  z-index: 0;
+  pointer-events: none;
   background:
     radial-gradient(
-      ellipse 90% 70% at 12% 40%,
-      color-mix(in srgb, var(--acid) 14%, transparent),
+      ellipse 80% 70% at 18% 42%,
+      color-mix(in srgb, var(--acid) 18%, transparent),
       transparent 62%
     ),
-    var(--ink);
+    radial-gradient(
+      ellipse 50% 45% at 88% 78%,
+      color-mix(in srgb, var(--acid) 7%, transparent),
+      transparent 70%
+    );
+  will-change: transform;
 }
 
 .home {
+  position: relative;
+  z-index: 1;
   min-height: 100svh;
   display: flex;
   align-items: center;
@@ -134,24 +197,22 @@ button:focus-visible {
   display: grid;
   gap: clamp(1.8rem, 4vh, 3.2rem);
   width: 100%;
-  max-width: 72rem;
+  max-width: 74rem;
   margin: 0 auto;
 }
 
-.wordmark,
-.mark {
-  margin: 0;
-  font-family: var(--font);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-  text-transform: none;
-  color: var(--fg);
-}
-
 .wordmark {
-  font-size: clamp(3.4rem, 9vw, 7.4rem);
-  max-width: 8ch;
+  margin: 0;
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: min(13vw, 9.2rem, calc((100vw - 2 * var(--space)) / 6.5));
+  letter-spacing: normal;
+  line-height: 0.95;
+  color: var(--fg);
+  /* Anurati ships caps only. DOM stays “Acidity”. */
+  text-transform: uppercase;
+  will-change: transform;
 }
 
 .letter {
@@ -174,7 +235,7 @@ a.to-work:link,
 a.to-work:visited {
   display: inline-block;
   margin-top: 1.75rem;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 500;
   color: var(--accent);
   text-decoration: underline;
@@ -189,9 +250,11 @@ a.to-work:focus-visible {
 
 @media (min-width: 900px) {
   .home-inner {
-    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-    gap: clamp(3rem, 7vw, 6.5rem);
-    align-items: center;
+    gap: clamp(2rem, 4vh, 3rem);
+  }
+
+  .letter {
+    max-width: 40rem;
   }
 }
 
@@ -200,15 +263,19 @@ html.is-pending .home-inner {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html.is-ready .home-inner {
-    animation: enter 0.95s var(--ease) both;
+  html.is-ready .wordmark {
+    animation: rise 1.15s var(--ease) both;
+  }
+
+  html.is-ready .letter {
+    animation: rise 1.05s var(--ease) 0.12s both;
   }
 }
 
-@keyframes enter {
+@keyframes rise {
   from {
     opacity: 0;
-    transform: translate3d(0, 14px, 0);
+    transform: translate3d(0, 18px, 0);
   }
   to {
     opacity: 1;
@@ -216,173 +283,191 @@ html.is-pending .home-inner {
   }
 }
 
-/* Work */
+/* Shelf */
 
-.page-work {
-  background:
-    radial-gradient(
-      ellipse 70% 60% at 80% 20%,
-      color-mix(in srgb, var(--acid) 8%, transparent),
-      transparent 64%
-    ),
-    var(--ink);
-}
-
-.mark {
+.scrim {
   position: fixed;
-  top: calc(1.15rem + env(safe-area-inset-top));
-  left: var(--space);
-  z-index: 8;
-  font-size: 1.2rem;
-  text-decoration: none;
-}
-
-.mark:hover,
-.mark:focus-visible {
-  color: var(--accent);
-}
-
-.work {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  padding: calc(4.6rem + env(safe-area-inset-top))
-    var(--space)
-    calc(1.3rem + env(safe-area-inset-bottom));
-}
-
-.stage {
-  position: relative;
-  flex: 1;
-  min-height: 18rem;
-}
-
-.slide {
-  position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  z-index: 20;
+  border: 0;
+  padding: 0;
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
   opacity: 0;
   pointer-events: none;
+  cursor: pointer;
 }
 
-.slide.is-on {
+body.is-shelf .scrim {
   opacity: 1;
   pointer-events: auto;
 }
 
-.slide-crop {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+.shelf {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  width: var(--shelf-w);
+  transform: translate3d(100%, 0, 0);
   pointer-events: none;
 }
 
-.slide-crop img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+body.is-shelf .shelf {
+  transform: none;
+  pointer-events: auto;
 }
 
-.slide.has-crop::after {
-  content: "";
+.shelf-glass {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    transparent 28%,
-    color-mix(in srgb, var(--ink) 78%, transparent) 100%
-  );
+  background: color-mix(in srgb, var(--ink) 58%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
+  backdrop-filter: blur(28px) saturate(1.25);
+  -webkit-backdrop-filter: blur(28px) saturate(1.25);
 }
 
-.slide-copy {
+.shelf-body {
   position: relative;
   z-index: 1;
-  max-width: 40rem;
-  padding-bottom: 0.4rem;
+  height: 100%;
+  overflow: auto;
+  padding: calc(1.25rem + env(safe-area-inset-top))
+    clamp(1.3rem, 4vw, 2.4rem)
+    calc(2rem + env(safe-area-inset-bottom));
 }
 
-.slide-copy h1 {
-  margin: 0;
-  font-size: clamp(4.6rem, 16vw, 11rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 0.86;
-}
-
-.slide.has-crop .slide-copy h1 {
-  font-size: clamp(3.4rem, 10vw, 7.2rem);
-}
-
-.slide-copy p {
-  margin: 0.95rem 0 0;
-  max-width: 28rem;
-  font-size: clamp(1.12rem, 2vw, 1.4rem);
-  color: var(--fg-dim);
-}
-
-.slide-copy a,
-.slide-copy a:link,
-.slide-copy a:visited {
-  display: inline-block;
-  margin: 1.2rem 0 0;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
-}
-
-.slide-copy a:hover,
-.slide-copy a:focus-visible {
-  color: var(--fg);
-}
-
-.picks {
+.shelf-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.55rem;
-  padding: 1.1rem 0 0.2rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.2rem;
 }
 
-.picks button {
+.shelf-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--fg-mute);
+}
+
+.shelf-close {
   padding: 0;
   border: 0;
   background: none;
   font: inherit;
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   font-weight: 500;
-  color: var(--fg-mute);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
   cursor: pointer;
 }
 
-.picks button:hover {
-  color: var(--accent);
+.shelf-close:hover {
+  color: var(--fg);
 }
 
-.picks button[aria-current="true"] {
+.app {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.5rem 0 1.7rem;
+  border-top: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+}
+
+.app:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+}
+
+.app-mark {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.app-mark-hilo {
+  width: 80px;
+  height: 80px;
+}
+
+.app-copy h2 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+}
+
+.app-slogan {
+  margin: 0.55rem 0 0;
+  font-size: clamp(1.08rem, 2vw, 1.28rem);
+  color: var(--fg);
+}
+
+.app-note {
+  margin: 0.7rem 0 0;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--fg-dim);
+}
+
+.app-copy a,
+.app-copy a:link,
+.app-copy a:visited {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 500;
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
+  text-underline-offset: 0.2em;
+}
+
+.app-copy a:hover,
+.app-copy a:focus-visible {
+  color: var(--fg);
+}
+
+@media (min-width: 640px) {
+  .app {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 1.4rem 1.6rem;
+    align-items: start;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .slide {
-    transition: opacity 540ms ease;
+  .scrim {
+    transition: opacity 420ms ease;
   }
 
-  .slide.is-on .slide-copy {
-    animation: enter 720ms var(--ease) both;
+  .shelf {
+    transition: transform 620ms var(--ease);
+  }
+
+  body.is-shelf .app {
+    animation: rise 700ms var(--ease) both;
+  }
+
+  body.is-shelf .app:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  body.is-shelf .app:nth-child(3) {
+    animation-delay: 130ms;
+  }
+
+  body.is-shelf .app:nth-child(4) {
+    animation-delay: 190ms;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home-inner,
-  .slide.is-on .slide-copy {
+  .wordmark,
+  .letter,
+  body.is-shelf .app {
     opacity: 1;
     animation: none;
     transform: none;
@@ -392,7 +477,22 @@ html.is-pending .home-inner {
     opacity: 1;
   }
 
-  .slide {
+  .wash,
+  .wordmark {
+    transform: none !important;
+  }
+
+  .cursor {
+    display: none !important;
+  }
+
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: auto !important;
+  }
+
+  .scrim,
+  .shelf {
     transition: none;
   }
 }
