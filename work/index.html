@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0C0D10" />
+    <meta
+      name="description"
+      content="Current work from Acidity: Mise, Orza, Hilo."
+    />
+    <title>Work — Acidity</title>
+    <link
+      rel="preload"
+      href="/fonts/Anurati-Regular.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
+    <link rel="icon" type="image/png" href="/mascot.png" />
+    <link rel="apple-touch-icon" href="/mascot.png" />
+    <link rel="canonical" href="https://acidity.lol/work" />
+  </head>
+  <body class="page-work">
+    <a class="skip" href="#main">Skip to content</a>
+
+    <a class="mark" href="/">Acidity</a>
+
+    <main id="main" class="work">
+      <div class="stage" data-stage>
+        <article class="slide is-on" data-slide="mise" aria-labelledby="mise-name">
+          <img
+            class="slide-image"
+            src="/apps/mise.png"
+            width="96"
+            height="96"
+            alt=""
+            decoding="async"
+          />
+          <div class="slide-copy">
+            <h1 id="mise-name">Mise</h1>
+            <p>Windows wander. One click puts them back.</p>
+            <a href="https://usemise.dev">usemise.dev</a>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="orza" aria-labelledby="orza-name" aria-hidden="true">
+          <img
+            class="slide-image"
+            src="/apps/orza.png"
+            width="96"
+            height="96"
+            alt=""
+            decoding="async"
+          />
+          <div class="slide-copy">
+            <h1 id="orza-name">Orza</h1>
+            <p>A Mac browser that stays out of the way.</p>
+            <a href="https://useorza.dev">Coming soon</a>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="hilo" aria-labelledby="hilo-name" aria-hidden="true">
+          <img
+            class="slide-image slide-image-hilo"
+            src="/apps/hilo-smile.png"
+            width="120"
+            height="120"
+            alt=""
+            decoding="async"
+          />
+          <div class="slide-copy">
+            <h1 id="hilo-name">Hilo</h1>
+            <p>Pull the string. Steal the time.</p>
+            <a href="https://hilo.acidity.lol">hilo.acidity.lol</a>
+          </div>
+        </article>
+      </div>
+
+      <nav class="picks" aria-label="Projects">
+        <button type="button" data-go="mise" aria-current="true">Mise</button>
+        <button type="button" data-go="orza">Orza</button>
+        <button type="button" data-go="hilo">Hilo</button>
+      </nav>
+    </main>
+
+    <script type="module" src="/src/work.ts"></script>
+  </body>
+</html>

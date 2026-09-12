@@ -2,6 +2,8 @@
 
 Studio site for [acidity.lol](https://acidity.lol).
 
+Two pages: home, and work.
+
 ## Run locally
 
 ```bash
@@ -20,16 +22,13 @@ Open http://localhost:5173
 ## Stack
 
 - Vite + TypeScript
-- Three.js scroll-aware crystal
-- Lenis + GSAP ScrollTrigger
-- Syne display + system UI fonts
-- Dark/light theme
-- Mascot logo at public/mascot.png
+- Anurati on the word Acidity only (normal tracking)
+- Satoshi for everything else
 
-## Motion and accessibility
+## Motion
 
-Effects respect prefers-reduced-motion: reduced motion skips Lenis/GSAP, freezes the crystal, and shows content without reveals.
+Home: the wordmark sharpens once. Work: a quiet crossfade between projects. Both respect `prefers-reduced-motion`.
 
-## Brand notes
+## Brand
 
-ink #0C0D10, raised #16181D, edge #23262C, paper #F4F4F2, acid #D8FF47 (sparse).
+ink `#0C0D10`, raised `#16181D`, edge `#23262C`, paper `#F4F4F2`, acid `#D8FF47` (sparse).
