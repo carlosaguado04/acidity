@@ -234,12 +234,62 @@ reduceMq.addEventListener('change', () => {
   requestPaint()
 })
 
-document.querySelectorAll<HTMLImageElement>('.app-mark').forEach((img) => {
-  img.addEventListener('error', () => img.remove())
-})
+function wireForm() {
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]')
+  const status = document.querySelector<HTMLElement>('[data-form-status]')
+  if (!form || !status) return
+
+  const send = form.querySelector<HTMLButtonElement>('.form-send')
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const data = new FormData(form)
+    if (String(data.get('_honey') ?? '')) return
+    const name = String(data.get('name') ?? '').trim()
+    const email = String(data.get('email') ?? '').trim()
+    const message = String(data.get('message') ?? '').trim()
+    if (!name || !email || !message) {
+      status.hidden = false
+      status.classList.remove('is-ok')
+      status.textContent = 'Name, email, and a message.'
+      return
+    }
+    if (send) send.disabled = true
+    status.hidden = false
+    status.classList.remove('is-ok')
+    status.textContent = 'Sending…'
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/hello@acidity.lol', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          _subject: 'Acidity.lol',
+          _template: 'table',
+          _captcha: false,
+        }),
+      })
+      if (!res.ok) throw new Error('send failed')
+      form.reset()
+      status.classList.add('is-ok')
+      status.textContent = 'Sent. I’ll read it.'
+    } catch {
+      status.classList.remove('is-ok')
+      status.textContent = 'Didn’t go through. Use hello@acidity.lol.'
+    } finally {
+      if (send) send.disabled = false
+    }
+  })
+}
 
 setShelf(shelfFromPath())
 prepareWords()
 watchEnter()
+wireForm()
 void waitForAnurati()
 requestPaint()

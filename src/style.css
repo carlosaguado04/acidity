@@ -425,23 +425,129 @@ body.is-shelf .scrim {
 }
 
 .contact {
-  margin-top: 22vh;
-  max-width: 22rem;
+  margin-top: 1.2rem;
+  max-width: 24rem;
+  padding-bottom: 2.5rem;
 }
 
 .contact-note {
-  margin: 0;
+  margin: 0 0 1.8rem;
   font-size: 1.12rem;
   line-height: 1.55;
   color: color-mix(in srgb, var(--fg-dim) 22%, var(--fg));
+}
+
+.form {
+  position: relative;
+  display: grid;
+  gap: 1.15rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field span {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg-mute);
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0 0.5rem;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--pink) 32%, transparent);
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--fg);
+  outline: none;
+  resize: vertical;
+}
+
+.field textarea {
+  min-height: 8rem;
+}
+
+.field input:hover,
+.field textarea:hover {
+  border-bottom-color: var(--accent);
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-bottom-color: var(--accent);
+}
+
+.field input:-webkit-autofill,
+.field textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--fg);
+  box-shadow: 0 0 0 1000px var(--ink) inset;
+  caret-color: var(--fg);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--fg-mute);
+}
+
+.honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-send {
+  appearance: none;
+  -webkit-appearance: none;
+  width: fit-content;
+  margin-top: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.form-send:hover,
+.form-send:focus,
+.form-send:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+
+.form-send:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.form-status {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  color: var(--fg-dim);
+}
+
+.form-status.is-ok {
+  color: var(--accent);
 }
 
 .contact-mail,
 .contact-mail:link,
 .contact-mail:visited {
   display: inline-block;
-  margin-top: 1.35rem;
-  font-size: 1.2rem;
+  margin-top: 1.8rem;
+  font-size: 1.02rem;
   font-weight: 500;
 }
 
