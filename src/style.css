@@ -1,12 +1,4 @@
-/* Acidity — two pages, ink + lime */
-
-@font-face {
-  font-family: "Anurati";
-  src: url("/fonts/Anurati-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: block;
-}
+/* Acidity — two pages */
 
 @font-face {
   font-family: "Satoshi";
@@ -42,8 +34,6 @@
   --paper-dim: #9aa0aa;
   --paper-mute: #7c828c;
   --acid: #d8ff47;
-  --cyan: #33f2eb;
-  --coral: #ff6b5a;
   --on-acid: #0c0d10;
 
   --bg: var(--ink);
@@ -51,11 +41,10 @@
   --fg-dim: var(--paper-dim);
   --fg-mute: var(--paper-mute);
   --accent: var(--acid);
-  --on-accent: var(--on-acid);
 
   --font: "Satoshi", -apple-system, "Helvetica Neue", sans-serif;
-  --font-brand: "Anurati", sans-serif;
-  --space: clamp(1.35rem, 4.2vw, 3.25rem);
+  --space: clamp(1.4rem, 4.4vw, 3.5rem);
+  --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -112,7 +101,7 @@ button:focus-visible {
   z-index: 20;
   padding: 0.55rem 0.9rem;
   background: var(--accent);
-  color: var(--on-accent);
+  color: var(--on-acid);
 }
 
 .skip:focus {
@@ -122,66 +111,70 @@ button:focus-visible {
 
 /* Home */
 
-.wash {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+.page-home {
   background:
     radial-gradient(
-      ellipse 92% 78% at 22% 58%,
-      color-mix(in srgb, var(--acid) 20%, transparent),
+      ellipse 90% 70% at 12% 40%,
+      color-mix(in srgb, var(--acid) 14%, transparent),
       transparent 62%
     ),
-    radial-gradient(
-      ellipse 70% 55% at 88% 12%,
-      color-mix(in srgb, var(--acid) 9%, transparent),
-      transparent 64%
-    );
+    var(--ink);
 }
 
 .home {
-  position: relative;
-  z-index: 1;
   min-height: 100svh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding: calc(var(--space) + env(safe-area-inset-top))
     var(--space)
     calc(var(--space) + env(safe-area-inset-bottom));
 }
 
-.wordmark,
-.mark {
-  font-family: var(--font-brand);
-  font-weight: 400;
-  font-synthesis: none;
-  letter-spacing: normal;
-  text-transform: none;
+.home-inner {
+  display: grid;
+  gap: clamp(1.8rem, 4vh, 3.2rem);
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
 }
 
-.wordmark {
+.wordmark,
+.mark {
   margin: 0;
-  font-size: clamp(3.4rem, 15vw, 11rem);
-  line-height: 0.95;
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  text-transform: none;
   color: var(--fg);
 }
 
-.studio {
-  margin: 1.5rem 0 0;
-  max-width: 28rem;
-  font-size: clamp(1.12rem, 2vw, 1.35rem);
-  line-height: 1.5;
-  color: var(--fg-dim);
+.wordmark {
+  font-size: clamp(3.4rem, 9vw, 7.4rem);
+  max-width: 8ch;
+}
+
+.letter {
+  max-width: var(--measure);
+}
+
+.letter p {
+  margin: 0 0 1.15em;
+  font-size: clamp(1.05rem, 1.55vw, 1.2rem);
+  line-height: 1.62;
+  color: color-mix(in srgb, var(--fg-dim) 28%, var(--fg));
+}
+
+.letter p:last-of-type {
+  margin-bottom: 0;
 }
 
 a.to-work,
 a.to-work:link,
 a.to-work:visited {
-  width: fit-content;
-  margin: 1.7rem 0 0;
-  font-size: 1.08rem;
+  display: inline-block;
+  margin-top: 1.75rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--accent);
   text-decoration: underline;
@@ -194,25 +187,30 @@ a.to-work:focus-visible {
   color: var(--fg);
 }
 
-html.is-pending .wordmark {
+@media (min-width: 900px) {
+  .home-inner {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: clamp(3rem, 7vw, 6.5rem);
+    align-items: center;
+  }
+}
+
+html.is-pending .home-inner {
   opacity: 0;
-  animation: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html:not(.is-pending) .wordmark {
-    animation: sharpen 1.45s var(--ease) both;
+  html.is-ready .home-inner {
+    animation: enter 0.95s var(--ease) both;
   }
 }
 
-@keyframes sharpen {
+@keyframes enter {
   from {
-    filter: blur(22px);
     opacity: 0;
-    transform: translate3d(0, 0.18em, 0);
+    transform: translate3d(0, 14px, 0);
   }
   to {
-    filter: blur(0);
     opacity: 1;
     transform: none;
   }
@@ -223,22 +221,20 @@ html.is-pending .wordmark {
 .page-work {
   background:
     radial-gradient(
-      ellipse 80% 70% at 78% 28%,
+      ellipse 70% 60% at 80% 20%,
       color-mix(in srgb, var(--acid) 8%, transparent),
-      transparent 68%
+      transparent 64%
     ),
     var(--ink);
 }
 
 .mark {
   position: fixed;
-  top: calc(1.1rem + env(safe-area-inset-top));
+  top: calc(1.15rem + env(safe-area-inset-top));
   left: var(--space);
   z-index: 8;
-  font-size: 1.15rem;
-  line-height: 1;
+  font-size: 1.2rem;
   text-decoration: none;
-  color: var(--fg);
 }
 
 .mark:hover,
@@ -252,7 +248,7 @@ html.is-pending .wordmark {
   flex-direction: column;
   padding: calc(4.6rem + env(safe-area-inset-top))
     var(--space)
-    calc(1.35rem + env(safe-area-inset-bottom));
+    calc(1.3rem + env(safe-area-inset-bottom));
 }
 
 .stage {
@@ -266,9 +262,7 @@ html.is-pending .wordmark {
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1.6rem;
+  justify-content: flex-end;
   opacity: 0;
   pointer-events: none;
 }
@@ -278,30 +272,54 @@ html.is-pending .wordmark {
   pointer-events: auto;
 }
 
-.slide-image {
-  width: clamp(7.25rem, 18vw, 13.5rem);
-  height: clamp(7.25rem, 18vw, 13.5rem);
-  object-fit: contain;
-  background: transparent;
+.slide-crop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.slide-image-hilo {
-  width: clamp(7.5rem, 18vw, 14rem);
-  height: clamp(7.5rem, 18vw, 14rem);
+.slide-crop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide.has-crop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 28%,
+    color-mix(in srgb, var(--ink) 78%, transparent) 100%
+  );
+}
+
+.slide-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+  padding-bottom: 0.4rem;
 }
 
 .slide-copy h1 {
   margin: 0;
-  font-size: clamp(4.2rem, 16vw, 10rem);
+  font-size: clamp(4.6rem, 16vw, 11rem);
   font-weight: 700;
   letter-spacing: -0.05em;
-  line-height: 0.88;
+  line-height: 0.86;
+}
+
+.slide.has-crop .slide-copy h1 {
+  font-size: clamp(3.4rem, 10vw, 7.2rem);
 }
 
 .slide-copy p {
-  margin: 0.9rem 0 0;
-  max-width: 26rem;
-  font-size: clamp(1.12rem, 2.1vw, 1.45rem);
+  margin: 0.95rem 0 0;
+  max-width: 28rem;
+  font-size: clamp(1.12rem, 2vw, 1.4rem);
   color: var(--fg-dim);
 }
 
@@ -309,7 +327,7 @@ html.is-pending .wordmark {
 .slide-copy a:link,
 .slide-copy a:visited {
   display: inline-block;
-  margin: 1.25rem 0 0;
+  margin: 1.2rem 0 0;
   font-size: 1.05rem;
   font-weight: 500;
   color: var(--accent);
@@ -326,8 +344,8 @@ html.is-pending .wordmark {
 .picks {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 1.6rem;
-  padding: 0.5rem 0 0.25rem;
+  gap: 0.4rem 1.55rem;
+  padding: 1.1rem 0 0.2rem;
 }
 
 .picks button {
@@ -352,50 +370,25 @@ html.is-pending .wordmark {
   text-underline-offset: 0.22em;
 }
 
-@media (min-width: 880px) {
-  .slide {
-    flex-direction: row;
-    align-items: center;
-    gap: clamp(2.5rem, 5vw, 4.5rem);
-  }
-
-  .slide-image,
-  .slide-image-hilo {
-    flex: 0 0 auto;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .slide {
-    transition: opacity 560ms ease;
+    transition: opacity 540ms ease;
   }
 
   .slide.is-on .slide-copy {
-    animation: enter 780ms var(--ease) both;
-  }
-}
-
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    animation: enter 720ms var(--ease) both;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wordmark,
+  .home-inner,
   .slide.is-on .slide-copy {
     opacity: 1;
     animation: none;
-    filter: none;
     transform: none;
   }
 
-  html.is-pending .wordmark {
+  html.is-pending .home-inner {
     opacity: 1;
   }
 

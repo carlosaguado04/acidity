@@ -12,9 +12,16 @@
     <title>Work — Acidity</title>
     <link
       rel="preload"
-      href="/fonts/Anurati-Regular.otf"
+      href="/fonts/Satoshi-Bold.woff2"
       as="font"
-      type="font/otf"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Satoshi-Regular.woff2"
+      as="font"
+      type="font/woff2"
       crossorigin
     />
     <link rel="icon" type="image/png" href="/mascot.png" />
@@ -24,19 +31,12 @@
   <body class="page-work">
     <a class="skip" href="#main">Skip to content</a>
 
-    <a class="mark" href="/" aria-label="Acidity">ACIDITY</a>
+    <a class="mark" href="/">Acidity</a>
 
     <main id="main" class="work">
       <div class="stage" data-stage>
         <article class="slide is-on" data-slide="mise" aria-labelledby="mise-name">
-          <img
-            class="slide-image"
-            src="/apps/mise.png"
-            width="220"
-            height="220"
-            alt=""
-            decoding="async"
-          />
+          <div class="slide-crop" data-crop="mise" hidden></div>
           <div class="slide-copy">
             <h1 id="mise-name">Mise</h1>
             <p>Windows wander. Mise puts them back.</p>
@@ -44,15 +44,13 @@
           </div>
         </article>
 
-        <article class="slide" data-slide="orza" aria-labelledby="orza-name" aria-hidden="true">
-          <img
-            class="slide-image"
-            src="/apps/orza.png"
-            width="220"
-            height="220"
-            alt=""
-            decoding="async"
-          />
+        <article
+          class="slide"
+          data-slide="orza"
+          aria-labelledby="orza-name"
+          aria-hidden="true"
+        >
+          <div class="slide-crop" data-crop="orza" hidden></div>
           <div class="slide-copy">
             <h1 id="orza-name">Orza</h1>
             <p>A minimal Mac browser.</p>
@@ -60,15 +58,13 @@
           </div>
         </article>
 
-        <article class="slide" data-slide="hilo" aria-labelledby="hilo-name" aria-hidden="true">
-          <img
-            class="slide-image slide-image-hilo"
-            src="/apps/hilo-smile.png"
-            width="220"
-            height="220"
-            alt=""
-            decoding="async"
-          />
+        <article
+          class="slide"
+          data-slide="hilo"
+          aria-labelledby="hilo-name"
+          aria-hidden="true"
+        >
+          <div class="slide-crop" data-crop="hilo" hidden></div>
           <div class="slide-copy">
             <h1 id="hilo-name">Hilo</h1>
             <p>Pull the string. Steal the time.</p>

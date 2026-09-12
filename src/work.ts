@@ -42,6 +42,29 @@ function step(dir: 1 | -1) {
   if (next) show(next, true)
 }
 
+function loadCrop(slot: HTMLElement) {
+  const id = slot.dataset.crop
+  if (!id) return
+  const candidates = [`/apps/${id}-crop.webp`, `/apps/${id}-crop.png`]
+  const probe = (i: number) => {
+    const src = candidates[i]
+    if (!src) return
+    const probeImg = new Image()
+    probeImg.onload = () => {
+      const img = document.createElement('img')
+      img.src = src
+      img.alt = ''
+      img.decoding = 'async'
+      slot.append(img)
+      slot.hidden = false
+      slot.closest('.slide')?.classList.add('has-crop')
+    }
+    probeImg.onerror = () => probe(i + 1)
+    probeImg.src = src
+  }
+  probe(0)
+}
+
 picks.forEach((btn) => {
   btn.addEventListener('click', () => {
     const id = btn.dataset.go
@@ -54,7 +77,9 @@ window.addEventListener('keydown', (e) => {
   const t = e.target
   if (t instanceof HTMLElement) {
     const tag = t.tagName
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) {
+      return
+    }
   }
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
     e.preventDefault()
@@ -73,9 +98,7 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('hashchange', () => show(idFromHash()))
 
-document.querySelectorAll<HTMLImageElement>('.slide-image').forEach((img) => {
-  img.addEventListener('error', () => img.remove())
-})
+document.querySelectorAll<HTMLElement>('[data-crop]').forEach(loadCrop)
 
 if (stage) {
   let x0: number | null = null

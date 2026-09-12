@@ -7,14 +7,21 @@
     <meta name="theme-color" content="#0C0D10" />
     <meta
       name="description"
-      content="Software that stays out of the way. No ads, no tracking."
+      content="One person. Small studio. Apps I’d keep on my own machine, and websites when the web part needs doing properly."
     />
     <title>Acidity</title>
     <link
       rel="preload"
-      href="/fonts/Anurati-Regular.otf"
+      href="/fonts/Satoshi-Bold.woff2"
       as="font"
-      type="font/otf"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Satoshi-Regular.woff2"
+      as="font"
+      type="font/woff2"
       crossorigin
     />
     <link rel="icon" type="image/png" href="/mascot.png" />
@@ -26,12 +33,30 @@
   </head>
   <body class="page-home">
     <a class="skip" href="#main">Skip to content</a>
-    <div class="wash" aria-hidden="true"></div>
 
     <main id="main" class="home">
-      <h1 class="wordmark" aria-label="Acidity">ACIDITY</h1>
-      <p class="studio">Software that stays out of the way. No ads, no tracking.</p>
-      <a class="to-work" href="/work">Work</a>
+      <div class="home-inner">
+        <h1 class="wordmark">Acidity</h1>
+        <div class="letter">
+          <p>
+            Acidity started in 2026 because I got sick of paying for apps that
+            feel half-done. If I’m going to live in this stuff all day, I want
+            it to actually work. So I started building the things I use.
+          </p>
+          <p>
+            That’s the rule. I don’t put something out that I wouldn’t keep on
+            my own machine. No ads. No tracking. I don’t want your data.
+          </p>
+          <p>
+            I also build websites when someone has a product and needs the web
+            part done properly — product sites, marketing sites, a real backend
+            when a pretty shell isn’t enough. Same filter. If it isn’t sharp, it
+            stays here.
+          </p>
+          <p>One person. Small studio. That’s the whole thing.</p>
+          <a class="to-work" href="/work">Work</a>
+        </div>
+      </div>
     </main>
 
     <script type="module" src="/src/home.ts"></script>
