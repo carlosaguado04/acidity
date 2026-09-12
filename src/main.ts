@@ -2,6 +2,7 @@ import './style.css'
 
 const root = document.documentElement
 const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)')
+const fineMq = window.matchMedia('(pointer: fine)')
 
 type ShelfId = 'apps' | 'work'
 
@@ -11,10 +12,15 @@ const shelves = [...document.querySelectorAll<HTMLElement>('[data-shelf]')]
 const openers = [...document.querySelectorAll<HTMLAnchorElement>('[data-open]')]
 const closers = [...document.querySelectorAll('[data-close]')]
 const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
+const mark = document.querySelector<HTMLElement>('[data-mark]')
 
 let lastFocus: HTMLElement | null = null
 let openId: ShelfId | null = null
-let washRaf = 0
+let raf = 0
+let parX = 0
+let parY = 0
+let parTX = 0
+let parTY = 0
 
 function reduced() {
   return reduceMq.matches
@@ -28,6 +34,7 @@ function readyType() {
 async function waitForAnurati() {
   if (reduced()) {
     readyType()
+    paint()
     return
   }
   try {
@@ -41,6 +48,7 @@ async function waitForAnurati() {
     // still show
   }
   readyType()
+  paint()
 }
 
 function isShelfId(value: string): value is ShelfId {
@@ -96,18 +104,63 @@ function setShelf(id: ShelfId | null, push = false) {
     lastFocus = null
     if (push && shelfFromPath()) history.pushState({ shelf: null }, '', '/')
   }
+  requestPaint()
 }
 
-function paintWash() {
-  washRaf = 0
-  if (!wash || reduced()) return
-  const y = window.scrollY
-  wash.style.transform = `translate3d(0, ${(y * 0.16).toFixed(1)}px, 0)`
+function progress() {
+  const h = window.innerHeight || 1
+  return Math.min(1, Math.max(0, window.scrollY / (h * 0.92)))
 }
 
-function onScroll() {
-  if (reduced() || washRaf) return
-  washRaf = requestAnimationFrame(paintWash)
+function easeOut(t: number) {
+  return 1 - (1 - t) ** 2
+}
+
+function paint() {
+  raf = 0
+  parX += (parTX - parX) * 0.08
+  parY += (parTY - parY) * 0.08
+  const e = easeOut(progress())
+  const scale = 1 - e * 0.78
+  const lift = e * window.innerHeight * -0.47
+  const live = !openId && !reduced() && fineMq.matches
+  const px = live ? parX * -11 * (1 - e * 0.65) : 0
+  const py = live ? parY * -8 * (1 - e * 0.65) : 0
+  if (mark) {
+    mark.style.transform = `translate(-50%, -50%) translate3d(${px.toFixed(1)}px, ${(lift + py).toFixed(1)}px, 0) scale(${scale.toFixed(4)})`
+  }
+  if (wash && !reduced()) {
+    wash.style.transform = `translate3d(0, ${(window.scrollY * 0.16).toFixed(1)}px, 0)`
+  }
+  if (Math.abs(parTX - parX) > 0.001 || Math.abs(parTY - parY) > 0.001) {
+    raf = requestAnimationFrame(paint)
+  }
+}
+
+function requestPaint() {
+  if (!raf) raf = requestAnimationFrame(paint)
+}
+
+function prepareWords() {
+  if (reduced()) return
+  document.querySelectorAll<HTMLElement>('.letter p[data-enter]').forEach((p) => {
+    const raw = p.textContent ?? ''
+    p.textContent = ''
+    let i = 0
+    raw.split(/(\s+)/).forEach((chunk) => {
+      if (!chunk) return
+      if (/^\s+$/.test(chunk)) {
+        p.append(chunk)
+        return
+      }
+      const span = document.createElement('span')
+      span.className = 'word'
+      span.textContent = chunk
+      span.style.setProperty('--i', String(i))
+      i += 1
+      p.append(span)
+    })
+  })
 }
 
 function watchEnter() {
@@ -124,7 +177,7 @@ function watchEnter() {
         io.unobserve(entry.target)
       }
     },
-    { threshold: 0.22, rootMargin: '0px 0px -10% 0px' },
+    { threshold: 0.18, rootMargin: '0px 0px -8% 0px' },
   )
   nodes.forEach((el) => io.observe(el))
 }
@@ -153,7 +206,22 @@ window.addEventListener('keydown', (e) => {
 })
 
 window.addEventListener('popstate', () => setShelf(shelfFromPath()))
-window.addEventListener('scroll', onScroll, { passive: true })
+window.addEventListener('scroll', requestPaint, { passive: true })
+window.addEventListener(
+  'pointermove',
+  (e) => {
+    if (e.pointerType === 'touch' || reduced() || openId || !fineMq.matches) return
+    parTX = e.clientX / window.innerWidth - 0.5
+    parTY = e.clientY / window.innerHeight - 0.5
+    requestPaint()
+  },
+  { passive: true },
+)
+document.documentElement.addEventListener('pointerleave', () => {
+  parTX = 0
+  parTY = 0
+  requestPaint()
+})
 
 reduceMq.addEventListener('change', () => {
   if (reduced()) {
@@ -161,6 +229,7 @@ reduceMq.addEventListener('change', () => {
     document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
     readyType()
   }
+  requestPaint()
 })
 
 document.querySelectorAll<HTMLImageElement>('.app-mark').forEach((img) => {
@@ -168,5 +237,7 @@ document.querySelectorAll<HTMLImageElement>('.app-mark').forEach((img) => {
 })
 
 setShelf(shelfFromPath())
+prepareWords()
 watchEnter()
 void waitForAnurati()
+requestPaint()

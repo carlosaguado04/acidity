@@ -187,15 +187,15 @@ button:focus-visible {
 
 .hero {
   min-height: 100svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--space);
 }
 
 .wordmark {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  width: calc(100vw - 2 * var(--space));
   margin: 0;
-  width: 100%;
   font-family: var(--font-brand);
   font-weight: 400;
   font-synthesis: none;
@@ -206,11 +206,16 @@ button:focus-visible {
   white-space: nowrap;
   color: var(--fg);
   text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
 }
 
 .letter {
+  position: relative;
+  z-index: 1;
   max-width: var(--measure);
-  padding: 8vh var(--space) 18vh;
+  padding: 18vh var(--space) 22vh;
 }
 
 .letter p {
@@ -241,41 +246,55 @@ html.is-pending .wordmark {
   opacity: 0;
 }
 
-html.has-js [data-enter] {
+html.has-js .entries[data-enter] {
   opacity: 0;
   transform: translate3d(0, 16px, 0);
 }
 
-html.has-js [data-enter].is-in {
+html.has-js .entries[data-enter].is-in {
   opacity: 1;
   transform: none;
 }
 
+html.has-js .letter p[data-enter] .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 0.65em, 0);
+  filter: blur(7px);
+}
+
+html.has-js .letter p[data-enter].is-in .word {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html.is-ready .wordmark {
-    animation: rise 1.15s var(--ease) both;
+    animation: fade-in 1.05s var(--ease) both;
   }
 
-  [data-enter].is-in {
+  html.has-js .entries[data-enter].is-in {
     transition:
-      opacity 0.85s var(--ease),
-      transform 0.85s var(--ease);
+      opacity 0.8s var(--ease),
+      transform 0.8s var(--ease);
   }
 
-  [data-enter].is-in:nth-child(2) {
-    transition-delay: 0.05s;
+  html.has-js .letter p[data-enter].is-in .word {
+    transition:
+      opacity 0.7s var(--ease),
+      transform 0.7s var(--ease),
+      filter 0.7s var(--ease);
+    transition-delay: calc(var(--i) * 14ms);
   }
+}
 
-  [data-enter].is-in:nth-child(3) {
-    transition-delay: 0.1s;
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-
-  [data-enter].is-in:nth-child(4) {
-    transition-delay: 0.15s;
-  }
-
-  [data-enter].is-in:nth-child(5) {
-    transition-delay: 0.2s;
+  to {
+    opacity: 1;
   }
 }
 
@@ -486,18 +505,20 @@ body.is-shelf .scrim {
 
 @media (prefers-reduced-motion: reduce) {
   .home,
-  .wordmark,
   .letter,
   [data-enter],
+  .letter p[data-enter] .word,
   .shelf.is-on .app,
   .shelf.is-on .hold {
     opacity: 1;
     animation: none;
+    filter: none;
     transform: none;
   }
 
   html.is-pending .wordmark {
     opacity: 1;
+    animation: none;
   }
 
   .wash-track,
