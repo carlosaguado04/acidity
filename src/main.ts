@@ -3,6 +3,7 @@ import './style.css'
 const root = document.documentElement
 const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)')
 const fineMq = window.matchMedia('(pointer: fine)')
+const hoverMq = window.matchMedia('(hover: hover)')
 
 type ShelfId = 'apps' | 'work' | 'contact'
 
@@ -13,6 +14,7 @@ const openers = [...document.querySelectorAll<HTMLAnchorElement>('[data-open]')]
 const closers = [...document.querySelectorAll('[data-close]')]
 const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
 const mark = document.querySelector<HTMLElement>('[data-mark]')
+const cursor = document.querySelector<HTMLElement>('.cursor')
 
 let lastFocus: HTMLElement | null = null
 let openId: ShelfId | null = null
@@ -21,6 +23,14 @@ let parX = 0
 let parY = 0
 let parTX = 0
 let parTY = 0
+let cursorOn = false
+let cursorRaf = 0
+let ptrX = 0
+let ptrY = 0
+let curX = 0
+let curY = 0
+let cursorArmed = false
+let cursorHot = false
 
 function reduced() {
   return reduceMq.matches
@@ -207,12 +217,51 @@ window.addEventListener('keydown', (e) => {
   }
 })
 
+function stepCursor() {
+  if (!cursorOn || !cursor) return
+  curX += (ptrX - curX) * 0.32
+  curY += (ptrY - curY) * 0.32
+  cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0)`
+  cursorRaf = requestAnimationFrame(stepCursor)
+}
+
+function setCursorMode() {
+  const next = !reduced() && fineMq.matches && hoverMq.matches
+  root.classList.toggle('has-cursor', next)
+  if (cursorOn && !next) {
+    cancelAnimationFrame(cursorRaf)
+    cursorRaf = 0
+    cursorOn = false
+    if (cursor) cursor.style.opacity = '0'
+  }
+  if (next && !cursorOn) {
+    cursorOn = true
+    stepCursor()
+  }
+}
+
 window.addEventListener('popstate', () => setShelf(shelfFromPath()))
 window.addEventListener('scroll', requestPaint, { passive: true })
 window.addEventListener(
   'pointermove',
   (e) => {
-    if (e.pointerType === 'touch' || reduced() || openId || !fineMq.matches) return
+    if (e.pointerType === 'touch') return
+    ptrX = e.clientX
+    ptrY = e.clientY
+    if (cursorOn && cursor) {
+      if (!cursorArmed) {
+        curX = ptrX
+        curY = ptrY
+        cursorArmed = true
+        cursor.style.opacity = '1'
+      }
+      const hot = !!(e.target instanceof Element && e.target.closest('a, button'))
+      if (hot !== cursorHot) {
+        cursorHot = hot
+        cursor.classList.toggle('is-hot', hot)
+      }
+    }
+    if (reduced() || openId || !fineMq.matches) return
     parTX = e.clientX / window.innerWidth - 0.5
     parTY = e.clientY / window.innerHeight - 0.5
     requestPaint()
@@ -220,12 +269,15 @@ window.addEventListener(
   { passive: true },
 )
 document.documentElement.addEventListener('pointerleave', () => {
+  cursorArmed = false
+  if (cursor) cursor.style.opacity = '0'
   parTX = 0
   parTY = 0
   requestPaint()
 })
 
 reduceMq.addEventListener('change', () => {
+  setCursorMode()
   if (reduced()) {
     if (wash) wash.style.transform = 'none'
     document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
@@ -233,6 +285,8 @@ reduceMq.addEventListener('change', () => {
   }
   requestPaint()
 })
+fineMq.addEventListener('change', setCursorMode)
+hoverMq.addEventListener('change', setCursorMode)
 
 function wireForm() {
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]')
@@ -287,6 +341,7 @@ function wireForm() {
   })
 }
 
+setCursorMode()
 setShelf(shelfFromPath())
 prepareWords()
 watchEnter()

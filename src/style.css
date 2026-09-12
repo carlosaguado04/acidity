@@ -118,6 +118,44 @@ button:focus-visible {
   top: 1rem;
 }
 
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  display: none;
+  background: transparent;
+  transition:
+    width 160ms var(--ease),
+    height 160ms var(--ease),
+    margin 160ms var(--ease),
+    background 160ms var(--ease),
+    opacity 180ms ease;
+}
+
+.cursor.is-hot {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+html.has-cursor .cursor {
+  display: block;
+}
+
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
 /* Soft pink blooms — CSS drift + scroll track, no cursor follow */
 
 .wash-track {
@@ -666,6 +704,15 @@ body.is-shelf .scrim {
   .bloom {
     transform: none !important;
     animation: none !important;
+  }
+
+  .cursor {
+    display: none !important;
+  }
+
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: auto !important;
   }
 
   .scrim,
