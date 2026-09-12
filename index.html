@@ -40,12 +40,11 @@
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <div class="wash wash-a" aria-hidden="true"></div>
-    <div class="wash wash-b" aria-hidden="true"></div>
+    <div class="bloom" aria-hidden="true"></div>
 
     <main id="main" class="home">
       <div class="stage-mark" data-parallax="mark">
-        <h1 class="wordmark">Acidity</h1>
+        <h1 class="wordmark" aria-label="Acidity">Acidity</h1>
       </div>
       <div class="letter" data-parallax="copy">
         <p>
@@ -64,20 +63,21 @@
           stays here.
         </p>
         <p>One person. Small studio. That’s the whole thing.</p>
-        <a class="to-work" href="/work" data-open-shelf aria-expanded="false" aria-controls="shelf">Work</a>
+        <nav class="entries" aria-label="Open">
+          <a href="/apps" data-open="apps" aria-expanded="false" aria-controls="shelf-apps">Apps</a>
+          <a href="/work" data-open="work" aria-expanded="false" aria-controls="shelf-work">Work</a>
+        </nav>
       </div>
     </main>
 
-    <div class="scrim" data-close-shelf hidden></div>
+    <div class="scrim" data-close hidden></div>
 
-    <aside class="shelf" id="shelf" aria-label="Work" aria-hidden="true">
+    <aside class="shelf" id="shelf-apps" data-shelf="apps" aria-label="Apps" aria-hidden="true">
       <div class="shelf-glass" aria-hidden="true"></div>
       <div class="shelf-body">
         <header class="shelf-bar">
-          <p class="shelf-title">Work</p>
-          <button type="button" class="shelf-close" data-close-shelf>
-            Close
-          </button>
+          <p class="shelf-title">Apps</p>
+          <button type="button" class="shelf-close" data-close>Close</button>
         </header>
 
         <article class="app" aria-labelledby="mise-name">
@@ -137,6 +137,17 @@
             <a href="https://useorza.dev">Coming soon</a>
           </div>
         </article>
+      </div>
+    </aside>
+
+    <aside class="shelf" id="shelf-work" data-shelf="work" aria-label="Work" aria-hidden="true">
+      <div class="shelf-glass" aria-hidden="true"></div>
+      <div class="shelf-body">
+        <header class="shelf-bar">
+          <p class="shelf-title">Work</p>
+          <button type="button" class="shelf-close" data-close>Close</button>
+        </header>
+        <p class="hold">Under construction</p>
       </div>
     </aside>
 
