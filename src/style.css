@@ -1,4 +1,4 @@
-/* Acidity — two pages, ink, quiet type */
+/* Acidity — two pages, ink + lime */
 
 @font-face {
   font-family: "Anurati";
@@ -120,81 +120,123 @@ button:focus-visible {
   top: 1rem;
 }
 
-/* Home — one poster */
+/* Home */
+
+.wash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 92% 78% at 22% 58%,
+      color-mix(in srgb, var(--acid) 20%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 88% 12%,
+      color-mix(in srgb, var(--acid) 9%, transparent),
+      transparent 64%
+    );
+}
 
 .home {
+  position: relative;
+  z-index: 1;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   padding: calc(var(--space) + env(safe-area-inset-top))
     var(--space)
-    calc(var(--space) + 0.4rem + env(safe-area-inset-bottom));
+    calc(var(--space) + env(safe-area-inset-bottom));
+}
+
+.wordmark,
+.mark {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .wordmark {
   margin: 0;
-  font-family: var(--font-brand);
-  font-size: clamp(2.8rem, 13.6vw, 10.2rem);
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 0.94;
-  text-transform: uppercase;
+  font-size: clamp(3.4rem, 15vw, 11rem);
+  line-height: 0.95;
   color: var(--fg);
 }
 
 .studio {
-  margin: 1.45rem 0 0;
-  max-width: 36rem;
-  font-size: clamp(1.02rem, 1.7vw, 1.18rem);
-  line-height: 1.55;
+  margin: 1.5rem 0 0;
+  max-width: 28rem;
+  font-size: clamp(1.12rem, 2vw, 1.35rem);
+  line-height: 1.5;
   color: var(--fg-dim);
 }
 
-.to-work {
+a.to-work,
+a.to-work:link,
+a.to-work:visited {
   width: fit-content;
-  margin: 1.55rem 0 0;
-  font-size: 1rem;
+  margin: 1.7rem 0 0;
+  font-size: 1.08rem;
   font-weight: 500;
-  text-decoration: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+a.to-work:hover,
+a.to-work:focus-visible {
   color: var(--fg);
 }
 
-.to-work:hover,
-.to-work:focus-visible {
-  color: var(--accent);
+html.is-pending .wordmark {
+  opacity: 0;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .wordmark {
-    animation: sharpen 1.2s var(--ease) both;
+  html:not(.is-pending) .wordmark {
+    animation: sharpen 1.45s var(--ease) both;
   }
 }
 
 @keyframes sharpen {
   from {
-    filter: blur(14px);
+    filter: blur(22px);
     opacity: 0;
+    transform: translate3d(0, 0.18em, 0);
   }
   to {
     filter: blur(0);
     opacity: 1;
+    transform: none;
   }
 }
 
-/* Work — small gallery */
+/* Work */
+
+.page-work {
+  background:
+    radial-gradient(
+      ellipse 80% 70% at 78% 28%,
+      color-mix(in srgb, var(--acid) 8%, transparent),
+      transparent 68%
+    ),
+    var(--ink);
+}
 
 .mark {
   position: fixed;
   top: calc(1.1rem + env(safe-area-inset-top));
   left: var(--space);
   z-index: 8;
-  font-family: var(--font-brand);
-  font-size: 1.05rem;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 1.15rem;
   line-height: 1;
-  text-transform: uppercase;
   text-decoration: none;
   color: var(--fg);
 }
@@ -208,15 +250,15 @@ button:focus-visible {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  padding: calc(4.4rem + env(safe-area-inset-top))
+  padding: calc(4.6rem + env(safe-area-inset-top))
     var(--space)
-    calc(1.2rem + env(safe-area-inset-bottom));
+    calc(1.35rem + env(safe-area-inset-bottom));
 }
 
 .stage {
   position: relative;
   flex: 1;
-  min-height: 16rem;
+  min-height: 18rem;
 }
 
 .slide {
@@ -226,7 +268,7 @@ button:focus-visible {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 1.15rem;
+  gap: 1.6rem;
   opacity: 0;
   pointer-events: none;
 }
@@ -237,50 +279,55 @@ button:focus-visible {
 }
 
 .slide-image {
-  width: 72px;
-  height: 72px;
+  width: clamp(7.25rem, 18vw, 13.5rem);
+  height: clamp(7.25rem, 18vw, 13.5rem);
   object-fit: contain;
   background: transparent;
 }
 
 .slide-image-hilo {
-  width: 88px;
-  height: 88px;
+  width: clamp(7.5rem, 18vw, 14rem);
+  height: clamp(7.5rem, 18vw, 14rem);
 }
 
 .slide-copy h1 {
   margin: 0;
-  font-size: clamp(2.6rem, 8vw, 5.2rem);
+  font-size: clamp(4.2rem, 16vw, 10rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 0.92;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
 }
 
 .slide-copy p {
-  margin: 0.85rem 0 0;
-  max-width: 24rem;
-  font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+  margin: 0.9rem 0 0;
+  max-width: 26rem;
+  font-size: clamp(1.12rem, 2.1vw, 1.45rem);
   color: var(--fg-dim);
 }
 
-.slide-copy a {
+.slide-copy a,
+.slide-copy a:link,
+.slide-copy a:visited {
   display: inline-block;
-  margin: 1.15rem 0 0;
-  font-size: 1rem;
+  margin: 1.25rem 0 0;
+  font-size: 1.05rem;
   font-weight: 500;
-  text-decoration: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
 }
 
 .slide-copy a:hover,
 .slide-copy a:focus-visible {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 .picks {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.35rem;
-  padding: 0.4rem 0 0.2rem;
+  gap: 0.45rem 1.6rem;
+  padding: 0.5rem 0 0.25rem;
 }
 
 .picks button {
@@ -288,34 +335,50 @@ button:focus-visible {
   border: 0;
   background: none;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--fg-mute);
   cursor: pointer;
 }
 
 .picks button:hover {
-  color: var(--fg);
+  color: var(--accent);
 }
 
 .picks button[aria-current="true"] {
-  color: var(--fg);
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+@media (min-width: 880px) {
+  .slide {
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .slide-image,
+  .slide-image-hilo {
+    flex: 0 0 auto;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .slide {
-    transition: opacity 520ms ease;
+    transition: opacity 560ms ease;
   }
 
   .slide.is-on .slide-copy {
-    animation: enter 680ms var(--ease) both;
+    animation: enter 780ms var(--ease) both;
   }
 }
 
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
+    transform: translate3d(0, 18px, 0);
   }
   to {
     opacity: 1;
@@ -323,22 +386,17 @@ button:focus-visible {
   }
 }
 
-@media (min-width: 880px) {
-  .slide-image {
-    width: 80px;
-    height: 80px;
-  }
-
-  .slide-image-hilo {
-    width: 96px;
-    height: 96px;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .wordmark,
   .slide.is-on .slide-copy {
+    opacity: 1;
     animation: none;
+    filter: none;
+    transform: none;
+  }
+
+  html.is-pending .wordmark {
+    opacity: 1;
   }
 
   .slide {

@@ -31,4 +31,4 @@ Home: the wordmark sharpens once. Work: a quiet crossfade between projects. Both
 
 ## Brand
 
-ink `#0C0D10`, raised `#16181D`, edge `#23262C`, paper `#F4F4F2`, acid `#D8FF47` (sparse).
+ink `#0C0D10`, raised `#16181D`, edge `#23262C`, paper `#F4F4F2`, acid `#D8FF47`.
