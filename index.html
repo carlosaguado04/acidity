@@ -69,13 +69,14 @@
         <nav class="entries" data-enter aria-label="Open">
           <a href="/apps" data-open="apps" aria-expanded="false" aria-controls="shelf-apps">Apps</a>
           <a href="/work" data-open="work" aria-expanded="false" aria-controls="shelf-work">Work</a>
+          <a href="/contact" data-open="contact" aria-expanded="false" aria-controls="shelf-contact">Contact</a>
         </nav>
       </section>
     </main>
 
     <div class="scrim" data-close hidden></div>
 
-    <aside class="shelf" id="shelf-apps" data-shelf="apps" aria-label="Apps" aria-hidden="true">
+    <aside class="shelf" id="shelf-apps" data-shelf="apps" aria-label="Apps" aria-hidden="true" tabindex="-1">
       <div class="shelf-glass" aria-hidden="true"></div>
       <div class="shelf-body">
         <header class="shelf-bar">
@@ -143,7 +144,7 @@
       </div>
     </aside>
 
-    <aside class="shelf" id="shelf-work" data-shelf="work" aria-label="Work" aria-hidden="true">
+    <aside class="shelf" id="shelf-work" data-shelf="work" aria-label="Work" aria-hidden="true" tabindex="-1">
       <div class="shelf-glass" aria-hidden="true"></div>
       <div class="shelf-body">
         <header class="shelf-bar">
@@ -151,6 +152,30 @@
           <button type="button" class="shelf-close" data-close>Close</button>
         </header>
         <p class="hold">Under construction</p>
+      </div>
+    </aside>
+
+    <aside
+      class="shelf"
+      id="shelf-contact"
+      data-shelf="contact"
+      aria-label="Contact"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div class="shelf-glass" aria-hidden="true"></div>
+      <div class="shelf-body">
+        <header class="shelf-bar">
+          <p class="shelf-title">Contact</p>
+          <button type="button" class="shelf-close" data-close>Close</button>
+        </header>
+        <div class="contact">
+          <p class="contact-note">
+            If you want to know more, send feedback, or need a site done
+            properly — write.
+          </p>
+          <a class="contact-mail" href="mailto:hello@acidity.lol">hello@acidity.lol</a>
+        </div>
       </div>
     </aside>
 

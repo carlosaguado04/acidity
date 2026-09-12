@@ -4,7 +4,7 @@ const root = document.documentElement
 const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)')
 const fineMq = window.matchMedia('(pointer: fine)')
 
-type ShelfId = 'apps' | 'work'
+type ShelfId = 'apps' | 'work' | 'contact'
 
 const home = document.getElementById('main')
 const scrim = document.querySelector<HTMLElement>('.scrim')
@@ -52,19 +52,21 @@ async function waitForAnurati() {
 }
 
 function isShelfId(value: string): value is ShelfId {
-  return value === 'apps' || value === 'work'
+  return value === 'apps' || value === 'work' || value === 'contact'
 }
 
 function shelfFromPath(): ShelfId | null {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   if (path === '/apps') return 'apps'
   if (path === '/work') return 'work'
+  if (path === '/contact') return 'contact'
   return null
 }
 
 function titleFor(id: ShelfId | null) {
   if (id === 'apps') return 'Apps — Acidity'
   if (id === 'work') return 'Work — Acidity'
+  if (id === 'contact') return 'Contact — Acidity'
   return 'Acidity'
 }
 
@@ -92,7 +94,7 @@ function setShelf(id: ShelfId | null, push = false) {
         document.activeElement instanceof HTMLElement ? document.activeElement : openers[0] ?? null
     }
     const panel = shelves.find((el) => el.dataset.shelf === id)
-    panel?.querySelector<HTMLElement>('a[href], button')?.focus()
+    panel?.focus({ preventScroll: true })
     if (push) {
       const href = `/${id}`
       if (window.location.pathname.replace(/\/+$/, '') !== href) {
