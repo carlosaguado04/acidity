@@ -53,7 +53,6 @@
   --space: clamp(1.25rem, 4vw, 3.25rem);
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --shelf-w: min(40rem, 100vw);
 }
 
 *,
@@ -64,12 +63,12 @@
 
 html,
 body {
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   margin: 0;
-  overflow-x: hidden;
   font-family: var(--font);
   font-size: 17px;
   font-weight: 400;
@@ -78,6 +77,7 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
 }
 
 img {
@@ -190,14 +190,13 @@ html.has-cursor * {
     );
 }
 
-/* Soft pink blooms — CSS drift + scroll track, no cursor follow */
+/* Soft pink blooms — CSS drift, no cursor follow */
 
 .wash-track {
   position: fixed;
   inset: -22%;
   z-index: 0;
   pointer-events: none;
-  will-change: transform;
 }
 
 .bloom {
@@ -255,18 +254,30 @@ html.has-cursor * {
 .home {
   position: relative;
   z-index: 1;
+  height: 100%;
 }
 
 .hero {
-  min-height: 100svh;
+  height: 100svh;
+  overflow: hidden;
 }
 
-.wordmark {
+.hero-stage {
   position: fixed;
   left: 50%;
   top: 50%;
   z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: calc(100vw - 2 * var(--space));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.wordmark {
+  width: 100%;
   margin: 0;
   font-family: var(--font-brand);
   font-weight: 400;
@@ -278,67 +289,60 @@ html.has-cursor * {
   white-space: nowrap;
   color: var(--fg);
   text-transform: uppercase;
-  transform: translate(-50%, -50%);
   pointer-events: none;
-  will-change: transform;
 }
 
-.letter {
-  position: relative;
-  z-index: 1;
-  max-width: var(--measure);
-  padding: 18vh var(--space) 22vh;
-}
-
-.letter p {
-  margin: 0 0 1.15em;
-  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
-  line-height: 1.62;
-  color: color-mix(in srgb, var(--fg-dim) 22%, var(--fg));
-}
-
-.letter p:last-of-type {
-  margin-bottom: 0;
-}
-
-.entries {
+.controls {
   display: flex;
-  gap: 1.6rem;
-  margin-top: 1.85rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.15rem 0.1rem;
+  margin-top: clamp(1.15rem, 2.8vh, 1.85rem);
+  pointer-events: auto;
 }
 
-.entries a,
-.entries a:link,
-.entries a:visited {
-  font-size: 1.08rem;
+.controls button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  font-size: clamp(0.98rem, 1.4vw, 1.08rem);
   font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
 }
 
-html.is-pending .wordmark {
+.controls button:hover,
+.controls button:focus-visible {
+  color: var(--fg);
+}
+
+.controls button:focus-visible {
+  outline-offset: 2px;
+}
+
+.controls .dot {
+  color: color-mix(in srgb, var(--fg-mute) 55%, var(--accent));
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+  padding: 0 0.12rem;
+}
+
+html.is-ready body.is-glance .controls {
   opacity: 0;
+  pointer-events: none;
+  animation: none;
 }
 
-html.has-js .entries[data-enter] {
+html.is-pending .wordmark,
+html.is-pending .controls {
   opacity: 0;
-  transform: translate3d(0, 16px, 0);
-}
-
-html.has-js .entries[data-enter].is-in {
-  opacity: 1;
-  transform: none;
-}
-
-html.has-js .letter p[data-enter] .word {
-  display: inline-block;
-  opacity: 0;
-  transform: translate3d(0, 0.65em, 0);
-  filter: blur(7px);
-}
-
-html.has-js .letter p[data-enter].is-in .word {
-  opacity: 1;
-  transform: none;
-  filter: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -346,18 +350,13 @@ html.has-js .letter p[data-enter].is-in .word {
     animation: fade-in 1.05s var(--ease) both;
   }
 
-  html.has-js .entries[data-enter].is-in {
-    transition:
-      opacity 0.8s var(--ease),
-      transform 0.8s var(--ease);
+  html.is-ready .controls {
+    animation: fade-in 1.05s var(--ease) both;
+    animation-delay: 140ms;
   }
 
-  html.has-js .letter p[data-enter].is-in .word {
-    transition:
-      opacity 0.7s var(--ease),
-      transform 0.7s var(--ease),
-      filter 0.7s var(--ease);
-    transition-delay: calc(var(--i) * 14ms);
+  .controls {
+    transition: opacity 220ms var(--ease);
   }
 }
 
@@ -370,29 +369,18 @@ html.has-js .letter p[data-enter].is-in .word {
   }
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 14px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (max-width: 720px) {
-  .hero {
-    overflow: hidden;
-  }
-
   .wordmark {
     font-size: calc((100vw - 2 * var(--space)) / 8.5);
     letter-spacing: 0.16em;
   }
+
+  .controls button {
+    padding: 0.4rem 0.55rem;
+  }
 }
 
-/* Shelves */
+/* Glance overlays — glass is backdrop only; body sits on top and stays clickable */
 
 .scrim {
   position: fixed;
@@ -400,74 +388,89 @@ html.has-js .letter p[data-enter].is-in .word {
   z-index: 20;
   border: 0;
   padding: 0;
-  background: color-mix(in srgb, var(--ink) 46%, transparent);
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
   opacity: 0;
   pointer-events: none;
   cursor: pointer;
 }
 
-body.is-shelf .scrim {
+body.is-glance .scrim {
   opacity: 1;
   pointer-events: auto;
 }
 
-.shelf {
+.glance {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  left: 50%;
+  top: 50%;
   z-index: 30;
-  width: var(--shelf-w);
-  transform: translate3d(100%, 0, 0);
+  width: min(42rem, calc(100vw - 2 * var(--space)));
+  max-height: min(82svh, 52rem);
+  border-radius: 1.35rem;
+  transform: translate(-50%, calc(-50% + 12px));
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
-.shelf.is-on {
-  transform: none;
+.glance.is-on {
+  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 28px 80px color-mix(in srgb, var(--ink) 42%, transparent);
 }
 
-.shelf:focus,
-.shelf:focus-visible {
+.glance:focus,
+.glance:focus-visible {
   outline: none;
 }
 
-.shelf-glass {
+.glance-glass {
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
-  background: color-mix(in srgb, var(--ink) 58%, transparent);
-  border-left: 1px solid color-mix(in srgb, var(--pink) 35%, transparent);
-  backdrop-filter: blur(28px) saturate(1.2);
-  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--paper) 11%, transparent),
+      color-mix(in srgb, var(--ink) 22%, transparent) 55%,
+      color-mix(in srgb, var(--paper) 6%, transparent)
+    );
+  border: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
+  backdrop-filter: blur(36px) saturate(1.45);
+  -webkit-backdrop-filter: blur(36px) saturate(1.45);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--paper) 22%, transparent);
 }
 
-.shelf-body {
+.glance-body {
   position: relative;
   z-index: 1;
-  height: 100%;
+  max-height: min(82svh, 52rem);
   overflow: auto;
-  padding: calc(1.25rem + env(safe-area-inset-top))
-    clamp(1.3rem, 4vw, 2.4rem)
-    calc(2rem + env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
+  padding: 1.25rem clamp(1.2rem, 3.6vw, 1.85rem) 1.7rem;
 }
 
-.shelf-bar {
+.glance-bar {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2.2rem;
+  margin-bottom: 1.35rem;
 }
 
-.shelf-title {
+.glance-title {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1.05rem;
   font-weight: 500;
-  color: var(--fg-mute);
+  letter-spacing: -0.01em;
+  color: var(--fg);
 }
 
-.shelf-close {
+.glance-close {
   appearance: none;
   -webkit-appearance: none;
   padding: 0;
@@ -481,187 +484,129 @@ body.is-shelf .scrim {
   cursor: pointer;
 }
 
-.shelf-close:hover,
-.shelf-close:focus,
-.shelf-close:focus-visible {
+.glance-close:hover,
+.glance-close:focus-visible {
   color: var(--fg);
-  outline: none;
-  box-shadow: none;
+}
+
+.about p {
+  margin: 0 0 1.05em;
+  font-size: clamp(0.98rem, 1.4vw, 1.08rem);
+  line-height: 1.62;
+  color: color-mix(in srgb, var(--fg-dim) 18%, var(--fg));
+}
+
+.about p:last-child {
+  margin-bottom: 0;
+}
+
+.about-practice {
+  margin: 0.15em 0 1.15em;
+}
+
+.about-practice p {
+  margin: 0 0 1.35em;
+}
+
+.about-practice p:last-child {
+  margin-bottom: 0;
 }
 
 .hold {
-  margin: 28vh 0 0;
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: var(--accent);
-}
-
-.contact {
-  margin-top: 1.2rem;
-  max-width: 24rem;
-  padding-bottom: 2.5rem;
-}
-
-.contact-note {
-  margin: 0 0 1.8rem;
-  font-size: 1.12rem;
-  line-height: 1.55;
-  color: color-mix(in srgb, var(--fg-dim) 22%, var(--fg));
-}
-
-.form {
-  position: relative;
-  display: grid;
-  gap: 1.15rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.field span {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--fg-mute);
-}
-
-.field input,
-.field textarea {
-  width: 100%;
-  margin: 0;
-  padding: 0.55rem 0 0.5rem;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--pink) 32%, transparent);
-  border-radius: 0;
-  background: transparent;
-  font: inherit;
-  font-size: 1.02rem;
-  line-height: 1.45;
-  color: var(--fg);
-  outline: none;
-  resize: vertical;
-}
-
-.field textarea {
-  min-height: 8rem;
-}
-
-.field input:hover,
-.field textarea:hover {
-  border-bottom-color: var(--accent);
-}
-
-.field input:focus,
-.field textarea:focus {
-  border-bottom-color: var(--accent);
-}
-
-.field input:-webkit-autofill,
-.field textarea:-webkit-autofill {
-  -webkit-text-fill-color: var(--fg);
-  box-shadow: 0 0 0 1000px var(--ink) inset;
-  caret-color: var(--fg);
-}
-
-.field input::placeholder,
-.field textarea::placeholder {
-  color: var(--fg-mute);
-}
-
-.honey {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
-.form-send {
-  appearance: none;
-  -webkit-appearance: none;
-  width: fit-content;
-  margin-top: 0.35rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
+  margin: 0.15rem 0 0.35rem;
   font-size: 1.05rem;
   font-weight: 500;
-  color: var(--accent);
-  cursor: pointer;
-}
-
-.form-send:hover,
-.form-send:focus,
-.form-send:focus-visible {
-  color: var(--fg);
-  outline: none;
-}
-
-.form-send:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-.form-status {
-  margin: 0.15rem 0 0;
-  font-size: 0.95rem;
   color: var(--fg-dim);
 }
 
-.form-status.is-ok {
+.contact-links {
+  display: grid;
+  gap: 1.15rem;
+  padding: 0.4rem 0 1.1rem;
+}
+
+.contact-links a {
+  display: grid;
+  gap: 0.2rem;
+  width: fit-content;
+}
+
+.contact-kind {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+}
+
+.contact-value {
+  font-size: 1.18rem;
+  font-weight: 500;
   color: var(--accent);
 }
 
-.contact-mail,
-.contact-mail:link,
-.contact-mail:visited {
-  display: inline-block;
-  margin-top: 1.8rem;
-  font-size: 1.02rem;
-  font-weight: 500;
+.contact-links a:hover .contact-value,
+.contact-links a:focus-visible .contact-value {
+  color: var(--fg);
 }
 
-.app {
+.apps {
   display: grid;
-  gap: 1.1rem;
-  padding: 1.5rem 0 1.7rem;
-  border-top: 1px solid color-mix(in srgb, var(--pink) 28%, transparent);
+  gap: 0.85rem;
+  padding-bottom: 0.4rem;
+  perspective: 1100px;
 }
 
-.app:last-child {
-  border-bottom: 1px solid color-mix(in srgb, var(--pink) 28%, transparent);
+.app-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.15rem 1.2rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--paper) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--paper) 11%, transparent);
+  transform: perspective(920px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .app-card {
+    transition: transform 380ms var(--ease);
+  }
+
+  .app-card:hover {
+    transition: transform 70ms linear;
+  }
 }
 
 .app-mark {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
 .app-mark-hilo {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
 }
 
-.app-copy h2 {
+.app-copy h3 {
   margin: 0;
-  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-size: clamp(1.7rem, 4.2vw, 2.15rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 0.92;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
 }
 
 .app-slogan {
-  margin: 0.55rem 0 0;
-  font-size: clamp(1.08rem, 2vw, 1.28rem);
+  margin: 0.4rem 0 0;
+  font-size: 1.05rem;
   color: var(--fg);
 }
 
 .app-note {
-  margin: 0.7rem 0 0;
-  font-size: 1.02rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.98rem;
   line-height: 1.55;
   color: var(--fg-dim);
 }
@@ -670,68 +615,55 @@ body.is-shelf .scrim {
 .app-copy a:link,
 .app-copy a:visited {
   display: inline-block;
-  margin-top: 1rem;
+  margin-top: 0.85rem;
   font-weight: 500;
 }
 
-.app-copy a:hover,
-.app-copy a:focus-visible {
-  color: var(--fg);
-}
-
 @media (min-width: 640px) {
-  .app {
-    grid-template-columns: 88px minmax(0, 1fr);
-    gap: 1.4rem 1.6rem;
+  .app-card {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 1.15rem 1.25rem;
     align-items: start;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .scrim {
-    transition: opacity 420ms ease;
+    transition: opacity 280ms ease;
   }
 
-  .shelf {
-    transition: transform 620ms var(--ease);
-  }
-
-  .shelf.is-on .app,
-  .shelf.is-on .hold,
-  .shelf.is-on .contact {
-    animation: rise 700ms var(--ease) both;
-  }
-
-  .shelf.is-on .app:nth-child(2) {
-    animation-delay: 70ms;
-  }
-
-  .shelf.is-on .app:nth-child(3) {
-    animation-delay: 130ms;
-  }
-
-  .shelf.is-on .app:nth-child(4) {
-    animation-delay: 190ms;
+  .glance {
+    transition:
+      opacity 320ms var(--ease),
+      transform 320ms var(--ease),
+      visibility 320ms var(--ease);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home,
-  .letter,
-  [data-enter],
-  .letter p[data-enter] .word,
-  .shelf.is-on .app,
-  .shelf.is-on .hold,
-  .shelf.is-on .contact {
-    opacity: 1;
+  .hero-stage,
+  .wordmark,
+  .controls,
+  .glance,
+  .app-card {
     animation: none;
     filter: none;
     transform: none;
   }
 
-  html.is-pending .wordmark {
+  html.is-pending .wordmark,
+  html.is-pending .controls {
     opacity: 1;
     animation: none;
+  }
+
+  .hero-stage {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .glance.is-on {
+    transform: translate(-50%, -50%) !important;
   }
 
   .wash-track,
@@ -744,7 +676,6 @@ body.is-shelf .scrim {
     /* static frame via main.ts (no RAF) */
   }
 
-
   .cursor {
     display: none !important;
   }
@@ -755,7 +686,8 @@ body.is-shelf .scrim {
   }
 
   .scrim,
-  .shelf {
+  .glance,
+  .app-card {
     transition: none;
   }
 }

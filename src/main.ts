@@ -5,21 +5,28 @@ const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)')
 const fineMq = window.matchMedia('(pointer: fine)')
 const hoverMq = window.matchMedia('(hover: hover)')
 
-type ShelfId = 'apps' | 'work' | 'contact'
+type GlanceId = 'about' | 'apps' | 'web' | 'contact'
+
+const titles: Record<GlanceId, string> = {
+  about: 'About Acidity',
+  apps: 'Apps',
+  web: 'Web works',
+  contact: 'Contact',
+}
 
 const home = document.getElementById('main')
-const scrim = document.querySelector<HTMLElement>('.scrim')
-const shelves = [...document.querySelectorAll<HTMLElement>('[data-shelf]')]
-const openers = [...document.querySelectorAll<HTMLAnchorElement>('[data-open]')]
+const glance = document.querySelector<HTMLElement>('#glance')
+const glanceTitle = document.querySelector<HTMLElement>('#glance-title')
+const panes = [...document.querySelectorAll<HTMLElement>('[data-pane]')]
+const openers = [...document.querySelectorAll<HTMLButtonElement>('[data-open]')]
 const closers = [...document.querySelectorAll('[data-close]')]
-const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
 const mark = document.querySelector<HTMLElement>('[data-mark]')
 const cursor = document.querySelector<HTMLElement>('.cursor')
 const auroraCanvas = document.querySelector<HTMLCanvasElement>('[data-aurora-canvas]')
 let auroraSync: (() => void) | null = null
 
 let lastFocus: HTMLElement | null = null
-let openId: ShelfId | null = null
+let openId: GlanceId | null = null
 let raf = 0
 let parX = 0
 let parY = 0
@@ -234,8 +241,6 @@ void main(){
   sync()
 }
 
-
-
 function readyType() {
   root.classList.remove('is-pending')
   root.classList.add('is-ready')
@@ -261,88 +266,55 @@ async function waitForAnurati() {
   paint()
 }
 
-function isShelfId(value: string): value is ShelfId {
-  return value === 'apps' || value === 'work' || value === 'contact'
+function isGlanceId(value: string): value is GlanceId {
+  return value === 'about' || value === 'apps' || value === 'web' || value === 'contact'
 }
 
-function shelfFromPath(): ShelfId | null {
-  const path = window.location.pathname.replace(/\/+$/, '') || '/'
-  if (path === '/apps') return 'apps'
-  if (path === '/work') return 'work'
-  if (path === '/contact') return 'contact'
-  return null
-}
-
-function titleFor(id: ShelfId | null) {
-  if (id === 'apps') return 'Apps — Acidity'
-  if (id === 'work') return 'Work — Acidity'
-  if (id === 'contact') return 'Contact — Acidity'
-  return 'Acidity'
-}
-
-function setShelf(id: ShelfId | null, push = false) {
+function setGlance(id: GlanceId | null) {
   const was = openId
   openId = id
-  document.body.classList.toggle('is-shelf', id !== null)
-  if (scrim) scrim.hidden = id === null
+  document.body.classList.toggle('is-glance', id !== null)
   if (home) home.inert = id !== null
 
-  shelves.forEach((el) => {
-    const on = el.dataset.shelf === id
-    el.classList.toggle('is-on', on)
-    el.setAttribute('aria-hidden', String(!on))
-  })
-  openers.forEach((a) => {
-    a.setAttribute('aria-expanded', String(a.dataset.open === id))
-  })
+  if (glance) {
+    glance.classList.toggle('is-on', id !== null)
+    glance.setAttribute('aria-hidden', String(id === null))
+    glance.inert = id === null
+  }
 
-  document.title = titleFor(id)
+  panes.forEach((el) => {
+    const on = el.dataset.pane === id
+    el.hidden = !on
+  })
+  openers.forEach((btn) => {
+    btn.setAttribute('aria-expanded', String(btn.dataset.open === id))
+  })
+  if (glanceTitle) glanceTitle.textContent = id ? titles[id] : ''
 
   if (id) {
     if (!was) {
       lastFocus =
         document.activeElement instanceof HTMLElement ? document.activeElement : openers[0] ?? null
     }
-    const panel = shelves.find((el) => el.dataset.shelf === id)
-    panel?.focus({ preventScroll: true })
-    if (push) {
-      const href = `/${id}`
-      if (window.location.pathname.replace(/\/+$/, '') !== href) {
-        history.pushState({ shelf: id }, '', href)
-      }
-    }
+    const body = glance?.querySelector<HTMLElement>('.glance-body')
+    if (body) body.scrollTop = 0
+    glance?.focus({ preventScroll: true })
   } else {
     lastFocus?.focus()
     lastFocus = null
-    if (push && shelfFromPath()) history.pushState({ shelf: null }, '', '/')
   }
   requestPaint()
-}
-
-function progress() {
-  const h = window.innerHeight || 1
-  return Math.min(1, Math.max(0, window.scrollY / (h * 0.92)))
-}
-
-function easeOut(t: number) {
-  return 1 - (1 - t) ** 2
 }
 
 function paint() {
   raf = 0
   parX += (parTX - parX) * 0.08
   parY += (parTY - parY) * 0.08
-  const e = easeOut(progress())
-  const scale = 1 - e * 0.78
-  const lift = e * window.innerHeight * -0.47
   const live = !openId && !reduced() && fineMq.matches
-  const px = live ? parX * -11 * (1 - e * 0.65) : 0
-  const py = live ? parY * -8 * (1 - e * 0.65) : 0
-  if (mark) {
-    mark.style.transform = `translate(-50%, -50%) translate3d(${px.toFixed(1)}px, ${(lift + py).toFixed(1)}px, 0) scale(${scale.toFixed(4)})`
-  }
-  if (wash && !reduced()) {
-    wash.style.transform = `translate3d(0, ${(window.scrollY * 0.16).toFixed(1)}px, 0)`
+  const px = live ? parX * -11 : 0
+  const py = live ? parY * -8 : 0
+  if (mark && !reduced()) {
+    mark.style.transform = `translate(-50%, -50%) translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0)`
   }
   if (Math.abs(parTX - parX) > 0.001 || Math.abs(parTY - parY) > 0.001) {
     raf = requestAnimationFrame(paint)
@@ -353,67 +325,45 @@ function requestPaint() {
   if (!raf) raf = requestAnimationFrame(paint)
 }
 
-function prepareWords() {
-  if (reduced()) return
-  document.querySelectorAll<HTMLElement>('.letter p[data-enter]').forEach((p) => {
-    const raw = p.textContent ?? ''
-    p.textContent = ''
-    let i = 0
-    raw.split(/(\s+)/).forEach((chunk) => {
-      if (!chunk) return
-      if (/^\s+$/.test(chunk)) {
-        p.append(chunk)
-        return
-      }
-      const span = document.createElement('span')
-      span.className = 'word'
-      span.textContent = chunk
-      span.style.setProperty('--i', String(i))
-      i += 1
-      p.append(span)
+function wireTilt() {
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-tilt]')]
+  cards.forEach((card) => {
+    const reset = () => {
+      card.style.setProperty('--tilt-x', '0deg')
+      card.style.setProperty('--tilt-y', '0deg')
+    }
+    card.addEventListener('pointermove', (e) => {
+      if (reduced() || e.pointerType === 'touch' || !fineMq.matches) return
+      const r = card.getBoundingClientRect()
+      if (!r.width || !r.height) return
+      const px = (e.clientX - r.left) / r.width
+      const py = (e.clientY - r.top) / r.height
+      const rx = (0.5 - py) * 8
+      const ry = (px - 0.5) * 10
+      card.style.setProperty('--tilt-x', `${rx.toFixed(2)}deg`)
+      card.style.setProperty('--tilt-y', `${ry.toFixed(2)}deg`)
     })
+    card.addEventListener('pointerleave', reset)
+    card.addEventListener('pointercancel', reset)
   })
 }
 
-function watchEnter() {
-  const nodes = [...document.querySelectorAll<HTMLElement>('[data-enter]')]
-  if (reduced()) {
-    nodes.forEach((el) => el.classList.add('is-in'))
-    return
-  }
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue
-        entry.target.classList.add('is-in')
-        io.unobserve(entry.target)
-      }
-    },
-    { threshold: 0.18, rootMargin: '0px 0px -8% 0px' },
-  )
-  nodes.forEach((el) => io.observe(el))
-}
-
-openers.forEach((a) => {
-  a.addEventListener('click', (e) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
-      return
-    }
-    const id = a.dataset.open
-    if (!id || !isShelfId(id)) return
-    e.preventDefault()
-    setShelf(id, true)
+openers.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.open
+    if (!id || !isGlanceId(id)) return
+    setGlance(openId === id ? null : id)
   })
 })
 
 closers.forEach((el) => {
-  el.addEventListener('click', () => setShelf(null, true))
+  el.addEventListener('click', () => setGlance(null))
 })
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && openId) {
     e.preventDefault()
-    setShelf(null, true)
+    setGlance(null)
   }
 })
 
@@ -440,8 +390,6 @@ function setCursorMode() {
   }
 }
 
-window.addEventListener('popstate', () => setShelf(shelfFromPath()))
-window.addEventListener('scroll', requestPaint, { passive: true })
 window.addEventListener(
   'pointermove',
   (e) => {
@@ -480,8 +428,11 @@ reduceMq.addEventListener('change', () => {
   setCursorMode()
   auroraSync?.()
   if (reduced()) {
-    if (wash) wash.style.transform = 'none'
-    document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
+    if (mark) mark.style.transform = 'translate(-50%, -50%)'
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
+      card.style.setProperty('--tilt-x', '0deg')
+      card.style.setProperty('--tilt-y', '0deg')
+    })
     readyType()
   }
   requestPaint()
@@ -489,64 +440,10 @@ reduceMq.addEventListener('change', () => {
 fineMq.addEventListener('change', setCursorMode)
 hoverMq.addEventListener('change', setCursorMode)
 
-function wireForm() {
-  const form = document.querySelector<HTMLFormElement>('[data-contact-form]')
-  const status = document.querySelector<HTMLElement>('[data-form-status]')
-  if (!form || !status) return
-
-  const send = form.querySelector<HTMLButtonElement>('.form-send')
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const data = new FormData(form)
-    if (String(data.get('_honey') ?? '')) return
-    const name = String(data.get('name') ?? '').trim()
-    const email = String(data.get('email') ?? '').trim()
-    const message = String(data.get('message') ?? '').trim()
-    if (!name || !email || !message) {
-      status.hidden = false
-      status.classList.remove('is-ok')
-      status.textContent = 'Name, email, and a message.'
-      return
-    }
-    if (send) send.disabled = true
-    status.hidden = false
-    status.classList.remove('is-ok')
-    status.textContent = 'Sending…'
-    try {
-      const res = await fetch('https://formsubmit.co/ajax/hello@acidity.lol', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          message,
-          _subject: 'Acidity.lol',
-          _template: 'table',
-          _captcha: false,
-        }),
-      })
-      if (!res.ok) throw new Error('send failed')
-      form.reset()
-      status.classList.add('is-ok')
-      status.textContent = 'Sent. I’ll read it.'
-    } catch {
-      status.classList.remove('is-ok')
-      status.textContent = 'Didn’t go through. Use hello@acidity.lol.'
-    } finally {
-      if (send) send.disabled = false
-    }
-  })
-}
+if (glance) glance.inert = true
 
 setCursorMode()
 startAurora()
-setShelf(shelfFromPath())
-prepareWords()
-watchEnter()
-wireForm()
+wireTilt()
 waitForAnurati()
 requestPaint()
