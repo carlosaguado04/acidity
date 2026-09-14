@@ -87,7 +87,7 @@ float fbm(vec2 p){
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res;
   uv.x *= u_res.x / u_res.y;
-  float t = u_t * 0.085;
+  float t = u_t * 0.125;
   // traveling liquid field — visible from across the room
   vec2 p = uv * 2.4 + vec2(t * 0.55, -t * 0.32);
   float n = fbm(p);
