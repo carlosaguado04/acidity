@@ -254,12 +254,12 @@ html.has-cursor * {
 .home {
   position: relative;
   z-index: 1;
-  height: 100%;
+  min-height: 132svh;
 }
 
 .hero {
+  min-height: 100svh;
   height: 100svh;
-  overflow: hidden;
 }
 
 .hero-stage {
@@ -290,6 +290,7 @@ html.has-cursor * {
   color: var(--fg);
   text-transform: uppercase;
   pointer-events: none;
+  transition: opacity 320ms var(--ease), transform 320ms var(--ease);
 }
 
 .controls {
@@ -299,6 +300,14 @@ html.has-cursor * {
   align-items: baseline;
   gap: 0.15rem 0.1rem;
   margin-top: clamp(1.15rem, 2.8vh, 1.85rem);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+}
+
+html.is-ready body.is-controls .controls {
+  opacity: 1;
+  transform: none;
   pointer-events: auto;
 }
 
@@ -334,10 +343,13 @@ html.has-cursor * {
   padding: 0 0.12rem;
 }
 
+/* Wordmark + controls leave in the same beat as the panel enters */
+html.is-ready body.is-glance .wordmark,
 html.is-ready body.is-glance .controls {
-  opacity: 0;
+  opacity: 0 !important;
   pointer-events: none;
   animation: none;
+  transform: translate3d(0, -6px, 0);
 }
 
 html.is-pending .wordmark,
@@ -350,13 +362,10 @@ html.is-pending .controls {
     animation: fade-in 1.05s var(--ease) both;
   }
 
-  html.is-ready .controls {
-    animation: fade-in 1.05s var(--ease) both;
-    animation-delay: 140ms;
-  }
-
   .controls {
-    transition: opacity 220ms var(--ease);
+    transition:
+      opacity 420ms var(--ease),
+      transform 420ms var(--ease);
   }
 }
 
@@ -388,10 +397,11 @@ html.is-pending .controls {
   z-index: 20;
   border: 0;
   padding: 0;
-  background: color-mix(in srgb, var(--ink) 32%, transparent);
+  background: color-mix(in srgb, var(--ink) 58%, transparent);
   opacity: 0;
   pointer-events: none;
   cursor: pointer;
+  transition: opacity 320ms var(--ease);
 }
 
 body.is-glance .scrim {
@@ -404,21 +414,30 @@ body.is-glance .scrim {
   left: 50%;
   top: 50%;
   z-index: 30;
-  width: min(42rem, calc(100vw - 2 * var(--space)));
-  max-height: min(82svh, 52rem);
-  border-radius: 1.35rem;
-  transform: translate(-50%, calc(-50% + 12px));
+  width: min(72rem, calc(100vw - 1.35 * var(--space)));
+  height: calc(100svh - 1.35 * var(--space));
+  max-height: none;
+  border-radius: 1.5rem;
+  transform: translate(-50%, calc(-50% + 18px)) scale(0.985);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition:
+    opacity 320ms var(--ease),
+    transform 320ms var(--ease),
+    visibility 0s linear 320ms;
 }
 
 .glance.is-on {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 28px 80px color-mix(in srgb, var(--ink) 42%, transparent);
+  transform: translate(-50%, -50%) scale(1);
+  transition:
+    opacity 320ms var(--ease),
+    transform 320ms var(--ease),
+    visibility 0s linear 0s;
+  box-shadow: 0 40px 120px color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .glance:focus,
@@ -431,27 +450,28 @@ body.is-glance .scrim {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  border-radius: 1.35rem;
+  border-radius: 1.5rem;
   background:
     linear-gradient(
       165deg,
-      color-mix(in srgb, var(--paper) 11%, transparent),
-      color-mix(in srgb, var(--ink) 22%, transparent) 55%,
-      color-mix(in srgb, var(--paper) 6%, transparent)
+      color-mix(in srgb, var(--ink) 72%, transparent),
+      color-mix(in srgb, var(--ink) 84%, transparent) 55%,
+      color-mix(in srgb, var(--ink) 78%, transparent)
     );
-  border: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
-  backdrop-filter: blur(36px) saturate(1.45);
-  -webkit-backdrop-filter: blur(36px) saturate(1.45);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--paper) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+  backdrop-filter: blur(48px) saturate(1.25);
+  -webkit-backdrop-filter: blur(48px) saturate(1.25);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--paper) 14%, transparent);
 }
 
 .glance-body {
   position: relative;
   z-index: 1;
-  max-height: min(82svh, 52rem);
+  height: 100%;
+  max-height: none;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 1.25rem clamp(1.2rem, 3.6vw, 1.85rem) 1.7rem;
+  padding: 1.35rem clamp(1.35rem, 4vw, 2.4rem) 2rem;
 }
 
 .glance-bar {
@@ -645,7 +665,6 @@ body.is-glance .scrim {
   .hero-stage,
   .wordmark,
   .controls,
-  .glance,
   .app-card {
     animation: none;
     filter: none;
@@ -659,6 +678,13 @@ body.is-glance .scrim {
   }
 
   .hero-stage {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .glance {
+    animation: none;
+    filter: none;
+    transition: none;
     transform: translate(-50%, -50%) !important;
   }
 

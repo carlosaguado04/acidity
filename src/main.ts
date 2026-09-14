@@ -274,6 +274,7 @@ function setGlance(id: GlanceId | null) {
   const was = openId
   openId = id
   document.body.classList.toggle('is-glance', id !== null)
+  document.body.style.overflow = id ? 'hidden' : ''
   if (home) home.inert = id !== null
 
   if (glance) {
@@ -324,6 +325,19 @@ function paint() {
 function requestPaint() {
   if (!raf) raf = requestAnimationFrame(paint)
 }
+
+function syncControlsReveal() {
+  // Tiny scroll: land on wordmark only; short scroll reveals the four controls.
+  // Reduced motion: show controls without requiring scroll.
+  if (reduced()) {
+    document.body.classList.add('is-controls')
+    return
+  }
+  const y = window.scrollY
+  const threshold = Math.max(48, window.innerHeight * 0.12)
+  document.body.classList.toggle('is-controls', y >= threshold)
+}
+
 
 function wireTilt() {
   const cards = [...document.querySelectorAll<HTMLElement>('[data-tilt]')]
@@ -390,6 +404,9 @@ function setCursorMode() {
   }
 }
 
+window.addEventListener('scroll', syncControlsReveal, { passive: true })
+window.addEventListener('resize', syncControlsReveal, { passive: true })
+
 window.addEventListener(
   'pointermove',
   (e) => {
@@ -445,5 +462,6 @@ if (glance) glance.inert = true
 setCursorMode()
 startAurora()
 wireTilt()
+syncControlsReveal()
 waitForAnurati()
 requestPaint()
