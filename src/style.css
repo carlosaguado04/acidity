@@ -174,12 +174,23 @@ html.has-cursor * {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  opacity: 0.38;
+  filter: blur(10px) saturate(0.92);
+  transform: scale(1.06);
+  transform-origin: center;
 }
 
 .stage-video-veil {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--ink) 58%, transparent);
+  background:
+    radial-gradient(
+      ellipse 78% 68% at 50% 42%,
+      color-mix(in srgb, var(--ink) 42%, transparent),
+      color-mix(in srgb, var(--ink) 82%, transparent) 72%,
+      color-mix(in srgb, var(--ink) 92%, transparent)
+    ),
+    color-mix(in srgb, var(--ink) 72%, transparent);
 }
 
 /* Soft pink blooms — CSS drift + scroll track, no cursor follow */
