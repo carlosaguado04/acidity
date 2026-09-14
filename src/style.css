@@ -61,10 +61,14 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
   height: 100%;
-  overflow: hidden;
+}
+
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  /* Document scrolls — smoke/aurora stay position:fixed */
 }
 
 body {
