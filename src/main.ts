@@ -69,6 +69,7 @@ void main(){ gl_Position = vec4(a,0.0,1.0); }
 precision mediump float;
 uniform vec2 u_res;
 uniform float u_t;
+
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
 float noise(vec2 p){
   vec2 i = floor(p); vec2 f = fract(p);
@@ -81,27 +82,46 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
   float v = 0.0; float a = 0.5;
-  for(int i=0;i<3;i++){ v += a*noise(p); p = p*2.02 + vec2(1.7,9.2); a *= 0.5; }
+  for(int i=0;i<3;i++){ v += a*noise(p); p *= 2.03; a *= 0.5; }
   return v;
+}
+vec2 curl(vec2 p){
+  float e = 0.12;
+  float n1 = fbm(p + vec2(0.0, e));
+  float n2 = fbm(p - vec2(0.0, e));
+  float n3 = fbm(p + vec2(e, 0.0));
+  float n4 = fbm(p - vec2(e, 0.0));
+  return vec2((n1 - n2) / (2.0 * e), (n4 - n3) / (2.0 * e));
 }
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res;
-  uv.x *= u_res.x / u_res.y;
-  float t = u_t * 0.125;
-  // traveling liquid field — visible from across the room
-  vec2 p = uv * 2.1 + vec2(t * 0.55, -t * 0.32);
-  float n = fbm(p);
-  float m = fbm(p * 1.35 + vec2(-t * 0.4, t * 0.55));
-  float field = smoothstep(0.28, 0.78, n * 0.65 + m * 0.55);
-  // soft ribbon / pool bias like the clip path
-  float ribbon = smoothstep(0.15, 0.85, 1.0 - abs(uv.y - (0.55 + 0.28 * sin(t * 0.7 + uv.x * 1.8))));
-  float glow = field * (0.55 + 0.45 * ribbon);
-  glow = pow(glow, 0.92);
+  float aspect = u_res.x / max(u_res.y, 1.0);
+  vec2 p = vec2(uv.x * aspect, uv.y);
+  float t = u_t;
+
+  // Strong advection so the field actually travels
+  vec2 flow = vec2(t * 0.42, -t * 0.28);
+  // Curl warps the domain — smoke filaments instead of a soft blot
+  vec2 q = p * 2.35 + flow;
+  vec2 c1 = curl(q * 0.85 + vec2(t * 0.15, -t * 0.11));
+  q += c1 * 0.55;
+  vec2 c2 = curl(q * 1.4 - vec2(t * 0.22, t * 0.18));
+  q += c2 * 0.32;
+
+  float n = fbm(q);
+  float m = fbm(q * 1.55 + vec2(2.7, -1.3) + flow * 0.6);
+  float field = smoothstep(0.22, 0.82, n * 0.58 + m * 0.52);
+
+  // Rising plume bias (smoke lifts + drifts)
+  float plume = smoothstep(0.05, 0.95, uv.y + 0.18 * sin(uv.x * 3.2 + t * 0.9));
+  float filament = smoothstep(0.35, 0.9, abs(c1.x) + abs(c1.y));
+  float glow = field * (0.45 + 0.35 * plume + 0.28 * filament);
+  glow = pow(clamp(glow, 0.0, 1.0), 0.88);
+
   vec3 ink = vec3(0.047, 0.051, 0.063);
   vec3 pink = vec3(0.894, 0.0, 0.486);
-  vec3 col = mix(ink, pink, glow * 0.92);
-  // slight hot core
-  col = mix(col, pink, glow * glow * 0.35);
+  vec3 col = mix(ink, pink, glow * 0.95);
+  col = mix(col, pink, glow * glow * 0.4);
   gl_FragColor = vec4(col, 1.0);
 }
 `
