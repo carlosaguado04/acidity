@@ -157,8 +157,8 @@ html.has-cursor * {
 }
 
 
-/* Full-bleed muted video stage */
-.stage-video {
+/* Soft Mexican-pink aurora — CSS only, seamless ping-pong */
+.stage-aurora {
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -167,30 +167,101 @@ html.has-cursor * {
   background: var(--ink);
 }
 
-.stage-video-media {
+.aurora {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.38;
-  filter: blur(10px) saturate(0.92);
-  transform: scale(1.06);
-  transform-origin: center;
+  border-radius: 50%;
+  filter: blur(120px);
+  will-change: transform;
+  opacity: 0.55;
 }
 
-.stage-video-veil {
+.aurora-a {
+  width: 72vmax;
+  height: 72vmax;
+  left: -18%;
+  top: 8%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    color-mix(in srgb, var(--pink) 55%, transparent),
+    transparent 68%
+  );
+}
+
+.aurora-b {
+  width: 64vmax;
+  height: 64vmax;
+  right: -22%;
+  bottom: -8%;
+  background: radial-gradient(
+    circle at 55% 45%,
+    color-mix(in srgb, var(--pink) 42%, transparent),
+    transparent 70%
+  );
+  opacity: 0.42;
+}
+
+.aurora-c {
+  width: 48vmax;
+  height: 48vmax;
+  left: 28%;
+  top: 42%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--pink) 28%, transparent),
+    transparent 72%
+  );
+  opacity: 0.34;
+}
+
+.aurora-veil {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(
-      ellipse 78% 68% at 50% 42%,
-      color-mix(in srgb, var(--ink) 42%, transparent),
-      color-mix(in srgb, var(--ink) 82%, transparent) 72%,
-      color-mix(in srgb, var(--ink) 92%, transparent)
-    ),
-    color-mix(in srgb, var(--ink) 72%, transparent);
+      ellipse 80% 70% at 50% 40%,
+      color-mix(in srgb, var(--ink) 28%, transparent),
+      color-mix(in srgb, var(--ink) 78%, transparent) 75%,
+      color-mix(in srgb, var(--ink) 90%, transparent)
+    );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aurora-a {
+    animation: aurora-a 32s ease-in-out infinite alternate;
+  }
+  .aurora-b {
+    animation: aurora-b 40s ease-in-out infinite alternate;
+  }
+  .aurora-c {
+    animation: aurora-c 26s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes aurora-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  to {
+    transform: translate3d(12%, -8%, 0) scale(1.18) rotate(12deg);
+  }
+}
+
+@keyframes aurora-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05) rotate(0deg);
+  }
+  to {
+    transform: translate3d(-14%, 10%, 0) scale(1.22) rotate(-10deg);
+  }
+}
+
+@keyframes aurora-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  to {
+    transform: translate3d(8%, 6%, 0) scale(1.2);
+  }
 }
 
 /* Soft pink blooms — CSS drift + scroll track, no cursor follow */
@@ -743,10 +814,11 @@ body.is-shelf .scrim {
     animation: none !important;
   }
 
-  /* Video stays as a still first frame (JS pauses); no looping motion */
-  .stage-video-media {
-    /* keep visible — paused by main.ts */
+  .aurora {
+    animation: none !important;
+    transform: none !important;
   }
+
 
   .cursor {
     display: none !important;
