@@ -326,16 +326,15 @@ function requestPaint() {
   if (!raf) raf = requestAnimationFrame(paint)
 }
 
-function syncControlsReveal() {
-  // Tiny scroll: land on wordmark only; short scroll reveals the four controls.
-  // Reduced motion: show controls without requiring scroll.
+function revealControls() {
+  // Option 1: wordmark lands, then the four rise under Acidity. No document scroll.
   if (reduced()) {
     document.body.classList.add('is-controls')
     return
   }
-  const y = window.scrollY
-  const threshold = Math.max(28, window.innerHeight * 0.06)
-  document.body.classList.toggle('is-controls', y >= threshold)
+  window.setTimeout(() => {
+    document.body.classList.add('is-controls')
+  }, 980)
 }
 
 
@@ -404,9 +403,6 @@ function setCursorMode() {
   }
 }
 
-window.addEventListener('scroll', syncControlsReveal, { passive: true })
-window.addEventListener('resize', syncControlsReveal, { passive: true })
-
 window.addEventListener(
   'pointermove',
   (e) => {
@@ -462,6 +458,6 @@ if (glance) glance.inert = true
 setCursorMode()
 startAurora()
 wireTilt()
-syncControlsReveal()
+revealControls()
 waitForAnurati()
 requestPaint()
