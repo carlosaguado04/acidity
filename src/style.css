@@ -254,12 +254,19 @@ html.has-cursor * {
 .home {
   position: relative;
   z-index: 1;
-  min-height: 132svh;
+  min-height: 100svh;
 }
 
 .hero {
+  position: relative;
   min-height: 100svh;
   height: 100svh;
+}
+
+/* Short scroll room under the hero so the four can rise into place */
+.hero-scroll {
+  height: 55svh;
+  pointer-events: none;
 }
 
 .hero-stage {
@@ -302,12 +309,13 @@ html.has-cursor * {
   margin-top: clamp(1.15rem, 2.8vh, 1.85rem);
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(0, 14px, 0);
+  /* Parked below the stage; rises under Acidity on scroll */
+  transform: translate3d(0, 42vh, 0);
 }
 
 html.is-ready body.is-controls .controls {
   opacity: 1;
-  transform: none;
+  transform: translate3d(0, 0, 0);
   pointer-events: auto;
 }
 

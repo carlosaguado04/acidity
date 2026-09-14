@@ -334,7 +334,7 @@ function syncControlsReveal() {
     return
   }
   const y = window.scrollY
-  const threshold = Math.max(48, window.innerHeight * 0.12)
+  const threshold = Math.max(28, window.innerHeight * 0.06)
   document.body.classList.toggle('is-controls', y >= threshold)
 }
 
