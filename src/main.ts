@@ -81,7 +81,7 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
   float v = 0.0; float a = 0.5;
-  for(int i=0;i<5;i++){ v += a*noise(p); p = p*2.02 + vec2(1.7,9.2); a *= 0.5; }
+  for(int i=0;i<3;i++){ v += a*noise(p); p = p*2.02 + vec2(1.7,9.2); a *= 0.5; }
   return v;
 }
 void main(){
@@ -89,7 +89,7 @@ void main(){
   uv.x *= u_res.x / u_res.y;
   float t = u_t * 0.125;
   // traveling liquid field — visible from across the room
-  vec2 p = uv * 2.4 + vec2(t * 0.55, -t * 0.32);
+  vec2 p = uv * 2.1 + vec2(t * 0.55, -t * 0.32);
   float n = fbm(p);
   float m = fbm(p * 1.35 + vec2(-t * 0.4, t * 0.55));
   float field = smoothstep(0.28, 0.78, n * 0.65 + m * 0.55);
@@ -134,6 +134,9 @@ void main(){
     return
   }
   g.useProgram(prog)
+  g.disable(g.DEPTH_TEST)
+  g.disable(g.BLEND)
+  g.disable(g.DITHER)
 
   const buf = g.createBuffer()
   g.bindBuffer(g.ARRAY_BUFFER, buf)
@@ -150,9 +153,10 @@ void main(){
   let running = false
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.75)
-    const w = Math.max(1, Math.floor(window.innerWidth * dpr))
-    const h = Math.max(1, Math.floor(window.innerHeight * dpr))
+    // Internal low-res buffer; CSS stretches the canvas for smooth fill.
+    const scale = 0.5
+    const w = Math.max(1, Math.floor(window.innerWidth * scale))
+    const h = Math.max(1, Math.floor(window.innerHeight * scale))
     if (auroraCanvas!.width !== w || auroraCanvas!.height !== h) {
       auroraCanvas!.width = w
       auroraCanvas!.height = h
@@ -169,6 +173,8 @@ void main(){
     g.drawArrays(g.TRIANGLE_STRIP, 0, 4)
     raf = requestAnimationFrame(frame)
   }
+
+  // Prefer vsync clock; never invent a setInterval fallback.
 
   function stop() {
     running = false
