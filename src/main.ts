@@ -15,6 +15,8 @@ const closers = [...document.querySelectorAll('[data-close]')]
 const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
 const mark = document.querySelector<HTMLElement>('[data-mark]')
 const cursor = document.querySelector<HTMLElement>('.cursor')
+const auroraCanvas = document.querySelector<HTMLCanvasElement>('[data-aurora-canvas]')
+let auroraSync: (() => void) | null = null
 
 let lastFocus: HTMLElement | null = null
 let openId: ShelfId | null = null
@@ -35,6 +37,177 @@ let cursorHot = false
 function reduced() {
   return reduceMq.matches
 }
+
+/** Visible Mexican-pink noise wash (tiny WebGL). Seamless; no particles. */
+function startAurora() {
+  if (!auroraCanvas) return
+  const gl =
+    auroraCanvas.getContext('webgl', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      powerPreference: 'low-power',
+    }) ||
+    (auroraCanvas.getContext('experimental-webgl', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+    }) as WebGLRenderingContext | null)
+  if (!gl) {
+    auroraCanvas.style.display = 'none'
+    return
+  }
+  const g = gl
+
+  const vs = `
+attribute vec2 a;
+void main(){ gl_Position = vec4(a,0.0,1.0); }
+`
+  const fs = `
+precision mediump float;
+uniform vec2 u_res;
+uniform float u_t;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+float noise(vec2 p){
+  vec2 i = floor(p); vec2 f = fract(p);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0,0.0));
+  float c = hash(i + vec2(0.0,1.0));
+  float d = hash(i + vec2(1.0,1.0));
+  vec2 u = f*f*(3.0-2.0*f);
+  return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v = 0.0; float a = 0.5;
+  for(int i=0;i<5;i++){ v += a*noise(p); p = p*2.02 + vec2(1.7,9.2); a *= 0.5; }
+  return v;
+}
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_res;
+  uv.x *= u_res.x / u_res.y;
+  float t = u_t * 0.085;
+  // traveling liquid field — visible from across the room
+  vec2 p = uv * 2.4 + vec2(t * 0.55, -t * 0.32);
+  float n = fbm(p);
+  float m = fbm(p * 1.35 + vec2(-t * 0.4, t * 0.55));
+  float field = smoothstep(0.28, 0.78, n * 0.65 + m * 0.55);
+  // soft ribbon / pool bias like the clip path
+  float ribbon = smoothstep(0.15, 0.85, 1.0 - abs(uv.y - (0.55 + 0.28 * sin(t * 0.7 + uv.x * 1.8))));
+  float glow = field * (0.55 + 0.45 * ribbon);
+  glow = pow(glow, 0.92);
+  vec3 ink = vec3(0.047, 0.051, 0.063);
+  vec3 pink = vec3(0.894, 0.0, 0.486);
+  vec3 col = mix(ink, pink, glow * 0.92);
+  // slight hot core
+  col = mix(col, pink, glow * glow * 0.35);
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
+  function compile(type: number, src: string) {
+    const s = g.createShader(type)
+    if (!s) return null
+    g.shaderSource(s, src)
+    g.compileShader(s)
+    if (!g.getShaderParameter(s, g.COMPILE_STATUS)) {
+      g.deleteShader(s)
+      return null
+    }
+    return s
+  }
+
+  const vsh = compile(g.VERTEX_SHADER, vs)
+  const fsh = compile(g.FRAGMENT_SHADER, fs)
+  if (!vsh || !fsh) {
+    auroraCanvas.style.display = 'none'
+    return
+  }
+  const prog = g.createProgram()
+  if (!prog) return
+  g.attachShader(prog, vsh)
+  g.attachShader(prog, fsh)
+  g.linkProgram(prog)
+  if (!g.getProgramParameter(prog, g.LINK_STATUS)) {
+    auroraCanvas.style.display = 'none'
+    return
+  }
+  g.useProgram(prog)
+
+  const buf = g.createBuffer()
+  g.bindBuffer(g.ARRAY_BUFFER, buf)
+  g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), g.STATIC_DRAW)
+  const loc = g.getAttribLocation(prog, 'a')
+  g.enableVertexAttribArray(loc)
+  g.vertexAttribPointer(loc, 2, g.FLOAT, false, 0, 0)
+
+  const uRes = g.getUniformLocation(prog, 'u_res')
+  const uT = g.getUniformLocation(prog, 'u_t')
+
+  let raf = 0
+  let start = performance.now()
+  let running = false
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.75)
+    const w = Math.max(1, Math.floor(window.innerWidth * dpr))
+    const h = Math.max(1, Math.floor(window.innerHeight * dpr))
+    if (auroraCanvas!.width !== w || auroraCanvas!.height !== h) {
+      auroraCanvas!.width = w
+      auroraCanvas!.height = h
+      g.viewport(0, 0, w, h)
+    }
+  }
+
+  function frame(now: number) {
+    if (!running) return
+    resize()
+    const t = (now - start) / 1000
+    g.uniform2f(uRes, auroraCanvas!.width, auroraCanvas!.height)
+    g.uniform1f(uT, t)
+    g.drawArrays(g.TRIANGLE_STRIP, 0, 4)
+    raf = requestAnimationFrame(frame)
+  }
+
+  function stop() {
+    running = false
+    cancelAnimationFrame(raf)
+    raf = 0
+  }
+
+  function play() {
+    if (running) return
+    running = true
+    start = performance.now()
+    raf = requestAnimationFrame(frame)
+  }
+
+  function sync() {
+    if (reduced()) {
+      stop()
+      // one static frame
+      resize()
+      g.uniform2f(uRes, auroraCanvas!.width, auroraCanvas!.height)
+      g.uniform1f(uT, 2.4)
+      g.drawArrays(g.TRIANGLE_STRIP, 0, 4)
+      return
+    }
+    play()
+  }
+
+  window.addEventListener('resize', () => {
+    if (reduced()) sync()
+  }, { passive: true })
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop()
+    else sync()
+  })
+
+  auroraSync = sync
+  sync()
+}
+
 
 
 function readyType() {
@@ -279,6 +452,7 @@ document.documentElement.addEventListener('pointerleave', () => {
 
 reduceMq.addEventListener('change', () => {
   setCursorMode()
+  auroraSync?.()
   if (reduced()) {
     if (wash) wash.style.transform = 'none'
     document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
@@ -343,6 +517,7 @@ function wireForm() {
 }
 
 setCursorMode()
+startAurora()
 setShelf(shelfFromPath())
 prepareWords()
 watchEnter()

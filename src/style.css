@@ -157,7 +157,7 @@ html.has-cursor * {
 }
 
 
-/* Soft Mexican-pink aurora — travels/morphs like the clip, CSS only */
+/* Visible Mexican-pink canvas noise wash — seamless, no particles */
 .stage-aurora {
   position: fixed;
   inset: 0;
@@ -167,56 +167,12 @@ html.has-cursor * {
   background: var(--ink);
 }
 
-.aurora {
+.aurora-canvas {
   position: absolute;
-  will-change: transform, border-radius, filter, opacity;
-  filter: blur(110px);
-}
-
-/* Primary mass — follows clip path: bottom sweep → thin diagonal → top-left pool */
-.aurora-a {
-  width: 88vmax;
-  height: 42vmax;
-  left: -20%;
-  top: 58%;
-  opacity: 0.62;
-  border-radius: 48% 52% 44% 56% / 42% 48% 52% 58%;
-  background: radial-gradient(
-    ellipse 70% 60% at 45% 55%,
-    color-mix(in srgb, var(--pink) 70%, transparent),
-    color-mix(in srgb, var(--pink) 22%, transparent) 55%,
-    transparent 72%
-  );
-}
-
-/* Soft trail / secondary glow — quieter, offset phase */
-.aurora-b {
-  width: 56vmax;
-  height: 56vmax;
-  left: 8%;
-  top: 28%;
-  opacity: 0.28;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    color-mix(in srgb, var(--pink) 45%, transparent),
-    transparent 68%
-  );
-}
-
-/* Keep a faint ambient pool so the stage never goes dead black */
-.aurora-c {
-  width: 70vmax;
-  height: 70vmax;
-  left: -10%;
-  top: -20%;
-  opacity: 0.18;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 40% 40%,
-    color-mix(in srgb, var(--pink) 32%, transparent),
-    transparent 70%
-  );
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .aurora-veil {
@@ -225,82 +181,10 @@ html.has-cursor * {
   background:
     radial-gradient(
       ellipse 82% 72% at 50% 42%,
-      color-mix(in srgb, var(--ink) 22%, transparent),
-      color-mix(in srgb, var(--ink) 72%, transparent) 78%,
-      color-mix(in srgb, var(--ink) 88%, transparent)
+      color-mix(in srgb, var(--ink) 28%, transparent),
+      color-mix(in srgb, var(--ink) 74%, transparent) 78%,
+      color-mix(in srgb, var(--ink) 90%, transparent)
     );
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .aurora-a {
-    animation: aurora-travel 14s ease-in-out infinite alternate;
-  }
-  .aurora-b {
-    animation: aurora-trail 16s ease-in-out infinite alternate;
-  }
-  .aurora-c {
-    animation: aurora-pool 22s ease-in-out infinite alternate;
-  }
-}
-
-/* bottom sweep → thin diagonal ribbon → top-left pool */
-@keyframes aurora-travel {
-  0% {
-    width: 92vmax;
-    height: 36vmax;
-    transform: translate3d(-4%, 22%, 0) scale(1.05, 1) rotate(-6deg);
-    border-radius: 60% 40% 55% 45% / 35% 55% 45% 65%;
-    opacity: 0.58;
-    filter: blur(100px);
-  }
-  35% {
-    width: 28vmax;
-    height: 110vmax;
-    transform: translate3d(28%, -8%, 0) scale(0.85, 1.15) rotate(38deg);
-    border-radius: 42% 58% 48% 52% / 70% 30% 70% 30%;
-    opacity: 0.5;
-    filter: blur(115px);
-  }
-  70% {
-    width: 58vmax;
-    height: 70vmax;
-    transform: translate3d(-6%, -32%, 0) scale(1.08) rotate(-12deg);
-    border-radius: 55% 45% 40% 60% / 50% 45% 55% 50%;
-    opacity: 0.64;
-    filter: blur(120px);
-  }
-  100% {
-    width: 78vmax;
-    height: 78vmax;
-    transform: translate3d(-18%, -38%, 0) scale(1.2) rotate(4deg);
-    border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
-    opacity: 0.7;
-    filter: blur(130px);
-  }
-}
-
-@keyframes aurora-trail {
-  0% {
-    transform: translate3d(18%, 24%, 0) scale(0.9);
-    opacity: 0.18;
-  }
-  50% {
-    transform: translate3d(4%, -6%, 0) scale(1.15);
-    opacity: 0.32;
-  }
-  100% {
-    transform: translate3d(-12%, -28%, 0) scale(1.05);
-    opacity: 0.24;
-  }
-}
-
-@keyframes aurora-pool {
-  0% {
-    transform: translate3d(6%, 4%, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(-8%, -10%, 0) scale(1.18);
-  }
 }
 
 /* Soft pink blooms — CSS drift + scroll track, no cursor follow */
@@ -853,9 +737,8 @@ body.is-shelf .scrim {
     animation: none !important;
   }
 
-  .aurora {
-    animation: none !important;
-    transform: none !important;
+  .aurora-canvas {
+    /* static frame via main.ts (no RAF) */
   }
 
 
