@@ -39,6 +39,19 @@
     </script>
   </head>
   <body>
+    <div class="stage-video" aria-hidden="true">
+      <video
+        class="stage-video-media"
+        data-stage-video
+        src="/background.mp4"
+        muted
+        loop
+        playsinline
+        autoplay
+        preload="metadata"
+      ></video>
+      <div class="stage-video-veil"></div>
+    </div>
     <a class="skip" href="#main">Skip to content</a>
     <div class="cursor" aria-hidden="true"></div>
     <div class="wash-track" data-scroll-wash aria-hidden="true">

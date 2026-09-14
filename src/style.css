@@ -156,6 +156,32 @@ html.has-cursor * {
   cursor: none !important;
 }
 
+
+/* Full-bleed muted video stage */
+.stage-video {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--ink);
+}
+
+.stage-video-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.stage-video-veil {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 58%, transparent);
+}
+
 /* Soft pink blooms — CSS drift + scroll track, no cursor follow */
 
 .wash-track {
@@ -704,6 +730,11 @@ body.is-shelf .scrim {
   .bloom {
     transform: none !important;
     animation: none !important;
+  }
+
+  /* Video stays as a still first frame (JS pauses); no looping motion */
+  .stage-video-media {
+    /* keep visible — paused by main.ts */
   }
 
   .cursor {

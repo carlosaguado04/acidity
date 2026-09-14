@@ -15,6 +15,7 @@ const closers = [...document.querySelectorAll('[data-close]')]
 const wash = document.querySelector<HTMLElement>('[data-scroll-wash]')
 const mark = document.querySelector<HTMLElement>('[data-mark]')
 const cursor = document.querySelector<HTMLElement>('.cursor')
+const stageVideo = document.querySelector<HTMLVideoElement>('[data-stage-video]')
 
 let lastFocus: HTMLElement | null = null
 let openId: ShelfId | null = null
@@ -35,6 +36,31 @@ let cursorHot = false
 function reduced() {
   return reduceMq.matches
 }
+
+function syncStageVideo() {
+  if (!stageVideo) return
+  stageVideo.muted = true
+  stageVideo.defaultMuted = true
+  stageVideo.playsInline = true
+  stageVideo.setAttribute('playsinline', '')
+  stageVideo.setAttribute('muted', '')
+  if (reduced()) {
+    stageVideo.pause()
+    try {
+      stageVideo.currentTime = 0
+    } catch {
+      // ignore seek races
+    }
+    return
+  }
+  const play = stageVideo.play()
+  if (play && typeof play.catch === 'function') {
+    play.catch(() => {
+      // autoplay blocked — leave muted; user gesture not required for bg
+    })
+  }
+}
+
 
 function readyType() {
   root.classList.remove('is-pending')
@@ -278,6 +304,7 @@ document.documentElement.addEventListener('pointerleave', () => {
 
 reduceMq.addEventListener('change', () => {
   setCursorMode()
+  syncStageVideo()
   if (reduced()) {
     if (wash) wash.style.transform = 'none'
     document.querySelectorAll('[data-enter]').forEach((el) => el.classList.add('is-in'))
@@ -346,5 +373,6 @@ setShelf(shelfFromPath())
 prepareWords()
 watchEnter()
 wireForm()
-void waitForAnurati()
+syncStageVideo()
+waitForAnurati()
 requestPaint()
