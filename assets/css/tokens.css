@@ -1,0 +1,29 @@
+/* Acidity Studio — fresh 2026 palette (not Brand DB locks) */
+:root {
+  --void: #070708;
+  --void-lift: #0e0e11;
+  --void-raised: #15151a;
+  --ink: #f2f2ef;
+  --ink-mute: #9a9a96;
+  --ink-dim: #5c5c58;
+  --edge: rgba(242, 242, 239, 0.08);
+  --edge-strong: rgba(242, 242, 239, 0.16);
+
+  --acid: #e8ff3d;
+  --acid-soft: rgba(232, 255, 61, 0.14);
+  --heat: #ff3b6b;
+  --heat-soft: rgba(255, 59, 107, 0.16);
+  --ember: #ff7a3d;
+  --ember-soft: rgba(255, 122, 61, 0.14);
+  --glow: #7cff9a;
+
+  --font-body: "Satoshi", system-ui, sans-serif;
+  --font-mark: "Anurati", "Satoshi", sans-serif;
+
+  --pad: clamp(1.25rem, 4vw, 3.5rem);
+  --max: 72rem;
+  --nav-h: 4.25rem;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur: 420ms;
+}
