@@ -2,259 +2,443 @@
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (typeof gsap === "undefined") {
     console.warn("[acidity] GSAP missing — motion skipped");
+    window.AcidityMotion = { init() {}, kill() {} };
     return;
   }
-  if (reduce) return;
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const wordmark = document.querySelector("[data-split]");
-  if (wordmark) {
-    const text = wordmark.textContent.trim();
-    wordmark.setAttribute("aria-label", text);
-    wordmark.textContent = "";
-    [...text].forEach((ch) => {
-      const span = document.createElement("span");
-      span.className = "char";
-      span.textContent = ch === " " ? "\u00A0" : ch;
-      wordmark.appendChild(span);
-    });
-
-    const chars = wordmark.querySelectorAll(".char");
-    gsap.set(chars, { yPercent: 120, rotateZ: 8, opacity: 0 });
-    gsap.to(chars, {
-      yPercent: 0,
-      rotateZ: 0,
-      opacity: 1,
-      duration: 1.05,
-      stagger: { each: 0.055, from: "start" },
-      ease: "power4.out",
-      delay: 0.08,
-    });
-
-    gsap.to(chars, {
-      y: (i) => (i % 2 === 0 ? -6 : 6),
-      duration: 2.4,
-      stagger: { each: 0.08, yoyo: true, repeat: -1 },
-      ease: "sine.inOut",
-      delay: 1.3,
-    });
-
-    /* Hero scrub — drift / blur / scale; opacity stays >= 0.55 (no vanishing A).
-       Uses yPercent so idle float on `y` can keep running at rest. */
-    gsap.fromTo(
-      chars,
-      {
-        yPercent: 0,
-        x: 0,
-        rotationZ: 0,
-        scale: 1,
-        filter: "blur(0px)",
-        opacity: 1,
-      },
-      {
-        yPercent: (i) => (i % 2 === 0 ? -28 : 34),
-        x: (i) => (i % 2 === 0 ? -18 : 22),
-        rotationZ: (i) => (i % 2 === 0 ? -9 : 11),
-        scale: 0.82,
-        filter: "blur(2.5px)",
-        opacity: 0.55,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      }
-    );
-  }
-
-  const heroLine = document.querySelector(".hero-line");
-  if (heroLine) {
-    gsap.from(heroLine, {
-      y: 40,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-      delay: 0.55,
-    });
-  }
-  const cue = document.querySelector("[data-scroll-cue]");
-  if (cue) {
-    gsap.fromTo(
-      cue,
-      { y: 0, opacity: 0.35 },
-      {
-        y: 8,
-        opacity: 1,
-        duration: 1.1,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-        delay: 1,
-      }
-    );
-  }
-
-  const glow = document.querySelector("[data-hero-glow]");
-  if (glow) {
-    gsap.to(glow, {
-      yPercent: 35,
-      scale: 1.25,
-      opacity: 0.2,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-      },
-    });
-  }
-
-  const explore = document.querySelector("[data-explore]");
-  const stages = gsap.utils.toArray("[data-stage]");
-  const dots = gsap.utils.toArray("[data-explore-dot]");
-
-  if (explore && stages.length) {
-    let lastIdx = -1;
-
-    const setActive = (index) => {
-      if (index === lastIdx) return;
-      lastIdx = index;
-
-      stages.forEach((el, i) => {
-        const on = i === index;
-        el.classList.toggle("is-active", on);
-        if (!on) el.classList.remove("is-punch");
-      });
-      dots.forEach((d, i) => d.classList.toggle("is-on", i === index));
-
-      const active = stages[index];
-      const idxEl = active.querySelector(".stage-index");
-
-      gsap.fromTo(
-        active,
-        { autoAlpha: 0, y: 70, scale: 0.88, rotateX: 6 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          scale: 1,
-          rotateX: 0,
-          duration: 0.45,
-          ease: "power4.out",
-          overwrite: "auto",
-        }
+  const kill = () => {
+    try {
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    } catch {}
+    try {
+      // Only kill page motion targets — never gsap.killTweensOf("*") (breaks floats/hover)
+      const targets = document.querySelectorAll(
+        ".wordmark, .wordmark .char, .hero-line, [data-card], [data-about-line], .talk-card, .app-card, .reveal, [data-explore-deck]"
       );
+      gsap.killTweensOf(targets);
+    } catch {}
+  };
 
-      active.classList.remove("is-punch");
-      void active.offsetWidth;
-      active.classList.add("is-punch");
-      window.setTimeout(() => active.classList.remove("is-punch"), 320);
+  const init = ({ soft = false } = {}) => {
+    if (reduce) return;
+    kill();
 
-      if (idxEl) {
-        gsap.fromTo(
-          idxEl,
-          { scale: 1.35 },
-          { scale: 1, duration: 0.55, ease: "back.out(2.2)", overwrite: "auto" }
-        );
-      }
+    // Soft hops: content already in place — no settle. First loads may animate.
+    window.__hadVt = !!soft;
 
-      stages.forEach((el, i) => {
-        if (i === index) return;
-        gsap.to(el, {
-          autoAlpha: 0,
-          y: i < index ? -50 : 60,
-          scale: 0.9,
-          rotateX: 0,
-          duration: 0.3,
-          overwrite: "auto",
-          ease: "power2.in",
+    const wordmark = document.querySelector("[data-split]");
+    const story = document.querySelector("[data-home-story]");
+    const heroLine = document.querySelector(".hero-line");
+    const cards = gsap.utils.toArray("[data-card]");
+
+    /* —— Home —— */
+    if (wordmark && story) {
+      const text = (wordmark.getAttribute("aria-label") || wordmark.textContent || "").trim() || "Acidity";
+      if (!wordmark.querySelector(".char")) {
+        wordmark.setAttribute("aria-label", text);
+        wordmark.textContent = "";
+        [...text].forEach((ch) => {
+          const span = document.createElement("span");
+          span.className = "char";
+          span.textContent = ch === " " ? " " : ch;
+          wordmark.appendChild(span);
         });
-      });
-    };
+      }
+      const chars = Array.from(wordmark.querySelectorAll(".char"));
+      const narrow = window.matchMedia("(max-width: 720px)").matches;
+      const deck = document.querySelector("[data-explore-deck]");
+      const deckW = () => (deck ? deck.clientWidth : window.innerWidth);
+      const deckH = () => (deck ? deck.clientHeight : window.innerHeight);
+      const parseLen = (raw, basis) => {
+        const v = String(raw || "0").trim();
+        const n = parseFloat(v);
+        if (!Number.isFinite(n)) return 0;
+        return v.endsWith("%") ? (n / 100) * basis : n;
+      };
+      const cardFrom = [
+        { x: -420, y: 220, rotation: -32 },
+        { x: 0, y: 380, rotation: 14 },
+        { x: 420, y: 220, rotation: 34 },
+      ];
+      const finals = () =>
+        cards.map((card) => {
+          const cs = getComputedStyle(card);
+          return {
+            x: parseLen(cs.getPropertyValue("--x"), deckW()),
+            y: parseLen(cs.getPropertyValue("--y"), deckH()),
+            rotation: parseFloat(cs.getPropertyValue("--tilt")) || 0,
+          };
+        });
 
-    gsap.set(stages, { autoAlpha: 0, y: 70, scale: 0.88, transformPerspective: 900 });
-    setActive(0);
 
-    ScrollTrigger.create({
-      trigger: explore,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const n = stages.length;
-        const seg = 1 / n;
-        let idx = Math.min(n - 1, Math.floor(self.progress / seg));
-        if (self.progress >= 1 - 0.001) idx = n - 1;
-        setActive(idx);
-      },
-    });
-  }
-
-  /* Studio about sticky type scrub */
-  const aboutLinesRoot = document.querySelector("[data-about-lines]");
-  const aboutSpacer = document.querySelector("[data-about-spacer]");
-  if (aboutLinesRoot && aboutSpacer) {
-    const lines = gsap.utils.toArray(aboutLinesRoot.querySelectorAll(".about-line"));
-    if (lines.length) {
-      aboutSpacer.style.setProperty("--about-beats", String(lines.length));
-      gsap.set(lines, { autoAlpha: 0, y: 30 });
-      gsap.set(lines[0], { autoAlpha: 1, y: 0 });
-
-      let aboutIdx = 0;
-      ScrollTrigger.create({
-        trigger: aboutSpacer,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: true,
-        onUpdate: (self) => {
-          const n = lines.length;
-          let idx = Math.min(n - 1, Math.floor(self.progress * n));
-          if (self.progress >= 1 - 0.001) idx = n - 1;
-          if (idx === aboutIdx) return;
-          aboutIdx = idx;
-          lines.forEach((el, i) => {
-            const on = i === idx;
-            gsap.to(el, {
-              autoAlpha: on ? 1 : 0,
-              y: on ? 0 : 30,
-              duration: 0.35,
-              overwrite: "auto",
-              ease: "power2.out",
+      if (soft) {
+        // Soft return: park wordmark (no tween fight); cards rise only
+        document.querySelector("[data-home-boot-pulse]")?.remove();
+        document.body.classList.remove("is-booting");
+        const deck = document.querySelector("[data-explore-deck]");
+        if (deck) {
+          deck.style.opacity = "";
+          deck.style.visibility = "";
+        }
+        gsap.set(wordmark, {
+          xPercent: -50,
+          yPercent: 0,
+          left: "50%",
+          top: "2.75rem",
+          scale: 0.52,
+          transformOrigin: "50% 50%",
+          autoAlpha: 1,
+        });
+        gsap.set(chars, { yPercent: 0, rotateZ: 0, opacity: 1, filter: "blur(0px)", y: 0 });
+        if (heroLine) gsap.set(heroLine, { autoAlpha: 0 });
+        const lands = finals();
+        if (!narrow) {
+          cards.forEach((card, i) => {
+            const land = lands[i] || { x: 0, y: 0, rotation: 0 };
+            gsap.set(card, {
+              xPercent: -50,
+              yPercent: -50,
+              x: land.x,
+              y: land.y + 28,
+              rotation: land.rotation,
+              autoAlpha: 0,
+              scale: 1,
+              transformOrigin: "50% 50%",
             });
           });
-        },
+        } else {
+          gsap.set(cards, { autoAlpha: 0, y: 28 });
+        }
+        story.classList.add("is-ready");
+        gsap.to(chars, {
+          y: (i) => (i % 2 === 0 ? -4 : 4),
+          duration: 2.8,
+          stagger: { each: 0.1, yoyo: true, repeat: -1 },
+          ease: "sine.inOut",
+        });
+        if (!narrow) {
+          cards.forEach((card, i) => {
+            const land = lands[i] || { x: 0, y: 0, rotation: 0 };
+            gsap.to(card, {
+              x: land.x,
+              y: land.y,
+              autoAlpha: 1,
+              duration: 0.8,
+              ease: "power3.out",
+              delay: 0.06 + i * 0.1,
+            });
+          });
+        } else {
+          gsap.to(cards, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.1,
+            delay: 0.06,
+          });
+        }
+      } else {
+        gsap.set(wordmark, {
+          xPercent: -50,
+          yPercent: -50,
+          left: "50%",
+          top: "50%",
+          scale: 1,
+          transformOrigin: "50% 50%",
+          autoAlpha: 1,
+        });
+        story.classList.add("is-ready");
+        gsap.set(chars, {
+          yPercent: 140,
+          rotateZ: () => gsap.utils.random(-12, 12),
+          opacity: 0,
+          filter: "blur(8px)",
+        });
+        if (heroLine) gsap.set(heroLine, { autoAlpha: 0, y: 24 });
+        if (!narrow) {
+          const lands = finals();
+          cards.forEach((card, i) => {
+            const f = cardFrom[i] || cardFrom[0];
+            const land = lands[i] || { x: 0, y: 0, rotation: 0 };
+            gsap.set(card, {
+              xPercent: -50,
+              yPercent: -50,
+              x: land.x + f.x,
+              y: land.y + f.y,
+              rotation: land.rotation + f.rotation,
+              autoAlpha: 0,
+              scale: 0.86,
+              transformOrigin: "50% 50%",
+            });
+          });
+        } else {
+          gsap.set(cards, { clearProps: "transform", autoAlpha: 0 });
+        }
+
+        const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+        intro.to(chars, {
+          yPercent: 0,
+          rotateZ: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 1.15,
+          stagger: { each: 0.06, from: "center" },
+          ease: "power4.out",
+        });
+        if (heroLine) {
+          intro.to(heroLine, { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.45");
+        }
+        const floatTween = gsap.to(chars, {
+          y: (i) => (i % 2 === 0 ? -7 : 7),
+          duration: 2.6,
+          stagger: { each: 0.09, yoyo: true, repeat: -1 },
+          ease: "sine.inOut",
+          paused: true,
+        });
+        intro.add(() => floatTween.play(), ">-=0.2");
+        intro.to({}, { duration: 1.05 });
+        intro.add(() => floatTween.pause());
+        intro.to(wordmark, { top: "2.75rem", yPercent: 0, scale: 0.52, duration: 1.15, ease: "power3.inOut" }, ">");
+        intro.to(chars, { y: 0, yPercent: 0, rotateZ: 0, duration: 0.9, ease: "power2.out" }, "<");
+        if (heroLine) intro.to(heroLine, { autoAlpha: 0, y: -28, duration: 0.55, ease: "power2.in" }, "<");
+        intro.add(() => {
+          gsap.set(chars, { y: 0 });
+          floatTween.kill();
+          gsap.to(chars, {
+            y: (i) => (i % 2 === 0 ? -4 : 4),
+            duration: 2.8,
+            stagger: { each: 0.1, yoyo: true, repeat: -1 },
+            ease: "sine.inOut",
+          });
+        });
+        if (!narrow) {
+          cards.forEach((card, i) => {
+            const lands = finals();
+            const land = lands[i] || { x: 0, y: 0, rotation: 0 };
+            const f = cardFrom[i] || cardFrom[0];
+            intro.fromTo(
+              card,
+              {
+                xPercent: -50,
+                yPercent: -50,
+                x: land.x + f.x,
+                y: land.y + f.y,
+                rotation: land.rotation + f.rotation,
+                autoAlpha: 0,
+                scale: 0.86,
+              },
+              {
+                xPercent: -50,
+                yPercent: -50,
+                x: land.x,
+                y: land.y,
+                rotation: land.rotation,
+                autoAlpha: 1,
+                scale: 1,
+                duration: 0.85,
+                ease: "power4.out",
+              },
+              i === 0 ? ">-=0.15" : "-=0.55"
+            );
+          });
+        } else {
+          intro.to(cards, { autoAlpha: 1, duration: 0.6, stagger: 0.1 }, ">-=0.1");
+        }
+      }
+    }
+
+    /* Studio — GSAP prime BEFORE is-ready; never touch page-title on soft (morph) */
+    const aboutProse = document.querySelector("[data-about-prose]");
+    if (aboutProse) {
+      const lines = gsap.utils.toArray(aboutProse.querySelectorAll(":scope > [data-about-line]"));
+      const talkCards = gsap.utils.toArray(aboutProse.querySelectorAll(".talk-card.explore-card"));
+      const pageTitle = document.querySelector(".page-studio .page-title");
+
+      if (lines.length) {
+        gsap.fromTo(
+          lines,
+          { autoAlpha: 0, y: 28 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.08,
+            delay: soft ? 0.06 : 0.1,
+            immediateRender: true,
+          }
+        );
+      }
+      if (talkCards.length) {
+        gsap.fromTo(
+          talkCards,
+          {
+            autoAlpha: 0,
+            y: 36,
+            scale: 0.94,
+            rotation: (i, el) => {
+              const t = parseFloat(getComputedStyle(el).getPropertyValue("--tilt")) || 0;
+              return t + (i === 0 ? -8 : 8);
+            },
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            rotation: (i, el) => parseFloat(getComputedStyle(el).getPropertyValue("--tilt")) || 0,
+            duration: 0.85,
+            ease: "power4.out",
+            stagger: 0.12,
+            delay: soft ? 0.28 : 0.45,
+            immediateRender: true,
+          }
+        );
+      }
+      // Unlock CSS only after GSAP has written opacity:0 inline
+      aboutProse.classList.add("is-ready");
+      if (pageTitle && !soft) {
+        gsap.fromTo(
+          pageTitle,
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.05, immediateRender: true }
+        );
+      }
+      // soft: leave page-title completely alone for view-transition morph
+    }
+
+    /* Apps + Web — shared .apps-list / .app-card rise; Apps title untouched on soft */
+    const appsList = document.querySelector(".apps-list");
+    if (appsList) {
+      const appCards = gsap.utils.toArray(appsList.querySelectorAll(".app-card"));
+      const appsTitle = document.querySelector(".page-apps .page-title");
+      if (appCards.length) {
+        gsap.fromTo(
+          appCards,
+          { autoAlpha: 0, y: 28 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.1,
+            delay: soft ? 0.08 : 0.12,
+            immediateRender: true,
+          }
+        );
+      }
+      appsList.classList.add("is-ready");
+      if (appsTitle && !soft) {
+        gsap.fromTo(
+          appsTitle,
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.05, immediateRender: true }
+        );
+      }
+    }
+
+    /* Web title — hard load only; soft morphs. Cards use .apps-list (same as Apps). */
+    const webTitle = document.querySelector(".page-web .page-title");
+    if (webTitle && !soft) {
+      gsap.fromTo(
+        webTitle,
+        { autoAlpha: 0, y: 16 },
+        { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.05, immediateRender: true }
+      );
+    }
+
+    if (!soft) {
+
+      gsap.utils.toArray(".reveal").forEach((el) => {
+        if (el.classList.contains("hero-line")) return;
+        if (el.classList.contains("app-card")) return;
+        gsap.from(el, {
+          opacity: 0,
+          y: 56,
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        });
       });
     }
-  }
+  };
 
-  const immediate = gsap.utils.toArray(".page-head.reveal");
-  if (immediate.length) {
-    gsap.from(immediate, {
-      y: 48,
-      opacity: 0,
-      duration: 0.95,
-      ease: "power3.out",
-      stagger: 0.08,
-    });
-  }
+  window.AcidityMotion = { init, kill };
 
-  gsap.utils.toArray(".reveal").forEach((el) => {
-    if (el.classList.contains("hero-line")) return;
-    if (immediate.includes(el)) return;
-    if (el.closest("[data-about-lines]")) return;
-    gsap.from(el, {
-      opacity: 0,
-      y: 56,
-      duration: 0.9,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: el,
-        start: "top 88%",
-        toggleActions: "play none none none",
-      },
+  const waitMs = (ms) => new Promise((r) => setTimeout(r, ms));
+  const waitPaint = () =>
+    new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  const preloadImage = (href) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = href;
     });
-  });
+
+  const warmHtml = (path) =>
+    fetch(path, { headers: { Accept: "text/html" }, credentials: "same-origin" })
+      .then((r) => r.text())
+      .catch(() => "");
+
+  /**
+   * First home load only: hold Acidity + pulse, warm fonts/pages/images,
+   * keep navigation locked (body.is-booting), then unlock and play intro.
+   * Soft hops never enter this path.
+   */
+  const finishBootAndIntro = async () => {
+    const isHome = document.body.classList.contains("page-home");
+    const story = document.querySelector("[data-home-story]");
+    const booting = document.body.classList.contains("is-booting");
+
+    if (!(isHome && story && booting)) {
+      document.body.classList.remove("is-booting");
+      document.documentElement.classList.remove("is-booting");
+      document.querySelector("[data-home-boot-pulse]")?.remove();
+      init({ soft: false });
+      return;
+    }
+
+    document.documentElement.classList.add("is-booting");
+
+    try {
+      const fonts =
+        document.fonts && document.fonts.ready
+          ? Promise.race([document.fonts.ready, waitMs(2000)])
+          : Promise.resolve();
+      const pages = Promise.all([warmHtml("/studio/"), warmHtml("/apps/"), warmHtml("/web/")]);
+      const images = Promise.all([
+        preloadImage("/assets/apps/mise.png"),
+        preloadImage("/assets/apps/hilo-smile.png"),
+        preloadImage("/assets/apps/orza.png"),
+      ]);
+      const sheets = Promise.all(
+        [...document.querySelectorAll('link[rel="stylesheet"]')].map((link) => {
+          if (link.sheet) return Promise.resolve();
+          return new Promise((resolve) => {
+            link.addEventListener("load", resolve, { once: true });
+            link.addEventListener("error", resolve, { once: true });
+          });
+        })
+      );
+      await Promise.all([fonts, pages, images, sheets]);
+      await waitPaint();
+    } catch (err) {
+      console.warn("[acidity] boot warm failed, intro anyway", err);
+    }
+
+    document.body.classList.remove("is-booting");
+    document.documentElement.classList.remove("is-booting");
+    document.querySelector("[data-home-boot-pulse]")?.remove();
+    await waitPaint();
+    init({ soft: false });
+  };
+
+  finishBootAndIntro();
 })();

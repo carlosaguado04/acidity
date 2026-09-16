@@ -7,13 +7,16 @@
     <meta name="theme-color" content="#070708" />
     <meta name="description" content="About Acidity — one-person studio." />
     <title>About Acidity — Studio</title>
-    <link rel="preload" href="../assets/fonts/Anurati-Regular.otf" as="font" type="font/otf" crossorigin />
-    <link rel="preload" href="../assets/fonts/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="../assets/fonts/Satoshi-Bold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="../assets/css/tokens.css" />
-    <link rel="stylesheet" href="../assets/css/base.css" />
-    <link rel="stylesheet" href="../assets/css/shell.css" />
-    <link rel="stylesheet" href="../assets/css/studio.css" />
+    <link rel="preload" href="/assets/fonts/Anurati-Regular.otf" as="font" type="font/otf" crossorigin />
+    <link rel="preload" href="/assets/fonts/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/Satoshi-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/assets/css/tokens.css" />
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/shell.css" />
+    <link rel="stylesheet" href="/assets/css/home.css" />
+    <link rel="stylesheet" href="/assets/css/studio.css" />
+    <link rel="stylesheet" href="/assets/css/apps.css" />
+    <link rel="stylesheet" href="/assets/css/web.css" />
   </head>
   <body class="page-studio">
     <a class="skip" href="#main">Skip to content</a>
@@ -33,87 +36,123 @@
             <span></span>
           </button>
           <nav class="primary-nav" id="primary-nav" data-primary-nav aria-label="Primary">
-            <a href="../" data-magnetic="22">Home</a>
-            <a href="../studio/" aria-current="page" data-magnetic="22">Studio</a>
-            <a href="../apps/" data-magnetic="22">Apps</a>
-            <a href="../web/" data-magnetic="22">Web</a>
+            <a href="/" data-magnetic="22">Home</a>
+            <a href="/studio/" aria-current="page" data-magnetic="22">Studio</a>
+            <a href="/apps/" data-magnetic="22">Apps</a>
+            <a href="/web/" data-magnetic="22">Web</a>
           </nav>
         </div>
       </header>
 
       <main id="main" class="site-main">
-        <header class="page-head reveal">
+        <header class="page-head">
           <h1 class="page-title">About Acidity</h1>
         </header>
 
-        <div class="about">
-          <div class="about-scroll" data-about-scroll>
-            <div class="about-stage" data-about-stage>
-              <div class="about-lines" data-about-lines>
-                <p class="about-line">
-                  Acidity started in 2026 because too much software feels unfinished.
-                  If you spend your day inside an app, it should work — reliably,
-                  quietly, without asking for more than it needs.
-                </p>
-                <p class="about-line">So I began building the tools I actually use.</p>
-                <p class="about-line">
-                  That is still the standard. Nothing ships that I would not keep on
-                  my own machine. No ads. No tracking. Your data stays yours.
-                </p>
-                <p class="about-line">
-                  Acidity is a one-person studio with two separate lines of work.
-                </p>
-                <p class="about-line">
-                  The first is software. These are my apps — products I design,
-                  build, and maintain for my own use, then release. They are not
-                  built for clients. They are not commissioned, white-labeled, or
-                  customized to someone else’s brief. They exist because I needed
-                  them to work a certain way, and that is the version that goes out.
-                </p>
-                <p class="about-line">
-                  The second is web work. Product sites, marketing sites, and
-                  backends for people who already have something to put online and
-                  need it done properly — not as a pretty shell, but as a site that
-                  can carry the product.
-                </p>
-                <p class="about-line">What that looks like in practice:</p>
-                <div class="about-practice about-line">
-                  <p>
-                    I ship when the work is finished, not when a version number
-                    looks good.
-                  </p>
-                  <p>
-                    The apps do not carry ads, trackers, or quiet data collection.
-                  </p>
-                  <p>Privacy is a default, not a feature page.</p>
-                  <p>
-                    The studio stays small on purpose. One person means fewer layers
-                    between the problem and the thing that solves it.
-                  </p>
-                </div>
-                <p class="about-line">
-                  If you need a site built with care, that is the work I take on.
-                </p>
-                <p class="about-line">One person. Small studio. That is the whole thing.</p>
-              </div>
-            </div>
-            <div class="about-spacer" data-about-spacer aria-hidden="true"></div>
-          </div>
+        <article class="about-prose" data-about-prose>
+          
+          
+          
+          <p class="about-line" data-about-line>
+            Acidity started in 2026 because too much software feels unfinished.
+            If you spend your day inside an app, it should work — reliably,
+            quietly, without asking for more than it needs.
+          </p>
 
-          <section class="studio-contact reveal" aria-labelledby="contact-title">
-            <h2 id="contact-title">Let's Talk</h2>
-            <nav class="contact-links" aria-label="Let's Talk">
-              <a href="mailto:hello@acidity.lol">
-                <span class="contact-kind">Email</span>
-                <span class="contact-value">hello@acidity.lol</span>
-              </a>
-              <a href="https://x.com/AcidityStudio" rel="noreferrer">
-                <span class="contact-kind">X</span>
-                <span class="contact-value">@AcidityStudio</span>
-              </a>
-            </nav>
+          <p class="about-line about-line--punch" data-about-line>
+            So I began building the tools I actually use.
+          </p>
+
+          <p class="about-line" data-about-line>
+            That is still the standard. Nothing ships that I would not keep on
+            my own machine. No ads. No tracking. Your data stays yours.
+          </p>
+
+          <p class="about-line about-line--punch" data-about-line>
+            Acidity is a one-person studio with two separate lines of work.
+          </p>
+
+          <section class="about-block" data-about-line>
+            <h2 class="about-kicker">Software</h2>
+            <p class="about-line">
+              The first is software. These are my apps — products I design,
+              build, and maintain for my own use, then release. They are not
+              built for clients. They are not commissioned, white-labeled, or
+              customized to someone else’s brief. They exist because I needed
+              them to work a certain way, and that is the version that goes out.
+            </p>
           </section>
-        </div>
+
+          <section class="about-block" data-about-line>
+            <h2 class="about-kicker">Web</h2>
+            <p class="about-line">
+              The second is web work. Product sites, marketing sites, and
+              backends for people who already have something to put online and
+              need it done properly — not as a pretty shell, but as a site that
+              can carry the product.
+            </p>
+          </section>
+
+          <p class="about-line about-line--punch" data-about-line>
+            What that looks like in practice:
+          </p>
+
+          <ul class="about-principles" data-about-line>
+            <li>I ship when the work is finished, not when a version number looks good.</li>
+            <li>The apps do not carry ads, trackers, or quiet data collection.</li>
+            <li>Privacy is a default, not a feature page.</li>
+            <li>The studio stays small on purpose. One person means fewer layers between the problem and the thing that solves it.</li>
+          </ul>
+
+          <p class="about-line" data-about-line>
+            If you need a site built with care, that is the work I take on.
+          </p>
+
+          <p class="about-line about-line--close" data-about-line>
+            One person. Small studio. That is the whole thing.
+          </p>
+
+
+
+
+
+
+
+          <section class="about-talk" data-about-line aria-labelledby="contact-title">
+            <h2 class="about-talk-title" id="contact-title">Let's Talk</h2>
+            <div class="about-talk-deck">
+              <a
+                class="explore-card talk-card"
+                href="mailto:hello@acidity.lol"
+                style="--tilt:-6deg"
+                data-talk="email"
+              >
+                <div class="explore-card-face" data-card-face>
+                  <div class="stage-body">
+                    <p class="talk-kind">Email</p>
+                    <h3 class="talk-value">hello@acidity.lol</h3>
+                    <span class="stage-link">Write →</span>
+                  </div>
+                </div>
+              </a>
+              <a
+                class="explore-card talk-card"
+                href="https://x.com/AcidityStudio"
+                rel="noreferrer"
+                style="--tilt:5deg"
+                data-talk="x"
+              >
+                <div class="explore-card-face" data-card-face>
+                  <div class="stage-body">
+                    <p class="talk-kind">X</p>
+                    <h3 class="talk-value">@AcidityStudio</h3>
+                    <span class="stage-link">Follow →</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </section>
+        </article>
       </main>
       <footer class="site-footer">
         <div class="site-footer-inner">
@@ -131,9 +170,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script src="../assets/js/main.js"></script>
-    <script src="../assets/js/motion.js"></script>
-    <script src="../assets/js/interact.js"></script>
-    <script src="../assets/js/transit.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/motion.js"></script>
+    <script src="/assets/js/interact.js"></script>
+    <script src="/assets/js/transit.js"></script>
   </body>
 </html>

@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: clip;
+  background: #070708;
 }
 
 .site-bg {
@@ -11,20 +12,11 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 70% 50% at 85% -10%, var(--acid-soft), transparent 55%),
-    radial-gradient(ellipse 55% 45% at -5% 30%, var(--heat-soft), transparent 50%),
-    radial-gradient(ellipse 40% 35% at 60% 100%, var(--ember-soft), transparent 55%),
-    var(--void);
+  background: var(--void, #070708);
 }
 
 .site-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
+  display: none;
 }
 
 /* —— Boutique edge rail (desktop) —— */
@@ -102,7 +94,6 @@
 }
 .primary-nav a[aria-current="page"] {
   color: var(--acid);
-  text-shadow: 0 0 28px var(--acid-soft);
 }
 
 .primary-nav a.is-pressed {
@@ -118,7 +109,6 @@
   height: 0.28rem;
   border-radius: 50%;
   background: var(--acid);
-  box-shadow: 0 0 12px var(--acid);
   transform: translateY(-50%);
 }
 
@@ -217,6 +207,7 @@
   margin-inline: auto;
   padding: clamp(2rem, 6vw, 4.5rem) var(--pad) clamp(3rem, 8vw, 6rem);
   padding-right: clamp(4.75rem, 11vw, 8.5rem);
+  background: transparent;
 }
 
 @media (max-width: 860px) {
@@ -232,6 +223,7 @@
   border-top: 1px solid var(--edge);
   padding: 1.75rem var(--pad) 2.25rem;
   padding-right: clamp(4.75rem, 11vw, 8.5rem);
+  background: #070708;
 }
 @media (max-width: 860px) {
   .site-footer { padding-right: var(--pad); }
@@ -329,127 +321,214 @@ html.reduce-motion .reveal {
   transform: none !important;
 }
 
-@supports (view-transition-name: none) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 380ms;
-    animation-timing-function: var(--ease-out);
-  }
-}
-
-@view-transition {
-  navigation: auto;
-}
 
 /* Home uses explore cards as nav — no chrome bar */
 .page-home .site-header { display: none; }
 
-/* —— Soft cursor light —— */
+/* Cursor light off — keeps the void dark */
 #cursor-light,
 [data-cursor-light] {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 45;
-  width: min(32rem, 58vw);
-  height: min(32rem, 58vw);
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(232, 255, 61, 0.22) 0%, rgba(232, 255, 61, 0.08) 32%, transparent 64%),
-    radial-gradient(circle at 62% 58%, rgba(255, 59, 107, 0.14) 0%, transparent 55%);
-  filter: blur(24px);
-  mix-blend-mode: screen;
-  transform: translate3d(-50%, -50%, 0);
+  display: none !important;
+}
+
+
+
+/* Unified page titles — same slot on Studio / Apps / Web for clean morphs */
+.page-head {
+  margin: 0 0 clamp(2rem, 5vw, 3.25rem);
+  padding: 0;
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 4.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* Shared idle float (`translate` so it does not fight GSAP `transform`) */
+@keyframes void-float-a {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+@keyframes void-float-b {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+@keyframes void-float-c {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+
+/* —— Shared explore / talk card chrome (Home + Studio Let's Talk) —— */
+.explore-card {
+  text-decoration: none;
+  color: inherit;
   will-change: transform, opacity;
-  transition: opacity 240ms var(--ease-out);
-}
-#cursor-light.is-on,
-[data-cursor-light].is-on {
-  opacity: 0.45;
 }
 
-@media (pointer: coarse), (hover: none) {
-  #cursor-light,
-  [data-cursor-light] {
-    display: none !important;
-  }
+.explore-card-face {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  align-items: start;
+  padding: clamp(1.35rem, 3.5vw, 2.15rem);
+  border: 1px solid var(--edge);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--void-raised) 86%, transparent),
+      color-mix(in srgb, var(--void-lift) 78%, transparent)
+    );
+  backdrop-filter: blur(28px) saturate(1.12);
+  -webkit-backdrop-filter: blur(28px) saturate(1.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transition:
+    border-color 280ms var(--ease-out),
+    box-shadow 280ms var(--ease-out);
+}
+
+.explore-card.is-forward {
+  z-index: 12;
+}
+
+.explore-card.is-forward .explore-card-face {
+  border-color: color-mix(in srgb, var(--ink) 22%, var(--edge));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--void-raised) 92%, transparent),
+      color-mix(in srgb, var(--void-lift) 86%, transparent)
+    );
+  backdrop-filter: blur(36px) saturate(1.18);
+  -webkit-backdrop-filter: blur(36px) saturate(1.18);
+  box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
+}
+
+.explore-card.is-pressed .explore-card-face {
+  filter: brightness(0.96);
+}
+
+.explore-card .stage-link {
+  display: inline-flex;
+  margin-top: 1.15rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+  border-bottom: 2px solid var(--acid);
+  padding-bottom: 0.12rem;
+  transition: color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+}
+
+.explore-card.is-forward .stage-link {
+  color: var(--acid);
+}
+
+.explore-card-face {
+  animation: void-float-a 3.2s ease-in-out infinite;
+}
+.explore-card:nth-child(2) .explore-card-face {
+  animation-name: void-float-b;
+  animation-duration: 3.6s;
+  animation-delay: 0.35s;
+}
+.explore-card:nth-child(3) .explore-card-face {
+  animation-name: void-float-c;
+  animation-duration: 3.4s;
+  animation-delay: 0.2s;
+}
+.explore-card.is-forward .explore-card-face {
+  animation-play-state: paused;
+}
+
+.app-card {
+  animation: void-float-a 3.3s ease-in-out infinite;
+}
+.app-card:nth-child(2) {
+  animation-name: void-float-b;
+  animation-duration: 3.7s;
+  animation-delay: 0.4s;
+}
+.app-card:nth-child(3) {
+  animation-name: void-float-c;
+  animation-duration: 3.5s;
+  animation-delay: 0.15s;
+}
+.app-card:hover,
+.app-card:focus-visible {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #cursor-light,
-  [data-cursor-light] {
-    display: none !important;
+  .explore-card-face,
+  .app-card {
+    animation: none !important;
   }
 }
 
-/* —— Route veil (page transition) —— */
-.route-veil {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  pointer-events: none;
-  visibility: hidden;
+/* —— Soft hops (same-document View Transition via transit.js) —— */
+.page-title {
+  view-transition-name: page-heading;
 }
-.route-veil-panel {
-  position: absolute;
-  inset: 0;
-  background: var(--void);
-  opacity: 0;
-  transform: scaleY(0);
-  transform-origin: top center;
-  transition:
-    opacity 280ms var(--ease-out),
-    transform 340ms var(--ease-out);
+
+.page-home .wordmark,
+.page-home .hero-line,
+.explore-card,
+.explore-card-face,
+.app-card,
+.about-prose,
+.site-header,
+.site-footer,
+.site-bg,
+.primary-nav {
+  view-transition-name: none;
 }
-.route-veil-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--acid), var(--heat), var(--acid));
-  box-shadow: 0 0 24px var(--acid-soft);
-  opacity: 0;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition:
-    opacity 200ms var(--ease-out),
-    transform 320ms var(--ease-out);
-  z-index: 1;
+
+::view-transition-group(page-heading) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
-.route-veil.is-covering {
-  visibility: visible;
-  pointer-events: auto;
+
+::view-transition-old(page-heading),
+::view-transition-new(page-heading) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  height: auto;
+  width: auto;
+  overflow: clip;
+  transform-origin: left top;
+  mix-blend-mode: normal;
 }
-.route-veil.is-covering .route-veil-panel {
-  opacity: 1;
-  transform: scaleY(1);
+
+/* Instant void under the title morph — no root crossfade stutter */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
-.route-veil.is-covering .route-veil-line {
-  opacity: 1;
-  transform: scaleX(1);
-}
-.route-veil.is-leaving {
-  visibility: visible;
-}
-.route-veil.is-leaving .route-veil-panel {
-  opacity: 0;
-  transform: scaleY(1);
-  transform-origin: bottom center;
-  transition:
-    opacity 360ms var(--ease-out),
-    transform 0ms;
-}
-.route-veil.is-leaving .route-veil-line {
-  opacity: 0;
-  transform: scaleX(1);
-  transition: opacity 280ms var(--ease-out);
+
+::view-transition-group(root) {
+  animation-duration: 0s;
+  background: #070708;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .route-veil {
-    display: none !important;
+  .page-title {
+    view-transition-name: none;
   }
+}
+
+/* Soft-hop lock: body content only — NEVER page-title/page-head (view-transition morph) */
+html.is-entering .about-prose [data-about-line],
+html.is-entering .about-prose .talk-card,
+html.is-entering .apps-list .app-card,
+html.is-entering .page-home .explore-deck,
+html.is-entering .page-home .hero-line {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }

@@ -1,3 +1,5 @@
+/* Home — single sticky viewport story */
+
 .page-home .site-main {
   width: 100%;
   max-width: none;
@@ -5,93 +7,81 @@
   padding-right: 0;
 }
 
-.hero {
+.page-home .home-flight {
+  position: relative;
+}
+
+.page-home .flight-canvas {
+  display: none;
+}
+
+/* Scroll runway only — pin stays in one viewport */
+.page-home .home-story {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: clamp(2rem, 8vw, 5rem) var(--pad);
-  padding-right: clamp(var(--pad), 10vw, 8rem);
+  height: 100vh;
+}
+
+.page-home .home-pin {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  padding: 0 var(--pad);
+  padding-right: clamp(var(--pad), 10vw, 8rem);
+  background: var(--void, #070708);
 }
 
-.home-flight {
-  position: relative;
-}
+.page-home .hero-glow { display: none; }
 
-.flight-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.95;
-}
-
-.home-flight .hero,
-.home-flight .explore {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-glow {
+/* Wordmark starts centered in the pin; GSAP moves it to the top */
+.page-home .wordmark {
   position: absolute;
-  inset: 18% 10% auto;
-  height: min(36rem, 70vw);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 40% 40%, var(--acid-soft), transparent 55%),
-    radial-gradient(circle at 70% 60%, var(--heat-soft), transparent 50%);
-  filter: blur(40px);
-  opacity: 0.55;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  width: min(100%, var(--max));
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  margin: 0;
+  transform: translate(-50%, -50%);
   text-align: center;
-  isolation: isolate;
-}
-
-.wordmark {
   font-family: var(--font-mark), var(--font-body), sans-serif;
   font-weight: 400;
   font-size: clamp(3rem, 12vw, 8.5rem);
   line-height: 1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin: 0 auto;
   color: var(--ink);
-  text-shadow: 0 0 40px var(--acid-soft);
   overflow: visible;
+  white-space: nowrap;
+  will-change: transform, font-size;
 }
 
-.wordmark .char {
+.page-home .wordmark .char {
   display: inline-block;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
   transform-origin: 50% 100%;
 }
 
-.hero-line {
-  margin: clamp(1.35rem, 3.5vw, 2.25rem) auto 0;
-  max-width: 28rem;
+.page-home .hero-line {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + clamp(2.4rem, 7vw, 5.5rem));
+  z-index: 3;
+  transform: translateX(-50%);
+  margin: 0;
+  width: min(100%, 28rem);
+  text-align: center;
   color: var(--ink-mute);
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
-.hero-scroll {
+.page-home .hero-scroll {
   position: absolute;
   bottom: 1.75rem;
   left: 50%;
+  z-index: 3;
   transform: translateX(-50%);
-  z-index: 2;
   margin: 0;
   font-size: 0.72rem;
   font-weight: 700;
@@ -100,82 +90,71 @@
   color: var(--ink-dim);
 }
 
-.explore {
-  position: relative;
-  z-index: 1;
-  height: 320vh;
-}
-
-.explore-pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 0 var(--pad);
-  padding-right: clamp(var(--pad), 10vw, 8rem);
-  overflow: hidden;
-}
-
-.explore-track {
-  position: relative;
-  width: min(100%, 42rem);
-  height: min(28rem, 70vh);
-}
-
-.explore-stage {
+/* Deck sits in lower ~60% of the pin, under the top title */
+.page-home .explore-deck {
   position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: clamp(1.25rem, 4vw, 2.5rem);
-  align-items: start;
-  padding: clamp(1.5rem, 4vw, 2.5rem);
-  border: 1px solid var(--edge);
-  border-radius: 1.5rem;
-  background:
-    linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--void-raised) 72%, transparent),
-      color-mix(in srgb, var(--void-lift) 55%, transparent)
-    );
-  backdrop-filter: blur(10px);
+  left: 50%;
+  top: 38%;
+  bottom: 4%;
+  z-index: 2;
+  width: min(100%, 52rem);
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.page-home .explore-card {
+  /* prevents FOUC on hero load */
   opacity: 0;
   visibility: hidden;
-  transform: translateY(48px) scale(0.96);
   pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(48%, 52%, 56%);
+  text-decoration: none;
+  color: inherit;
+  transform: translate(-50%, -50%) translate(var(--x, 0), var(--y, 0)) rotate(var(--tilt, 0deg));
+  z-index: var(--z, 1);
+  pointer-events: auto;
   will-change: transform, opacity;
 }
 
-.explore-stage.is-active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: none;
+/* Must beat shell .explore-card.is-forward — home.css loads later with same specificity */
+.page-home .explore-card.is-forward {
+  z-index: 20;
 }
 
+/* Face chrome lives in shell.css — home only sizes type on the deck */
+.page-home .explore-card .stage-index {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  color: var(--acid);
+}
+
+.page-home .explore-card .stage-body h3 {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  letter-spacing: -0.04em;
+  margin: 0 0 0.65rem;
+  color: var(--ink);
+}
+
+.page-home .explore-card .stage-copy {
+  color: var(--ink-mute);
+  font-size: clamp(0.98rem, 1.45vw, 1.12rem);
+  max-width: 22rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Legacy stage helpers (studio/other pages may still reference) */
 .stage-index {
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 700;
   letter-spacing: -0.06em;
   line-height: 1;
   color: var(--acid);
-  text-shadow: 0 0 32px var(--acid-soft);
-}
-
-.stage-kicker {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--heat);
-  margin-bottom: 0.65rem;
-}
-
-.stage-body h2 {
-  font-size: clamp(2.2rem, 5.5vw, 3.6rem);
-  letter-spacing: -0.04em;
-  margin-bottom: 0.85rem;
 }
 
 .stage-copy {
@@ -199,79 +178,253 @@
 .stage-link:hover { color: var(--acid); }
 .stage-link.is-pressed { transform: scale(0.96); }
 
-.explore-progress {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.55rem;
-}
-.explore-progress span {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--ink-dim);
-  transition: background 250ms var(--ease-out), transform 250ms var(--ease-spring);
-}
-.explore-progress span.is-on {
-  background: var(--acid);
-  box-shadow: 0 0 12px var(--acid);
-  transform: scale(1.25);
+@media (max-width: 720px) {
+  .page-home .explore-deck {
+    top: 34%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+  }
+
+  .page-home .explore-card {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: min(100%, 22rem);
+    transform: rotate(var(--tilt, 0deg));
+    margin: 0;
+  }
+
+  .explore-card[style*="--tilt:-7"] { transform: rotate(-3deg); }
+  .explore-card[style*="--tilt:3"] { transform: rotate(2deg); }
+  .explore-card[style*="--tilt:8"] { transform: rotate(4deg); }
 }
 
 @media (max-width: 560px) {
-  .explore-stage { grid-template-columns: 1fr; gap: 0.75rem; }
-  .hero { padding-right: var(--pad); }
-  .explore-pin { padding-right: var(--pad); }
+  .page-home .explore-card-face { grid-template-columns: 1fr; gap: 0.65rem; }
+  .page-home .home-pin { padding-right: var(--pad); }
+  .page-home .wordmark { font-size: clamp(2.4rem, 14vw, 4.5rem); }
 }
 
-.reduce-motion .explore-stage,
-html.reduce-motion .explore-stage {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: none !important;
-  position: relative !important;
-  pointer-events: auto !important;
-  margin-bottom: 1rem;
+/* reduce-motion: static layout, cards stacked visible */
+.reduce-motion .page-home .home-story,
+html.reduce-motion .page-home .home-story {
+  height: auto;
 }
-.reduce-motion .explore,
-html.reduce-motion .explore { height: auto; }
-.reduce-motion .explore-pin,
-html.reduce-motion .explore-pin {
+
+.reduce-motion .home-pin,
+html.reduce-motion .page-home .home-pin {
   position: relative;
   height: auto;
-  display: block;
-  padding-top: 2rem;
+  min-height: 100vh;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: clamp(4rem, 12vh, 6rem);
   padding-bottom: 3rem;
 }
-.reduce-motion .explore-track,
-html.reduce-motion .explore-track {
+
+.reduce-motion .page-home .wordmark,
+html.reduce-motion .page-home .wordmark {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  margin-bottom: 1rem;
+}
+
+.reduce-motion .page-home .wordmark .char,
+html.reduce-motion .page-home .wordmark .char {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.reduce-motion .page-home .hero-line,
+html.reduce-motion .page-home .hero-line {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  margin: 0 auto 1.5rem;
+}
+
+.reduce-motion .hero-scroll,
+html.reduce-motion .page-home .hero-scroll {
+  display: none;
+}
+
+.reduce-motion .explore-deck,
+html.reduce-motion .page-home .explore-deck {
+  position: relative;
+  left: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;
   height: auto;
-  display: grid;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-}
-.reduce-motion .explore-progress,
-html.reduce-motion .explore-progress { display: none; }
-
-/* Explore stage punch flash */
-.explore-stage.is-punch {
-  border-color: color-mix(in srgb, var(--acid) 75%, var(--edge));
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--acid) 35%, transparent),
-    0 0 42px var(--acid-soft),
-    0 18px 48px rgba(0, 0, 0, 0.35);
-  transition:
-    border-color 280ms var(--ease-out),
-    box-shadow 280ms var(--ease-out);
+  margin: 0 auto;
 }
 
-.explore-stage .stage-index {
-  display: inline-block;
-  transform-origin: left center;
-  will-change: transform;
+.reduce-motion .page-home .explore-card,
+html.reduce-motion .page-home .explore-card {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 42rem;
+  margin: 0 auto;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  filter: none !important;
 }
 
-.wordmark .char {
-  will-change: transform, opacity, filter;
+/* —— First-load boot (body.is-booting set in HTML until fonts ready) —— */
+.page-home.is-booting .explore-deck,
+.page-home.is-booting .hero-line {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.home-boot-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 6;
+  width: 2.75rem;
+  height: 2px;
+  margin-top: clamp(2.1rem, 6vw, 4.25rem);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-home.is-booting .home-boot-pulse {
+  opacity: 1;
+  visibility: visible;
+}
+
+.home-boot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--acid);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--acid) 55%, transparent);
+  animation: home-boot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes home-boot-pulse {
+  0% { transform: translateX(0); opacity: 0.35; }
+  50% { opacity: 1; }
+  100% { transform: translateX(150%); opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-boot-pulse::after {
+    animation: none;
+    width: 100%;
+    transform: none;
+    opacity: 0.7;
+  }
+}
+
+/* Soft/hard home: hide story until motion primes (kills Acidity flicker on return) */
+.page-home .home-story:not(.is-ready) .wordmark,
+.page-home .home-story:not(.is-ready) .explore-deck,
+.page-home .home-story:not(.is-ready) .hero-line {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* First-load boot: Acidity + pulse visible; nav locked until warm */
+.page-home.is-booting .home-story .wordmark {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.page-home.is-booting .explore-deck,
+.page-home.is-booting .hero-line {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html.is-booting a,
+body.is-booting a {
+  pointer-events: none !important;
+  cursor: default;
+}
+
+.home-boot-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 6;
+  width: 2.75rem;
+  height: 2px;
+  margin-top: clamp(2.1rem, 6vw, 4.25rem);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-home.is-booting .home-boot-pulse {
+  opacity: 1;
+  visibility: visible;
+}
+
+.home-boot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--acid);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--acid) 55%, transparent);
+  animation: home-boot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes home-boot-pulse {
+  0% { transform: translateX(0); opacity: 0.35; }
+  50% { opacity: 1; }
+  100% { transform: translateX(150%); opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-boot-pulse::after {
+    animation: none;
+    width: 100%;
+    transform: none;
+    opacity: 0.7;
+  }
+  .page-home .home-story:not(.is-ready) .wordmark,
+  .page-home .home-story:not(.is-ready) .explore-deck,
+  .page-home .home-story:not(.is-ready) .hero-line {
+    opacity: 1;
+    visibility: visible;
+  }
 }

@@ -1,39 +1,41 @@
+/* Web uses the same title slot + apps-list / app-card language as Apps */
 .page-web .site-main {
-  display: grid;
-  place-items: center;
-  min-height: calc(100vh - var(--nav-h) - 8rem);
+  padding-right: clamp(5.5rem, 14vw, 10rem);
+  max-width: min(100%, 56rem);
+  padding-top: clamp(2rem, 6vw, 4.5rem);
 }
 
-.web-hold {
-  text-align: center;
-  display: grid;
-  gap: 1rem;
-  justify-items: center;
+.page-web .apps-list {
+  /* one empty card — don’t stretch a lonely cell across two columns */
+  grid-template-columns: minmax(0, 1fr);
+  max-width: min(100%, 26rem);
 }
 
-.web-hold h1 {
-  font-size: clamp(2rem, 6vw, 3.5rem);
+.page-web .app-card--hold {
+  cursor: default;
+  text-decoration: none;
+}
+
+.page-web .app-card--hold:hover,
+.page-web .app-card--hold:focus-visible {
+  /* keep the same lift language, no “link” chrome */
+  outline: none;
+}
+
+.page-web .app-card--hold .app-copy {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.page-web .app-card--hold .app-link.is-soon {
+  border-bottom-color: color-mix(in srgb, var(--heat) 70%, var(--edge));
+  color: var(--heat);
+}
+
+.page-web .app-card--hold .app-copy h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.04em;
   color: var(--ink-mute);
   font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.web-pulse {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: var(--ember);
-  box-shadow: 0 0 0 0 var(--ember-soft);
-  animation: pulse 2.2s var(--ease-out) infinite;
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 var(--ember-soft); }
-  70% { box-shadow: 0 0 0 18px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-
-.reduce-motion .web-pulse,
-html.reduce-motion .web-pulse {
-  animation: none;
 }

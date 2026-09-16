@@ -1,160 +1,200 @@
-.page-studio .page-head {
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
-}
-
-.page-kicker {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--heat);
-  margin-bottom: 0.85rem;
-}
-
-.page-title {
-  font-size: clamp(2.4rem, 7vw, 4.5rem);
-  max-width: 12ch;
-}
-
-.about {
-  max-width: 42rem;
-}
-
-/* Sticky about storytelling scrub */
-.about-scroll {
-  position: relative;
-}
-
-.about-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  align-items: center;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.about-lines {
-  position: relative;
+.page-studio .site-main {
+  max-width: min(100%, 42rem);
   width: 100%;
+  padding-top: clamp(2rem, 6vw, 4.5rem);
+  padding-bottom: clamp(4rem, 10vh, 7rem);
+  padding-right: clamp(5rem, 12vw, 9rem);
+}
+
+.about-prose {
   display: grid;
-  pointer-events: auto;
+  gap: clamp(1.75rem, 4vw, 2.75rem);
 }
 
 .about-line {
-  grid-area: 1 / 1;
-  width: 100%;
   margin: 0;
-  color: var(--ink);
-  font-size: clamp(1.08rem, 1.55vw, 1.28rem);
-  line-height: 1.65;
-  opacity: 0;
-  visibility: hidden;
-  will-change: transform, opacity;
-}
-
-.about-line:first-child {
-  opacity: 1;
-  visibility: visible;
-}
-
-.about-line.about-practice {
-  margin: 0;
-  padding: 1.35rem 1.4rem;
-  border-left: 3px solid var(--acid);
-  background: linear-gradient(90deg, var(--acid-soft), transparent 70%);
-  border-radius: 0 0.85rem 0.85rem 0;
-  display: grid;
-  gap: 0.9rem;
-}
-
-.about-line.about-practice p {
-  position: static;
-  opacity: 1;
-  visibility: visible;
   color: var(--ink-mute);
-  font-size: clamp(1.02rem, 1.4vw, 1.15rem);
+  font-size: clamp(1.05rem, 1.55vw, 1.22rem);
   line-height: 1.65;
-  margin: 0;
+  max-width: 38rem;
 }
 
-.about-spacer {
-  height: calc(var(--about-beats, 9) * 80vh);
-  margin-top: -100vh;
-  pointer-events: none;
-}
-
-.studio-contact {
-  margin-top: clamp(2rem, 5vw, 3.5rem);
-  padding-top: 2rem;
-  border-top: 1px solid var(--edge);
-  display: grid;
-  gap: 1rem;
+.about-line--lead {
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  line-height: 1.45;
   max-width: 28rem;
 }
 
-.studio-contact h2 {
-  font-size: 1.35rem;
+.about-line--punch {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: clamp(1.45rem, 2.8vw, 2.05rem);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  max-width: 22ch;
 }
 
-.contact-links {
+.about-line--close {
+  color: var(--acid);
+  font-weight: 700;
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  letter-spacing: -0.03em;
+}
+
+.about-block {
   display: grid;
   gap: 0.65rem;
 }
 
-.contact-links a {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.95rem 1.1rem;
-  border: 1px solid var(--edge);
-  border-radius: 0.85rem;
-  text-decoration: none;
-  background: var(--void-lift);
-  transition: border-color var(--dur) var(--ease-out), background var(--dur) var(--ease-out);
-}
-.contact-links a:hover {
-  border-color: color-mix(in srgb, var(--acid) 40%, var(--edge));
-  background: var(--void-raised);
-  color: var(--ink);
-}
-.contact-kind {
-  font-size: 0.78rem;
+.about-kicker {
+  margin: 0;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--heat);
 }
-.contact-value {
-  font-weight: 700;
+
+.about-principles {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+  max-width: 36rem;
+}
+
+.about-principles li {
+  position: relative;
+  padding-left: 1.15rem;
+  color: var(--ink-mute);
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.55;
+}
+
+.about-principles li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--acid) 70%, var(--heat));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--acid) 40%, transparent);
+}
+
+.about-talk {
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  border-top: 1px solid var(--edge);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.about-talk-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  letter-spacing: -0.04em;
   color: var(--ink);
 }
-.contact-links a:hover .contact-value {
+
+.about-talk-deck {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  align-items: stretch;
+  max-width: 36rem;
+  perspective: 900px;
+}
+
+/* Home explore-card language, but relative in the prose flow */
+.page-studio .about-talk .talk-card.explore-card {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 100%;
+  max-width: none;
+  pointer-events: auto;
+  transform: rotate(var(--tilt, 0deg));
+  z-index: 1;
+}
+
+.page-studio .about-talk .talk-card .explore-card-face {
+  grid-template-columns: 1fr;
+  min-height: 9.5rem;
+  height: 100%;
+  /* same transparent glass as home — no solid acid/heat fills */
+}
+
+.page-studio .about-talk .talk-kind {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+.page-studio .about-talk .talk-value {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.page-studio .about-talk .talk-card[data-talk="email"] .talk-value {
   color: var(--acid);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .about-stage {
-    position: relative;
-    height: auto;
-    display: block;
-  }
-  .about-lines {
-    min-height: 0;
-    display: grid;
-    gap: 1.15rem;
-  }
-  .about-line,
-  .about-line:first-child {
-    grid-area: auto;
-    position: relative;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-  }
-  .about-spacer {
-    display: none;
+.page-studio .about-talk .talk-card[data-talk="x"] .talk-value {
+  color: #ffb4c4;
+}
+
+.page-studio .about-talk .talk-card .stage-link {
+  margin-top: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .about-talk-deck {
+    grid-template-columns: 1fr;
   }
 }
+
+/* Load animation start — opacity only (no transform; GSAP owns motion) */
+.about-prose:not(.is-ready) > [data-about-line] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.about-prose.is-ready > [data-about-line] {
+  visibility: visible;
+  /* opacity owned by GSAP after prime */
+}
+
+.reduce-motion .about-prose > [data-about-line],
+html.reduce-motion .about-prose > [data-about-line] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+@media (max-width: 900px) {
+  .page-studio .site-main {
+    padding-right: var(--pad);
+  }
+
+  .about-line--lead {
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  line-height: 1.45;
+  max-width: 28rem;
+}
+
+.about-line--punch {
+    max-width: none;
+  }
+}
+
+
