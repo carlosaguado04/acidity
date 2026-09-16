@@ -498,11 +498,11 @@ html.reduce-motion .reveal {
 ::view-transition-new(page-heading) {
   animation-duration: 0.45s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  height: auto;
-  width: auto;
-  overflow: clip;
+  overflow: visible;
   transform-origin: left top;
   mix-blend-mode: normal;
+  object-fit: contain;
+  object-position: left top;
 }
 
 /* Instant void under the title morph — no root crossfade stutter */
@@ -515,11 +515,6 @@ html.reduce-motion .reveal {
 ::view-transition-group(root) {
   animation-duration: 0s;
   background: #070708;
-}
-
-html.vt-from-home ::view-transition-old(page-heading),
-html.vt-to-home ::view-transition-new(page-heading) {
-  transform-origin: 50% 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
