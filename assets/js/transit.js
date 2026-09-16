@@ -116,6 +116,11 @@
     syncNav(location.pathname);
     window.scrollTo(0, 0);
 
+    // Park home wordmark before the new VT snapshot so inner titles morph into Acidity
+    if (document.body.classList.contains("page-home") && window.AcidityMotion?.parkHomeWordmark) {
+      window.AcidityMotion.parkHomeWordmark();
+    }
+
     // Must run inside the VT update callback so the "new" snapshot is already hidden
     hideEntrance();
   };
@@ -127,7 +132,10 @@
       window.AcidityMotion.init({ soft: !!soft });
     }
     // Next frame: GSAP opacity:0 is committed, then drop CSS lock
-    requestAnimationFrame(() => clearEntering());
+    requestAnimationFrame(() => {
+      clearEntering();
+      document.documentElement.classList.remove("vt-from-home", "vt-to-home");
+    });
     if (window.AcidityInteract && window.AcidityInteract.bindAll) {
       window.AcidityInteract.bindAll();
     } else if (window.AcidityInteract && window.AcidityInteract.bindCards) {
@@ -166,6 +174,16 @@
       if (!doc.querySelector("#main")) {
         location.href = abs.href;
         return;
+      }
+
+      const fromHome = document.body.classList.contains("page-home");
+      const toHome = pathOf(abs.href) === "/";
+      if (!reduce) {
+        if (fromHome) {
+          document.documentElement.classList.add("vt-from-home");
+          window.AcidityMotion?.freezeHomeWordmark?.();
+        }
+        if (toHome) document.documentElement.classList.add("vt-to-home");
       }
 
       const swapOnly = () => {

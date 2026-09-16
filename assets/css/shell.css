@@ -472,11 +472,11 @@ html.reduce-motion .reveal {
 }
 
 /* —— Soft hops (same-document View Transition via transit.js) —— */
-.page-title {
+.page-title,
+.page-home .wordmark {
   view-transition-name: page-heading;
 }
 
-.page-home .wordmark,
 .page-home .hero-line,
 .explore-card,
 .explore-card-face,
@@ -517,8 +517,14 @@ html.reduce-motion .reveal {
   background: #070708;
 }
 
+html.vt-from-home ::view-transition-old(page-heading),
+html.vt-to-home ::view-transition-new(page-heading) {
+  transform-origin: 50% 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .page-title {
+  .page-title,
+  .page-home .wordmark {
     view-transition-name: none;
   }
 }

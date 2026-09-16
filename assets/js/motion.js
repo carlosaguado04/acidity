@@ -8,11 +8,67 @@
     document.querySelectorAll(".wordmark .char").forEach((el) => {
       el.style.opacity = "1";
     });
-    window.AcidityMotion = { init() {}, kill() {} };
+    window.AcidityMotion = { init() {}, kill() {}, parkHomeWordmark() {}, freezeHomeWordmark() {} };
     return;
   }
 
   gsap.registerPlugin(ScrollTrigger);
+
+  const parkHomeWordmark = () => {
+    const wordmark = document.querySelector(".page-home [data-split]");
+    const story = document.querySelector("[data-home-story]");
+    if (!wordmark || !story) return false;
+    document.querySelector("[data-home-boot-pulse]")?.remove();
+    document.body.classList.remove("is-booting");
+    document.documentElement.classList.remove("is-booting");
+    if (!wordmark.querySelector(".char")) {
+      const text = (wordmark.getAttribute("aria-label") || wordmark.textContent || "").trim() || "Acidity";
+      wordmark.setAttribute("aria-label", text);
+      wordmark.textContent = "";
+      [...text].forEach((ch) => {
+        const span = document.createElement("span");
+        span.className = "char";
+        span.textContent = ch === " " ? " " : ch;
+        wordmark.appendChild(span);
+      });
+    }
+    const chars = wordmark.querySelectorAll(".char");
+    gsap.set(wordmark, {
+      xPercent: -50,
+      yPercent: 0,
+      left: "50%",
+      top: "2.75rem",
+      scale: 0.52,
+      transformOrigin: "50% 50%",
+      autoAlpha: 1,
+    });
+    gsap.set(chars, { yPercent: 0, rotateZ: 0, opacity: 1, filter: "blur(0px)", y: 0 });
+    const heroLine = document.querySelector(".hero-line");
+    if (heroLine) gsap.set(heroLine, { autoAlpha: 0 });
+    story.classList.add("is-ready");
+    return true;
+  };
+
+  const freezeHomeWordmark = () => {
+    const wordmark = document.querySelector(".page-home [data-split]");
+    if (!wordmark) return;
+    const chars = wordmark.querySelectorAll(".char");
+    gsap.killTweensOf([wordmark, ...chars]);
+    const fontPx = parseFloat(getComputedStyle(wordmark).fontSize) || 0;
+    const scale = Number(gsap.getProperty(wordmark, "scale")) || 1;
+    gsap.set(chars, { y: 0, yPercent: 0, rotateZ: 0, opacity: 1, filter: "blur(0px)" });
+    // Bake GSAP scale into font-size so the VT snapshot matches the parked visual, not the huge unscaled box.
+    gsap.set(wordmark, {
+      scale: 1,
+      fontSize: fontPx * scale,
+      xPercent: -50,
+      yPercent: 0,
+      left: "50%",
+      transformOrigin: "50% 50%",
+      autoAlpha: 1,
+    });
+    void wordmark.offsetWidth;
+  };
 
   const kill = () => {
     try {
@@ -83,24 +139,12 @@
 
       if (soft) {
         // Soft return: park wordmark (no tween fight); cards rise only
-        document.querySelector("[data-home-boot-pulse]")?.remove();
-        document.body.classList.remove("is-booting");
+        parkHomeWordmark();
         const deck = document.querySelector("[data-explore-deck]");
         if (deck) {
           deck.style.opacity = "";
           deck.style.visibility = "";
         }
-        gsap.set(wordmark, {
-          xPercent: -50,
-          yPercent: 0,
-          left: "50%",
-          top: "2.75rem",
-          scale: 0.52,
-          transformOrigin: "50% 50%",
-          autoAlpha: 1,
-        });
-        gsap.set(chars, { yPercent: 0, rotateZ: 0, opacity: 1, filter: "blur(0px)", y: 0 });
-        if (heroLine) gsap.set(heroLine, { autoAlpha: 0 });
         const lands = finals();
         if (!narrow) {
           cards.forEach((card, i) => {
@@ -392,7 +436,7 @@
     }
   };
 
-  window.AcidityMotion = { init, kill };
+  window.AcidityMotion = { init, kill, parkHomeWordmark, freezeHomeWordmark };
 
   const waitMs = (ms) => new Promise((r) => setTimeout(r, ms));
   let homeWarm = Promise.resolve();
