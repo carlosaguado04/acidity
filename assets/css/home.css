@@ -57,8 +57,45 @@
 
 .page-home .wordmark .char {
   display: inline-block;
+  opacity: 0;
   will-change: transform, opacity, filter;
   transform-origin: 50% 100%;
+}
+
+/* Loading bar lives on the wordmark itself — not a second Acidity */
+.page-home .wordmark-load {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  display: block;
+  width: 5.25rem;
+  height: 2px;
+  margin-top: 1rem;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-home .wordmark-load::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--acid);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--acid) 55%, transparent);
+  animation: wordmark-load 1s ease-in-out infinite;
+}
+
+@keyframes wordmark-load {
+  0% { transform: translateX(0); opacity: 0.35; }
+  50% { opacity: 1; }
+  100% { transform: translateX(150%); opacity: 0.35; }
 }
 
 .page-home .hero-line {
@@ -290,75 +327,12 @@ html.reduce-motion .page-home .explore-card {
   filter: none !important;
 }
 
-/* —— First-load boot (body.is-booting set in HTML until fonts ready) —— */
-.page-home.is-booting .explore-deck,
-.page-home.is-booting .hero-line {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.home-boot-pulse {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 6;
-  width: 2.75rem;
-  height: 2px;
-  margin-top: clamp(2.1rem, 6vw, 4.25rem);
-  border-radius: 999px;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--ink) 18%, transparent);
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.page-home.is-booting .home-boot-pulse {
-  opacity: 1;
-  visibility: visible;
-}
-
-.home-boot-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 40%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--acid);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--acid) 55%, transparent);
-  animation: home-boot-pulse 1s ease-in-out infinite;
-}
-
-@keyframes home-boot-pulse {
-  0% { transform: translateX(0); opacity: 0.35; }
-  50% { opacity: 1; }
-  100% { transform: translateX(150%); opacity: 0.35; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-boot-pulse::after {
-    animation: none;
-    width: 100%;
-    transform: none;
-    opacity: 0.7;
-  }
-}
-
-/* Soft/hard home: hide story until motion primes (kills Acidity flicker on return) */
+/* Hide story until GSAP primes letter intro (no Acidity flash on first paint) */
 .page-home .home-story:not(.is-ready) .wordmark,
 .page-home .home-story:not(.is-ready) .explore-deck,
 .page-home .home-story:not(.is-ready) .hero-line {
   opacity: 0;
   visibility: hidden;
-}
-
-/* First-load boot: Acidity + pulse visible; nav locked until warm */
-.page-home.is-booting .home-story .wordmark {
-  opacity: 1 !important;
-  visibility: visible !important;
 }
 
 .page-home.is-booting .explore-deck,
@@ -374,57 +348,19 @@ body.is-booting a {
   cursor: default;
 }
 
-.home-boot-pulse {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 6;
-  width: 2.75rem;
-  height: 2px;
-  margin-top: clamp(2.1rem, 6vw, 4.25rem);
-  border-radius: 999px;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--ink) 18%, transparent);
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.page-home.is-booting .home-boot-pulse {
-  opacity: 1;
-  visibility: visible;
-}
-
-.home-boot-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 40%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--acid);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--acid) 55%, transparent);
-  animation: home-boot-pulse 1s ease-in-out infinite;
-}
-
-@keyframes home-boot-pulse {
-  0% { transform: translateX(0); opacity: 0.35; }
-  50% { opacity: 1; }
-  100% { transform: translateX(150%); opacity: 0.35; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .home-boot-pulse::after {
-    animation: none;
-    width: 100%;
-    transform: none;
-    opacity: 0.7;
-  }
   .page-home .home-story:not(.is-ready) .wordmark,
   .page-home .home-story:not(.is-ready) .explore-deck,
   .page-home .home-story:not(.is-ready) .hero-line {
     opacity: 1;
     visibility: visible;
+  }
+  .page-home .wordmark .char {
+    opacity: 1;
+  }
+  .page-home .wordmark-load,
+  .page-home .wordmark-load::after {
+    display: none;
+    animation: none;
   }
 }

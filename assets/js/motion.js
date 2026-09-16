@@ -2,6 +2,12 @@
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (typeof gsap === "undefined") {
     console.warn("[acidity] GSAP missing — motion skipped");
+    document.body.classList.remove("is-booting");
+    document.documentElement.classList.remove("is-booting");
+    document.querySelector("[data-home-story]")?.classList.add("is-ready");
+    document.querySelectorAll(".wordmark .char").forEach((el) => {
+      el.style.opacity = "1";
+    });
     window.AcidityMotion = { init() {}, kill() {} };
     return;
   }
@@ -15,7 +21,7 @@
     try {
       // Only kill page motion targets — never gsap.killTweensOf("*") (breaks floats/hover)
       const targets = document.querySelectorAll(
-        ".wordmark, .wordmark .char, .hero-line, [data-card], [data-about-line], .talk-card, .app-card, .reveal, [data-explore-deck]"
+        ".wordmark, .wordmark .char, .wordmark-load, .hero-line, [data-card], [data-about-line], .talk-card, .app-card, .reveal, [data-explore-deck]"
       );
       gsap.killTweensOf(targets);
     } catch {}
@@ -37,6 +43,7 @@
     if (wordmark && story) {
       const text = (wordmark.getAttribute("aria-label") || wordmark.textContent || "").trim() || "Acidity";
       if (!wordmark.querySelector(".char")) {
+        const load = wordmark.querySelector("[data-home-boot-pulse]");
         wordmark.setAttribute("aria-label", text);
         wordmark.textContent = "";
         [...text].forEach((ch) => {
@@ -45,6 +52,7 @@
           span.textContent = ch === " " ? " " : ch;
           wordmark.appendChild(span);
         });
+        if (load) wordmark.appendChild(load);
       }
       const chars = Array.from(wordmark.querySelectorAll(".char"));
       const narrow = window.matchMedia("(max-width: 720px)").matches;
@@ -141,6 +149,14 @@
           });
         }
       } else {
+        const pulse = wordmark.querySelector("[data-home-boot-pulse]");
+        // Prime letters off-screen before is-ready — otherwise Acidity paints, then vanishes, then intro.
+        gsap.set(chars, {
+          yPercent: 140,
+          rotateZ: () => gsap.utils.random(-12, 12),
+          opacity: 0,
+          filter: "blur(8px)",
+        });
         gsap.set(wordmark, {
           xPercent: -50,
           yPercent: -50,
@@ -150,13 +166,7 @@
           transformOrigin: "50% 50%",
           autoAlpha: 1,
         });
-        story.classList.add("is-ready");
-        gsap.set(chars, {
-          yPercent: 140,
-          rotateZ: () => gsap.utils.random(-12, 12),
-          opacity: 0,
-          filter: "blur(8px)",
-        });
+        if (pulse) gsap.set(pulse, { autoAlpha: 0 });
         if (heroLine) gsap.set(heroLine, { autoAlpha: 0, y: 24 });
         if (!narrow) {
           const lands = finals();
@@ -177,6 +187,7 @@
         } else {
           gsap.set(cards, { clearProps: "transform", autoAlpha: 0 });
         }
+        story.classList.add("is-ready");
 
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         intro.to(chars, {
@@ -188,8 +199,20 @@
           stagger: { each: 0.06, from: "center" },
           ease: "power4.out",
         });
+        if (pulse) intro.to(pulse, { autoAlpha: 1, duration: 0.4, ease: "power2.out" }, "-=0.35");
+        intro.addPause("+=0", () => {
+          Promise.all([homeWarm, waitMs(1250)]).finally(() => {
+            document.body.classList.remove("is-booting");
+            document.documentElement.classList.remove("is-booting");
+            intro.resume();
+          });
+        });
+        if (pulse) {
+          intro.to(pulse, { autoAlpha: 0, duration: 0.35, ease: "power2.in" });
+          intro.add(() => pulse.remove());
+        }
         if (heroLine) {
-          intro.to(heroLine, { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.45");
+          intro.to(heroLine, { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.15");
         }
         const floatTween = gsap.to(chars, {
           y: (i) => (i % 2 === 0 ? -7 : 7),
@@ -199,7 +222,7 @@
           paused: true,
         });
         intro.add(() => floatTween.play(), ">-=0.2");
-        intro.to({}, { duration: 1.05 });
+        intro.to({}, { duration: 0.45 });
         intro.add(() => floatTween.pause());
         intro.to(wordmark, { top: "2.75rem", yPercent: 0, scale: 0.52, duration: 1.15, ease: "power3.inOut" }, ">");
         intro.to(chars, { y: 0, yPercent: 0, rotateZ: 0, duration: 0.9, ease: "power2.out" }, "<");
@@ -372,8 +395,7 @@
   window.AcidityMotion = { init, kill };
 
   const waitMs = (ms) => new Promise((r) => setTimeout(r, ms));
-  const waitPaint = () =>
-    new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  let homeWarm = Promise.resolve();
 
   const preloadImage = (href) =>
     new Promise((resolve) => {
@@ -388,8 +410,8 @@
       .catch(() => "");
 
   /**
-   * First home load only: hold Acidity + pulse, warm fonts/pages/images,
-   * keep navigation locked (body.is-booting), then unlock and play intro.
+   * First home load only: wait for fonts, play the letter intro, then hold a
+   * loader on that same wordmark (no second Acidity) while pages/images warm.
    * Soft hops never enter this path.
    */
   const finishBootAndIntro = async () => {
@@ -397,27 +419,34 @@
     const story = document.querySelector("[data-home-story]");
     const booting = document.body.classList.contains("is-booting");
 
-    if (!(isHome && story && booting)) {
+    const unlock = () => {
       document.body.classList.remove("is-booting");
       document.documentElement.classList.remove("is-booting");
+    };
+
+    if (!(isHome && story && booting) || reduce) {
       document.querySelector("[data-home-boot-pulse]")?.remove();
+      unlock();
       init({ soft: false });
       return;
     }
 
     document.documentElement.classList.add("is-booting");
 
+    homeWarm = Promise.all([
+      warmHtml("/studio/"),
+      warmHtml("/apps/"),
+      warmHtml("/web/"),
+      preloadImage("/assets/apps/mise.png"),
+      preloadImage("/assets/apps/hilo-smile.png"),
+      preloadImage("/assets/apps/orza.png"),
+    ]).catch(() => {});
+
     try {
       const fonts =
         document.fonts && document.fonts.ready
           ? Promise.race([document.fonts.ready, waitMs(2000)])
           : Promise.resolve();
-      const pages = Promise.all([warmHtml("/studio/"), warmHtml("/apps/"), warmHtml("/web/")]);
-      const images = Promise.all([
-        preloadImage("/assets/apps/mise.png"),
-        preloadImage("/assets/apps/hilo-smile.png"),
-        preloadImage("/assets/apps/orza.png"),
-      ]);
       const sheets = Promise.all(
         [...document.querySelectorAll('link[rel="stylesheet"]')].map((link) => {
           if (link.sheet) return Promise.resolve();
@@ -427,16 +456,11 @@
           });
         })
       );
-      await Promise.all([fonts, pages, images, sheets]);
-      await waitPaint();
+      await Promise.all([fonts, sheets]);
     } catch (err) {
       console.warn("[acidity] boot warm failed, intro anyway", err);
     }
 
-    document.body.classList.remove("is-booting");
-    document.documentElement.classList.remove("is-booting");
-    document.querySelector("[data-home-boot-pulse]")?.remove();
-    await waitPaint();
     init({ soft: false });
   };
 

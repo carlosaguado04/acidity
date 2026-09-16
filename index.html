@@ -20,6 +20,34 @@
     <link rel="stylesheet" href="/assets/css/studio.css" />
     <link rel="stylesheet" href="/assets/css/apps.css" />
     <link rel="stylesheet" href="/assets/css/web.css" />
+    <style>
+      /* First paint: keep Acidity hidden until GSAP primes the letter intro */
+      .page-home .home-story:not(.is-ready) .wordmark,
+      .page-home .home-story:not(.is-ready) .hero-line,
+      .page-home .home-story:not(.is-ready) .explore-deck {
+        opacity: 0;
+        visibility: hidden;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .page-home .home-story:not(.is-ready) .wordmark,
+        .page-home .home-story:not(.is-ready) .hero-line,
+        .page-home .home-story:not(.is-ready) .explore-deck {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript>
+      <style>
+        .page-home .home-story .wordmark,
+        .page-home .home-story .hero-line,
+        .page-home .home-story .explore-deck,
+        .page-home .wordmark .char {
+          opacity: 1;
+          visibility: visible;
+        }
+      </style>
+    </noscript>
   </head>
   <body class="page-home is-booting">
     <a class="skip" href="#main">Skip to content</a>
@@ -30,8 +58,7 @@
         <div class="home-flight" data-home-flight>
           <section class="home-story" data-home-story data-explore aria-label="Acidity">
             <div class="home-pin" data-home-pin>
-              <h1 class="wordmark" data-split>Acidity</h1>
-              <div class="home-boot-pulse" data-home-boot-pulse aria-hidden="true"></div>
+              <h1 class="wordmark" data-split aria-label="Acidity"><span class="char">A</span><span class="char">c</span><span class="char">i</span><span class="char">d</span><span class="char">i</span><span class="char">t</span><span class="char">y</span><span class="wordmark-load" data-home-boot-pulse aria-hidden="true"></span></h1>
               <p class="hero-line">App and web development</p>
 <div class="explore-deck" data-explore-deck>
                 <a
