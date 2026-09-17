@@ -83,94 +83,6 @@
     });
   };
 
-  const headingEl = (root = document) =>
-    root.querySelector(".wordmark") || root.querySelector(".page-title");
-
-  const captureHeading = (el) => {
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    if (r.width < 1 || r.height < 1) return null;
-    const cs = getComputedStyle(el);
-    return {
-      text: (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim(),
-      left: r.left,
-      top: r.top,
-      fontFamily: cs.fontFamily,
-      fontWeight: cs.fontWeight,
-      fontSize: cs.fontSize,
-      letterSpacing: cs.letterSpacing,
-      lineHeight: cs.lineHeight,
-      color: cs.color,
-      textTransform: cs.textTransform,
-    };
-  };
-
-  const paintHeading = (node, face) => {
-    node.textContent = face.text;
-    Object.assign(node.style, {
-      position: "absolute",
-      left: `${face.left}px`,
-      top: `${face.top}px`,
-      margin: "0",
-      padding: "0",
-      border: "0",
-      fontFamily: face.fontFamily,
-      fontWeight: face.fontWeight,
-      fontSize: face.fontSize,
-      letterSpacing: face.letterSpacing,
-      lineHeight: face.lineHeight,
-      color: face.color,
-      textTransform: face.textTransform,
-      whiteSpace: "nowrap",
-      pointerEvents: "none",
-      transformOrigin: "left top",
-    });
-  };
-
-  /* Apps↔Web titles are the same size, so the browser title morph is a no-op.
-     Cover the old word before swap, then crossfade into the new word. */
-  const morphSameSizeTitle = (from) =>
-    new Promise((resolve) => {
-      const toEl = headingEl();
-      const to = captureHeading(toEl);
-      const finish = () => {
-        if (toEl) {
-          toEl.style.visibility = "";
-          toEl.style.viewTransitionName = "";
-        }
-        resolve();
-      };
-      if (reduce || typeof gsap === "undefined" || !from || !to || !toEl) {
-        finish();
-        return;
-      }
-      toEl.style.visibility = "hidden";
-      const layer = document.createElement("div");
-      layer.setAttribute("aria-hidden", "true");
-      layer.style.cssText = "position:fixed;inset:0;z-index:90;pointer-events:none;";
-      const oldN = document.createElement("div");
-      const newN = document.createElement("div");
-      paintHeading(oldN, from);
-      paintHeading(newN, from);
-      newN.textContent = to.text;
-      newN.style.fontFamily = to.fontFamily;
-      newN.style.fontWeight = to.fontWeight;
-      newN.style.letterSpacing = to.letterSpacing;
-      newN.style.textTransform = to.textTransform;
-      newN.style.color = to.color;
-      layer.append(oldN, newN);
-      document.body.appendChild(layer);
-      gsap.timeline({
-        onComplete: () => {
-          layer.remove();
-          finish();
-        },
-        defaults: { duration: 0.55, ease: "power2.inOut" },
-      })
-        .to(oldN, { opacity: 0 }, 0)
-        .fromTo(newN, { opacity: 0 }, { opacity: 1 }, 0);
-    });
-
   /** CSS-only lock during soft hop — never touch page-title (morph). */
   const hideEntrance = () => {
     document.documentElement.classList.add("is-entering");
@@ -259,44 +171,23 @@
         return;
       }
 
-      const fromPath = pathOf(location.href);
-      const toPath = pathOf(abs.href);
-      const sameSizeTitles =
-        (fromPath === "/apps" && toPath === "/web") || (fromPath === "/web" && toPath === "/apps");
-
       if (!reduce && document.body.classList.contains("page-home")) {
         window.AcidityMotion?.freezeHomeWordmark?.();
-      }
-
-      let fromHeading = null;
-      const currentHeading = headingEl();
-      if (!reduce && sameSizeTitles) {
-        fromHeading = captureHeading(currentHeading);
-        if (currentHeading) currentHeading.style.viewTransitionName = "none";
       }
 
       const swapOnly = () => {
         if (push) history.pushState({ soft: true }, "", abs.href);
         swapDom(doc);
-        if (sameSizeTitles) {
-          const nextHeading = headingEl();
-          if (nextHeading) {
-            nextHeading.style.viewTransitionName = "none";
-            nextHeading.style.visibility = "hidden";
-          }
-        }
       };
 
       if (!reduce && typeof document.startViewTransition === "function") {
         const vt = document.startViewTransition(swapOnly);
-        await Promise.race([vt.finished.catch(() => {}), waitMs(sameSizeTitles ? 80 : 900)]);
+        await Promise.race([vt.finished.catch(() => {}), waitMs(900)]);
         await waitPaint();
-        if (sameSizeTitles) await morphSameSizeTitle(fromHeading);
         afterSwap(true);
       } else {
         swapOnly();
         await waitPaint();
-        if (sameSizeTitles) await morphSameSizeTitle(fromHeading);
         afterSwap(true);
       }
     } catch (err) {
