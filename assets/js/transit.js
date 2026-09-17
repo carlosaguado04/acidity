@@ -84,7 +84,7 @@
   };
 
   const pageHeading = (root = document) =>
-    root.querySelector(".wordmark") || root.querySelector(".page-title");
+    root.querySelector(".wordmark") || root.querySelector(".page-head");
 
   const markHeading = (el) => {
     if (el) el.style.viewTransitionName = "page-heading";

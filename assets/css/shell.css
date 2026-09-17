@@ -337,6 +337,8 @@ html.reduce-motion .reveal {
 .page-head {
   margin: 0 0 clamp(2rem, 5vw, 3.25rem);
   padding: 0;
+  display: block;
+  width: 100%;
 }
 
 .page-title {
@@ -472,7 +474,9 @@ html.reduce-motion .reveal {
 }
 
 /* —— Soft hops (same-document View Transition via transit.js) —— */
-.page-title,
+/* Slot, not the shrink-wrapped word — Apps/Web are the same size so a
+   title-only name looks like a pop. Home uses the wordmark. */
+.page-head,
 .page-home .wordmark {
   view-transition-name: page-heading;
 }
@@ -490,19 +494,34 @@ html.reduce-motion .reveal {
 }
 
 ::view-transition-group(page-heading) {
-  animation-duration: 0.45s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-::view-transition-old(page-heading),
-::view-transition-new(page-heading) {
-  animation-duration: 0.45s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  overflow: visible;
+::view-transition-old(page-heading) {
+  animation: heading-fade-out 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
   transform-origin: left top;
-  mix-blend-mode: normal;
+  mix-blend-mode: plus-lighter;
   object-fit: contain;
   object-position: left top;
+}
+
+::view-transition-new(page-heading) {
+  animation: heading-fade-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: left top;
+  mix-blend-mode: plus-lighter;
+  object-fit: contain;
+  object-position: left top;
+}
+
+@keyframes heading-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes heading-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Instant void under the title morph — no root crossfade stutter */
@@ -518,7 +537,7 @@ html.reduce-motion .reveal {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-title,
+  .page-head,
   .page-home .wordmark {
     view-transition-name: none;
   }
