@@ -474,13 +474,10 @@ html.reduce-motion .reveal {
 }
 
 /* —— Soft hops (same-document View Transition via transit.js) —— */
-/* Slot, not the shrink-wrapped word — Apps/Web are the same size so a
-   title-only name looks like a pop. Home uses the wordmark. */
+/* Title morph is GSAP (transit.js) so Apps↔Web gets the same crossfade as Studio. */
+.page-home .wordmark,
 .page-head,
-.page-home .wordmark {
-  view-transition-name: page-heading;
-}
-
+.page-title,
 .page-home .hero-line,
 .explore-card,
 .explore-card-face,
@@ -493,37 +490,6 @@ html.reduce-motion .reveal {
   view-transition-name: none;
 }
 
-::view-transition-group(page-heading) {
-  animation-duration: 0.55s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::view-transition-old(page-heading) {
-  animation: heading-fade-out 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
-  transform-origin: left top;
-  mix-blend-mode: plus-lighter;
-  object-fit: contain;
-  object-position: left top;
-}
-
-::view-transition-new(page-heading) {
-  animation: heading-fade-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
-  transform-origin: left top;
-  mix-blend-mode: plus-lighter;
-  object-fit: contain;
-  object-position: left top;
-}
-
-@keyframes heading-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes heading-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* Instant void under the title morph — no root crossfade stutter */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -534,13 +500,6 @@ html.reduce-motion .reveal {
 ::view-transition-group(root) {
   animation-duration: 0s;
   background: #070708;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .page-head,
-  .page-home .wordmark {
-    view-transition-name: none;
-  }
 }
 
 /* Soft-hop lock: body content only — NEVER page-title/page-head (view-transition morph) */

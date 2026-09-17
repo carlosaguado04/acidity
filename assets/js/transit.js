@@ -83,12 +83,95 @@
     });
   };
 
-  const pageHeading = (root = document) =>
-    root.querySelector(".wordmark") || root.querySelector(".page-head");
+  const headingEl = (root = document) =>
+    root.querySelector(".wordmark") || root.querySelector(".page-title");
 
-  const markHeading = (el) => {
-    if (el) el.style.viewTransitionName = "page-heading";
+  const captureHeading = (el) => {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) return null;
+    const cs = getComputedStyle(el);
+    return {
+      text: (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim(),
+      left: r.left,
+      top: r.top,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      fontSize: cs.fontSize,
+      letterSpacing: cs.letterSpacing,
+      lineHeight: cs.lineHeight,
+      color: cs.color,
+      textTransform: cs.textTransform,
+    };
   };
+
+  const paintHeading = (node, face) => {
+    node.textContent = face.text;
+    Object.assign(node.style, {
+      position: "absolute",
+      left: `${face.left}px`,
+      top: `${face.top}px`,
+      margin: "0",
+      padding: "0",
+      border: "0",
+      fontFamily: face.fontFamily,
+      fontWeight: face.fontWeight,
+      fontSize: face.fontSize,
+      letterSpacing: face.letterSpacing,
+      lineHeight: face.lineHeight,
+      color: face.color,
+      textTransform: face.textTransform,
+      whiteSpace: "nowrap",
+      pointerEvents: "none",
+      transformOrigin: "left top",
+    });
+  };
+
+  const morphHeading = (from) =>
+    new Promise((resolve) => {
+      const toEl = headingEl();
+      const to = captureHeading(toEl);
+      const finish = () => {
+        if (toEl) toEl.style.visibility = "";
+        resolve();
+      };
+      if (reduce || typeof gsap === "undefined" || !from || !to || !toEl) {
+        finish();
+        return;
+      }
+      toEl.style.visibility = "hidden";
+      const layer = document.createElement("div");
+      layer.setAttribute("aria-hidden", "true");
+      layer.style.cssText = "position:fixed;inset:0;z-index:90;pointer-events:none;";
+      const oldN = document.createElement("div");
+      const newN = document.createElement("div");
+      paintHeading(oldN, from);
+      paintHeading(newN, from);
+      newN.textContent = to.text;
+      newN.style.fontFamily = to.fontFamily;
+      newN.style.fontWeight = to.fontWeight;
+      newN.style.letterSpacing = to.letterSpacing;
+      newN.style.textTransform = to.textTransform;
+      newN.style.color = to.color;
+      layer.append(oldN, newN);
+      document.body.appendChild(layer);
+      const done = () => {
+        layer.remove();
+        finish();
+      };
+      const tl = gsap.timeline({ onComplete: done, defaults: { duration: 0.5, ease: "power2.inOut" } });
+      tl.to(
+        oldN,
+        { left: to.left, top: to.top, fontSize: to.fontSize, letterSpacing: to.letterSpacing, opacity: 0 },
+        0
+      );
+      tl.fromTo(
+        newN,
+        { left: from.left, top: from.top, fontSize: from.fontSize, letterSpacing: from.letterSpacing, opacity: 0 },
+        { left: to.left, top: to.top, fontSize: to.fontSize, letterSpacing: to.letterSpacing, opacity: 1 },
+        0
+      );
+    });
 
   /** CSS-only lock during soft hop — never touch page-title (morph). */
   const hideEntrance = () => {
@@ -123,11 +206,11 @@
     syncNav(location.pathname);
     window.scrollTo(0, 0);
 
-    // Park home wordmark before the new VT snapshot so inner titles morph into Acidity
     if (document.body.classList.contains("page-home") && window.AcidityMotion?.parkHomeWordmark) {
       window.AcidityMotion.parkHomeWordmark();
     }
-    markHeading(pageHeading());
+    const nextHeading = headingEl();
+    if (nextHeading) nextHeading.style.visibility = "hidden";
 
     // Must run inside the VT update callback so the "new" snapshot is already hidden
     hideEntrance();
@@ -181,11 +264,12 @@
         return;
       }
 
+      let fromHeading = null;
       if (!reduce) {
         if (document.body.classList.contains("page-home")) {
           window.AcidityMotion?.freezeHomeWordmark?.();
         }
-        markHeading(pageHeading());
+        fromHeading = captureHeading(headingEl());
       }
 
       const swapOnly = () => {
@@ -195,13 +279,14 @@
 
       if (!reduce && typeof document.startViewTransition === "function") {
         const vt = document.startViewTransition(swapOnly);
-        // finished can hang — cap wait; content stays hidden via is-entering + inline
         await Promise.race([vt.finished.catch(() => {}), waitMs(900)]);
         await waitPaint();
+        await morphHeading(fromHeading);
         afterSwap(true);
       } else {
         swapOnly();
         await waitPaint();
+        await morphHeading(fromHeading);
         afterSwap(true);
       }
     } catch (err) {
