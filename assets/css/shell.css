@@ -475,12 +475,10 @@ html.reduce-motion .reveal {
   }
 }
 
-/* —— Soft hops —— */
-/* Title morph is one shared FLIP in transit.js (every route, including Apps ↔ Web).
-   Do NOT put view-transition-name on titles — UA VT alone reads as a pop when boxes are similar. */
+/* —— Soft hops (same-document View Transition via transit.js) —— */
 .page-title,
 .page-home .wordmark {
-  view-transition-name: none;
+  view-transition-name: page-heading;
 }
 
 .page-home .hero-line,
@@ -495,7 +493,23 @@ html.reduce-motion .reveal {
   view-transition-name: none;
 }
 
-/* Instant void cut under the title FLIP — no root crossfade stutter */
+::view-transition-group(page-heading) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(page-heading),
+::view-transition-new(page-heading) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  height: auto;
+  width: auto;
+  overflow: clip;
+  transform-origin: left top;
+  mix-blend-mode: plus-lighter;
+}
+
+/* Instant void under the title morph — no root crossfade stutter */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -507,7 +521,14 @@ html.reduce-motion .reveal {
   background: #070708;
 }
 
-/* Soft-hop lock: body content only — NEVER page-title/page-head (FLIP owns the title) */
+@media (prefers-reduced-motion: reduce) {
+  .page-title,
+  .page-home .wordmark {
+    view-transition-name: none;
+  }
+}
+
+/* Soft-hop lock: body content only — NEVER page-title/page-head (view-transition morph) */
 html.is-entering .about-prose [data-about-line],
 html.is-entering .about-prose .talk-card,
 html.is-entering .apps-list .app-card,
