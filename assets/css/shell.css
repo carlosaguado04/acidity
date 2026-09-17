@@ -474,10 +474,11 @@ html.reduce-motion .reveal {
 }
 
 /* —— Soft hops (same-document View Transition via transit.js) —— */
-/* Title morph is GSAP (transit.js) so Apps↔Web gets the same crossfade as Studio. */
-.page-home .wordmark,
-.page-head,
 .page-title,
+.page-home .wordmark {
+  view-transition-name: page-heading;
+}
+
 .page-home .hero-line,
 .explore-card,
 .explore-card-face,
@@ -490,6 +491,22 @@ html.reduce-motion .reveal {
   view-transition-name: none;
 }
 
+::view-transition-group(page-heading) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(page-heading),
+::view-transition-new(page-heading) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  height: auto;
+  width: auto;
+  overflow: clip;
+  transform-origin: left top;
+  mix-blend-mode: plus-lighter;
+}
+
 /* Instant void under the title morph — no root crossfade stutter */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -500,6 +517,13 @@ html.reduce-motion .reveal {
 ::view-transition-group(root) {
   animation-duration: 0s;
   background: #070708;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-title,
+  .page-home .wordmark {
+    view-transition-name: none;
+  }
 }
 
 /* Soft-hop lock: body content only — NEVER page-title/page-head (view-transition morph) */

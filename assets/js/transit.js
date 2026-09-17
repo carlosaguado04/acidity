@@ -127,12 +127,17 @@
     });
   };
 
-  const morphHeading = (from) =>
+  /* Apps↔Web titles are the same size, so the browser title morph is a no-op.
+     Cover the old word before swap, then crossfade into the new word. */
+  const morphSameSizeTitle = (from) =>
     new Promise((resolve) => {
       const toEl = headingEl();
       const to = captureHeading(toEl);
       const finish = () => {
-        if (toEl) toEl.style.visibility = "";
+        if (toEl) {
+          toEl.style.visibility = "";
+          toEl.style.viewTransitionName = "";
+        }
         resolve();
       };
       if (reduce || typeof gsap === "undefined" || !from || !to || !toEl) {
@@ -155,22 +160,15 @@
       newN.style.color = to.color;
       layer.append(oldN, newN);
       document.body.appendChild(layer);
-      const done = () => {
-        layer.remove();
-        finish();
-      };
-      const tl = gsap.timeline({ onComplete: done, defaults: { duration: 0.5, ease: "power2.inOut" } });
-      tl.to(
-        oldN,
-        { left: to.left, top: to.top, fontSize: to.fontSize, letterSpacing: to.letterSpacing, opacity: 0 },
-        0
-      );
-      tl.fromTo(
-        newN,
-        { left: from.left, top: from.top, fontSize: from.fontSize, letterSpacing: from.letterSpacing, opacity: 0 },
-        { left: to.left, top: to.top, fontSize: to.fontSize, letterSpacing: to.letterSpacing, opacity: 1 },
-        0
-      );
+      gsap.timeline({
+        onComplete: () => {
+          layer.remove();
+          finish();
+        },
+        defaults: { duration: 0.55, ease: "power2.inOut" },
+      })
+        .to(oldN, { opacity: 0 }, 0)
+        .fromTo(newN, { opacity: 0 }, { opacity: 1 }, 0);
     });
 
   /** CSS-only lock during soft hop — never touch page-title (morph). */
@@ -209,10 +207,7 @@
     if (document.body.classList.contains("page-home") && window.AcidityMotion?.parkHomeWordmark) {
       window.AcidityMotion.parkHomeWordmark();
     }
-    const nextHeading = headingEl();
-    if (nextHeading) nextHeading.style.visibility = "hidden";
 
-    // Must run inside the VT update callback so the "new" snapshot is already hidden
     hideEntrance();
   };
 
@@ -264,29 +259,44 @@
         return;
       }
 
+      const fromPath = pathOf(location.href);
+      const toPath = pathOf(abs.href);
+      const sameSizeTitles =
+        (fromPath === "/apps" && toPath === "/web") || (fromPath === "/web" && toPath === "/apps");
+
+      if (!reduce && document.body.classList.contains("page-home")) {
+        window.AcidityMotion?.freezeHomeWordmark?.();
+      }
+
       let fromHeading = null;
-      if (!reduce) {
-        if (document.body.classList.contains("page-home")) {
-          window.AcidityMotion?.freezeHomeWordmark?.();
-        }
-        fromHeading = captureHeading(headingEl());
+      const currentHeading = headingEl();
+      if (!reduce && sameSizeTitles) {
+        fromHeading = captureHeading(currentHeading);
+        if (currentHeading) currentHeading.style.viewTransitionName = "none";
       }
 
       const swapOnly = () => {
         if (push) history.pushState({ soft: true }, "", abs.href);
         swapDom(doc);
+        if (sameSizeTitles) {
+          const nextHeading = headingEl();
+          if (nextHeading) {
+            nextHeading.style.viewTransitionName = "none";
+            nextHeading.style.visibility = "hidden";
+          }
+        }
       };
 
       if (!reduce && typeof document.startViewTransition === "function") {
         const vt = document.startViewTransition(swapOnly);
-        await Promise.race([vt.finished.catch(() => {}), waitMs(900)]);
+        await Promise.race([vt.finished.catch(() => {}), waitMs(sameSizeTitles ? 80 : 900)]);
         await waitPaint();
-        await morphHeading(fromHeading);
+        if (sameSizeTitles) await morphSameSizeTitle(fromHeading);
         afterSwap(true);
       } else {
         swapOnly();
         await waitPaint();
-        await morphHeading(fromHeading);
+        if (sameSizeTitles) await morphSameSizeTitle(fromHeading);
         afterSwap(true);
       }
     } catch (err) {
