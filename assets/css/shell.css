@@ -343,6 +343,8 @@ html.reduce-motion .reveal {
 
 .page-title {
   margin: 0;
+  width: max-content;
+  max-width: 100%;
   font-size: clamp(2.4rem, 7vw, 4.5rem);
   letter-spacing: -0.045em;
   line-height: 1;
